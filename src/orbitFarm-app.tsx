@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState, type FormEvent } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import type { Polygon } from 'geojson';
 import {
   ArrowLeft, ArrowRight, BookOpen, CalendarDays, Check, CheckCheck,
@@ -8,19 +8,20 @@ import {
 } from 'lucide-react';
 import {
   CROP_CATALOG, SCENARIOS, buildAnalysisRequest, createApiProvider,
-  createMockProvider, createScenarioState, farmReducer, getDueTasks,
-  getFarmDate, getGrowthStage, loadFarm, loadProviderSettings, saveFarm, saveProviderSettings, validateBoundary,
+  createMockProvider, createScenarioState, createDefaultLayout, farmReducer, getDueTasks,
+  getFarmDate, getGrowthStage, getBedName, loadFarm, loadProviderSettings, saveFarm, saveProviderSettings, validateBoundary, validateFarmLayout,
 } from './domain/orbitFarm-domain';
 import type {
-  AnalysisResult, CareTask, CropId, FarmAction, FarmInputs, FarmState,
+  AnalysisResult, CareTask, CropId, FarmAction, FarmInputs, FarmLayout, FarmState,
   JournalEntry, ProviderSettings, ScenarioId,
 } from './domain/orbitFarm-types';
 import { CropSprite, FarmScene, SatelliteIcon } from './components/orbitFarm-farm-scene';
 const BoundaryMap = lazy(() => import('./components/orbitFarm-boundary-map').then((module) => ({ default: module.BoundaryMap })));
+const FarmLayoutEditor = lazy(() => import('./components/orbitFarm-layout-editor').then((module) => ({ default: module.FarmLayoutEditor })));
 import { OrbitScanner } from './components/orbitFarm-scanner';
 import { Select } from './components/orbitFarm-select';
 
-type Route = 'farm' | 'plans' | 'tasks' | 'journal' | 'lab' | 'setup';
+type Route = 'farm' | 'plans' | 'tasks' | 'journal' | 'lab' | 'setup' | 'layout';
 interface Draft { name: string; inputs: FarmInputs; boundary: Polygon | null }
 const NAV = [
   { route: 'farm', label: 'Your farm', icon: Sprout },
@@ -30,12 +31,11 @@ const NAV = [
 ] as const;
 const TEXTURES = ['sand', 'loamy_sand', 'sandy_loam', 'loam', 'silt_loam', 'silt', 'sandy_clay_loam', 'clay_loam', 'silty_clay_loam', 'sandy_clay', 'silty_clay', 'clay'];
 const cropName = (id: CropId) => CROP_CATALOG.find((crop) => crop.id === id)?.name ?? id;
-const plotLetter = (slot: number) => String.fromCharCode(65 + slot);
 const human = (value: string) => value.replaceAll('_', ' ');
 const displayDate = (date: string) => new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }).format(new Date(date.length === 10 ? `${date}T12:00:00Z` : date));
 const readRoute = (): Route => {
   const route = window.location.hash.replace(/^#\//, '').split('/')[0];
-  return ['farm', 'plans', 'tasks', 'journal', 'lab', 'setup'].includes(route) ? route as Route : 'farm';
+  return ['farm', 'plans', 'tasks', 'journal', 'lab', 'setup', 'layout'].includes(route) ? route as Route : 'farm';
 };
 
 function restore() {
@@ -54,7 +54,11 @@ export function OrbitFarmApp() {
   const [initial] = useState(restore);
   const [state, setState] = useState<FarmState>(initial.state);
   const [route, setRoute] = useState<Route>(readRoute);
-  const [selectedSlotId, setSelectedSlotId] = useState<number | null>(0);
+  const routeRef = useRef(route);
+  const layoutDirtyRef = useRef(false);
+  const allowLayoutLeaveRef = useRef(false);
+  const reportLayoutDirty = useCallback((dirty: boolean) => { layoutDirtyRef.current = dirty; }, []);
+  const [selectedSlotId, setSelectedSlotId] = useState<number | null>(initial.state.layout.beds[0]?.slotId ?? null);
   const [mapView, setMapView] = useState(false);
   const [notice, setNoticeValue] = useState<string | null>(null);
   const [noticeTaskId, setNoticeTaskId] = useState<string | null>(null);
@@ -99,18 +103,37 @@ export function OrbitFarmApp() {
     setNotice(mode === 'mock' ? 'Demo fixtures selected explicitly.' : 'API provider selected. Analyze your field to send its information.');
   }
 
-  function navigate(next: Route) {
+  function navigate(next: Route, allowLayoutLeave = false) {
+    allowLayoutLeaveRef.current = allowLayoutLeave;
     window.location.hash = `/${next}`;
-    setRoute(next);
   }
   function dispatch(action: FarmAction, message?: string) {
     setState((current) => farmReducer(current, action));
     if (message) setNotice(message, action.type === 'complete_task' || action.type === 'skip_task' || action.type === 'snooze_task' ? action.taskId : undefined);
   }
   useEffect(() => {
-    const onHash = () => { setRoute(readRoute()); window.scrollTo({ top: 0 }); };
+    const onHash = () => {
+      const next = readRoute();
+      if (routeRef.current === 'layout' && next !== 'layout' && layoutDirtyRef.current && !allowLayoutLeaveRef.current) {
+        if (!window.confirm('Leave without saving your layout changes?')) {
+          window.history.replaceState(null, '', '#/layout');
+          return;
+        }
+      }
+      allowLayoutLeaveRef.current = false;
+      if (next !== 'layout') layoutDirtyRef.current = false;
+      routeRef.current = next;
+      setRoute(next);
+      window.scrollTo({ top: 0 });
+    };
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (routeRef.current !== 'layout' || !layoutDirtyRef.current) return;
+      event.preventDefault();
+      event.returnValue = '';
+    };
     window.addEventListener('hashchange', onHash);
-    return () => window.removeEventListener('hashchange', onHash);
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => { window.removeEventListener('hashchange', onHash); window.removeEventListener('beforeunload', onBeforeUnload); };
   }, []);
   useEffect(() => {
     if (lastSaved.current === state || recoveryRequired) return;
@@ -119,6 +142,20 @@ export function OrbitFarmApp() {
     catch { setStorageError('Your changes could not be saved. Keep this tab open and try again.'); }
   }, [state, recoveryRequired]);
   useEffect(() => () => abort.current?.abort(), []);
+  useEffect(() => {
+    if (!state.layout.beds.some((bed) => bed.slotId === selectedSlotId)) setSelectedSlotId(state.layout.beds[0]?.slotId ?? null);
+  }, [state.layout, selectedSlotId]);
+
+  function saveLayout(layout: FarmLayout) {
+    const checked = validateFarmLayout(layout);
+    if (!checked.valid) { setNotice(checked.errors[0] ?? 'Check your bed shapes before saving.'); return; }
+    const removed = state.plots.filter((plot) => !layout.beds.some((bed) => bed.slotId === plot.slotId));
+    if (removed.length && !window.confirm(`Remove ${removed.length} planted ${removed.length === 1 ? 'bed' : 'beds'} from this layout? Their plantings and open tasks will be removed. Your journal history will be kept.`)) return;
+    dispatch({ type: 'set_layout', layout }, 'Farm layout saved. Your remaining crops and care history are preserved.');
+    setSelectedSlotId(layout.beds.some((bed) => bed.slotId === selectedSlotId) ? selectedSlotId : layout.beds[0]?.slotId ?? null);
+    setMapView(false);
+    navigate('farm', true);
+  }
 
   function createFarm() {
     setEditingFarm(false);
@@ -167,8 +204,10 @@ export function OrbitFarmApp() {
     if (!boundary.valid || !draft.boundary) { setFormError(boundary.errors[0] ?? 'Draw a closed field boundary before continuing.'); return; }
     const inputs = structuredClone(draft.inputs);
     inputs.soil.source = inputs.soil.ph === null && inputs.soil.texture === null ? 'unknown' : 'farmer_reported';
+    const freshFarm = createScenarioState('empty-farm');
+    if (!editingFarm && state.boundary === null) freshFarm.layout = structuredClone(state.layout);
     const next: FarmState = {
-      ...(editingFarm ? state : createScenarioState('empty-farm')),
+      ...(editingFarm ? state : freshFarm),
       farmId: editingFarm ? state.farmId : crypto.randomUUID(), name: draft.name.trim(), boundary: draft.boundary,
       boundaryVersion: editingFarm ? state.boundaryVersion + 1 : 1, inputs,
       scenarioId: state.scenarioId === 'empty-farm' ? 'dry-week' : state.scenarioId,
@@ -183,7 +222,7 @@ export function OrbitFarmApp() {
     void analyze(next);
   }
   function loadScenario(id: ScenarioId) {
-    if ((state.name !== 'Meadow Farm' || state.journal.length > 0 || recoveryRequired) && !window.confirm('Replace the saved demo farm with this test scenario?')) return;
+    if ((state.name !== 'Meadow Farm' || state.journal.length > 0 || recoveryRequired || JSON.stringify(state.layout) !== JSON.stringify(createDefaultLayout())) && !window.confirm('Replace the saved demo farm with this test scenario?')) return;
     abort.current?.abort();
     setState(createScenarioState(id));
     setRecoveryRequired(false);
@@ -195,38 +234,43 @@ export function OrbitFarmApp() {
     navigate('farm');
   }
   function plantShortcut() {
-    const empty = Array.from({ length: 6 }, (_, slot) => slot).find((slot) => !state.plots.some((plot) => plot.slotId === slot));
-    setSelectedSlotId(empty ?? state.plots[0]?.slotId ?? 0);
-    setNotice(empty === undefined ? 'Your plots are full. Select a crop to edit its planting.' : `Plot ${plotLetter(empty)} is ready. Choose a crop in the planting panel.`);
+    if (!state.layout.beds.length) { setNotice('Draw your first bed to make room for a crop.'); navigate('layout'); return; }
+    const empty = state.layout.beds.find((bed) => !state.plots.some((plot) => plot.slotId === bed.slotId));
+    setSelectedSlotId(empty?.slotId ?? state.plots[0]?.slotId ?? state.layout.beds[0].slotId);
+    setNotice(empty ? `${empty.name} is ready. Choose a crop in the planting panel.` : 'Your beds are planted. Select a crop to edit its planting.');
   }
   function taskAction(task: CareTask, type: 'complete_task' | 'skip_task' | 'snooze_task') {
     dispatch({ type, taskId: task.id }, type === 'complete_task' ? task.kind === 'water' ? 'Irrigation logged. A little care goes a long way.' : 'Care task completed. Your action is saved in the journal.' : type === 'skip_task' ? 'Task skipped. Your choice is saved in the journal.' : 'Reminder moved to tomorrow in demo time.');
   }
 
   return <div className="app-shell">
-    <a className="skip-link" href="#main-content">Skip to content</a>
+    <a className="skip-link" href={`#/${route}`} onClick={(event) => { event.preventDefault(); const main = document.getElementById('main-content'); main?.focus(); main?.scrollIntoView({ block: 'start' }); }}>Skip to content</a>
     <aside className="sidebar">
       <a className="wordmark" href="#/farm" aria-label="orbitFarm home"><span className="brand-mark"><Sprout size={23} /></span><span className="brand-name">orbitFarm<span className="brand-period" aria-hidden="true">.</span></span></a>
       <div className="workspace-label">YOUR GROWING SPACE</div>
       <div className="farm-identity"><span className="farm-avatar"><Wheat size={24} /></span><div><strong data-testid="farm-name">{state.name}</strong><span>Personal workspace</span></div></div>
       <nav aria-label="Main navigation">
-        {NAV.map(({ route: target, label, icon: Icon }) => <a key={target} href={`#/${target}`} aria-label={label} className={`nav-link ${route === target ? 'active' : ''}`} aria-current={route === target ? 'page' : undefined}><Icon size={19} /><span>{label}</span>{target === 'tasks' && dueTasks.length > 0 && <span className="nav-count">{dueTasks.length}</span>}</a>)}
+        {NAV.map(({ route: target, label, icon: Icon }) => <a key={target} href={`#/${target}`} aria-label={label} className={`nav-link ${(route === target || (target === 'farm' && route === 'layout')) ? 'active' : ''}`} aria-current={(route === target || (target === 'farm' && route === 'layout')) ? 'page' : undefined}><Icon size={19} /><span>{label}</span>{target === 'tasks' && dueTasks.length > 0 && <span className="nav-count">{dueTasks.length}</span>}</a>)}
       </nav>
       <div className="sidebar-season"><span className="eyebrow"><Sun size={14} /> THE NEXT GOOD THING</span><h3>A little space.<br />A fresh start.</h3><p>Thoughtful seasons begin with small decisions.</p><button className="text-button" onClick={() => { navigate('plans'); }}>Explore your plans <ArrowRight size={16} /></button></div>
       <div className="sidebar-bottom"><a href="#/lab" className={`nav-link ${route === 'lab' ? 'active' : ''}`}><FlaskConical size={18} />Test benches</a><div className="sidebar-footer"><span className="avatar">F</span><span>Field notes & fresh starts<small>orbitFarm · early access</small></span><CircleHelp size={16} /></div></div>
     </aside>
     <div className="app-body">
-      <header className="topbar"><div className="breadcrumbs"><Sprout size={16} /><span>My workspace</span><ChevronRight size={13} /><strong>{route === 'farm' ? 'Your farm' : route === 'lab' ? 'Test benches' : route === 'setup' ? 'Field setup' : route === 'plans' ? 'Rotation plans' : route === 'tasks' ? 'Tasks' : 'Journal'}</strong></div><div className="topbar-right"><span className={`data-badge ${sourceLabel === 'Demo data' ? 'demo' : 'nasa'}`}><span />{sourceLabel}</span><span className="topbar-divider" /><span className="topbar-date"><CalendarDays size={15} />{displayDate(state.demoNow)}</span><span className="avatar">F</span></div></header>
+      <header className="topbar"><div className="breadcrumbs"><Sprout size={16} /><span>My workspace</span><ChevronRight size={13} /><strong>{route === 'farm' ? 'Your farm' : route === 'lab' ? 'Test benches' : route === 'setup' ? 'Field setup' : route === 'layout' ? 'Farm layout' : route === 'plans' ? 'Rotation plans' : route === 'tasks' ? 'Tasks' : 'Journal'}</strong></div><div className="topbar-right"><span className={`data-badge ${sourceLabel === 'Demo data' ? 'demo' : 'nasa'}`}><span />{sourceLabel}</span><span className="topbar-divider" /><span className="topbar-date"><CalendarDays size={15} />{displayDate(state.demoNow)}</span><span className="avatar">F</span></div></header>
       {storageError && <div className="storage-alert" role="alert"><Database size={18} /><span>{storageError}</span>{recoveryRequired ? <button onClick={() => loadScenario('dry-week')}>Reset demo safely</button> : <button onClick={() => { try { setStorageError(saveFarm(state, window.localStorage)); } catch { setStorageError('Browser storage is still unavailable.'); } }}>Try saving again</button>}</div>}
       {providerError && <div className="storage-alert" role="alert"><Database size={18} /><span>{providerError}</span><button onClick={() => navigate('lab')}>Open provider settings</button></div>}
       {notice && <div className="notice" role="status"><Check size={17} /><span>{notice}</span>{lastUndoable && <button className="text-button" onClick={() => { dispatch({ type: 'undo_action', entryId: lastUndoable.id }); setNotice('Action undone. Your task is restored.'); }}><Undo2 size={15} />Undo</button>}<button className="icon-button" aria-label="Dismiss notification" onClick={() => setNotice(null)}><X size={16} /></button></div>}
-      <main id="main-content">
+      <main id="main-content" tabIndex={-1}>
         {route === 'farm' && <>
           <div className="page-heading"><div><span className="eyebrow"><span className="tiny-leaf" />FROM ORBIT TO YOUR NEXT SEASON</span><h1>Your farm, a little happier.</h1><p>Big-picture insights. Small, thoughtful actions.</p></div><div className="heading-actions"><button className="button secondary" disabled={Boolean(state.pendingRequestId)} onClick={() => state.boundary ? void analyze() : createFarm()}><ScanLine size={17} />Analyze field</button><button className="button primary" onClick={createFarm}><Plus size={17} />Create farm</button></div></div>
           {state.pendingRequestId && <OrbitScanner key={state.pendingRequestId} mode={analysisMode} compact />}
           <div className="farm-layout"><section className="farm-main">
-            <div className="farm-window"><div className="farm-window-toolbar"><div><span className="live-dot" /><strong>{state.name}</strong><span className="muted">{state.boundary ? `${validateBoundary(state.boundary).areaHa.toFixed(1)} ha` : 'No field selected'}</span></div><div className="segmented" aria-label="Field view"><button aria-pressed={!mapView} onClick={() => setMapView(false)}><Sprout size={14} />Farm</button><button aria-pressed={mapView} onClick={() => { setPendingBoundary(state.boundary); setMapView(true); }}><MapPin size={14} />Map</button></div></div>
-              {mapView ? <div className="map-workspace"><Suspense fallback={<p className="muted small">Loading the field map…</p>}><BoundaryMap boundary={pendingBoundary} error={pendingBoundary ? validateBoundary(pendingBoundary).errors[0] : null} onChange={setPendingBoundary} /></Suspense><button className="button primary" onClick={() => { const checked = validateBoundary(pendingBoundary); if (checked.valid && pendingBoundary) { dispatch({ type: 'set_boundary', boundary: pendingBoundary }, 'Boundary saved. Analyze the field to refresh its recommendations.'); setMapView(false); } else setNotice(checked.errors[0] ?? 'Draw a valid field boundary.'); }}>Confirm boundary</button></div> : <FarmScene plots={state.plots} selectedSlotId={selectedSlotId} onSelectSlot={setSelectedSlotId} tasks={state.tasks} demoNow={state.demoNow} isScanning={Boolean(state.pendingRequestId)} />}
+            <div className="farm-window"><div className="farm-window-toolbar"><div><span className="live-dot" /><strong>{state.name}</strong><span className="muted">{state.boundary ? `${validateBoundary(state.boundary).areaHa.toFixed(1)} ha` : 'No field selected'}</span></div><div className="farm-view-actions"><button className="text-button edit-layout-button" onClick={() => navigate('layout')}><Settings2 size={15} />Edit layout</button><div className="segmented" aria-label="Field view"><button aria-pressed={!mapView} onClick={() => setMapView(false)}><Sprout size={14} />Farm</button><button aria-pressed={mapView} onClick={() => { setPendingBoundary(state.boundary); setMapView(true); }}><MapPin size={14} />Map</button></div></div></div>
+              {mapView ? <div className="map-workspace"><Suspense fallback={<p className="muted small">Loading the field map…</p>}><BoundaryMap boundary={pendingBoundary} error={pendingBoundary ? validateBoundary(pendingBoundary).errors[0] : null} onChange={setPendingBoundary} /></Suspense><button className="button primary" onClick={() => { const checked = validateBoundary(pendingBoundary); if (checked.valid && pendingBoundary) { dispatch({ type: 'set_boundary', boundary: pendingBoundary }, 'Boundary saved. Analyze the field to refresh its recommendations.'); setMapView(false); } else setNotice(checked.errors[0] ?? 'Draw a valid field boundary.'); }}>Confirm boundary</button></div> : <FarmScene layout={state.layout} plots={state.plots} selectedSlotId={selectedSlotId} onSelectSlot={setSelectedSlotId} tasks={state.tasks} demoNow={state.demoNow} isScanning={Boolean(state.pendingRequestId)} />}
+              <div className="farm-bed-controls">
+                {state.layout.beds.length ? <Select label="Selected bed" value={selectedSlotId === null ? '' : String(selectedSlotId)} onChange={(value) => setSelectedSlotId(Number(value))} options={state.layout.beds.map((bed) => { const plot = state.plots.find((item) => item.slotId === bed.slotId); return { value: String(bed.slotId), label: `${bed.name} · ${plot ? cropName(plot.cropId) : 'Empty'}` }; })} /> : <p className="muted small">A blank canvas. Draw a bed to start your planting plan.</p>}
+                <span className="bed-count">{state.layout.beds.length} {state.layout.beds.length === 1 ? 'bed' : 'beds'} · Custom layout</span>
+              </div>
               <div className="farm-window-footer"><span><span className="legend-dot planted" />{state.plots.length} planted plots</span><span><span className="legend-dot attention" />{dueTasks.length} {dueTasks.length === 1 ? 'task' : 'tasks'} need a check</span><span className="scene-caption">Schematic layout · not to scale</span></div>
             </div>
             <div className="conditions-heading"><div><h2>A view from above</h2><p>Your field conditions, made a little clearer.</p></div><button className="text-button" onClick={() => navigate('plans')}>See the evidence <ArrowRight size={15} /></button></div>
@@ -236,9 +280,13 @@ export function OrbitFarmApp() {
           </section>
           <aside className="care-sidebar"><div className="section-heading"><h2>A little care today</h2><span className="soft-count">{dueTasks.length}</span></div><p className="section-subtitle">Small steps. Happy growing.</p>
             {selectedTask ? <TaskCard task={selectedTask} state={state} onAction={taskAction} selected /> : <div className="caught-up"><span className="caught-up-icon"><CheckCheck size={28} /></span><h3>{state.boundary ? 'A moment to grow.' : 'Your next season starts here.'}</h3><p>{state.boundary ? 'No task is due for this plot. Your next check will appear when it is time.' : 'Draw your field, explore its conditions, and make it your own.'}</p>{!state.boundary && <button className="button primary" onClick={createFarm}>Draw my farm <ArrowRight size={16} /></button>}</div>}
-            {selectedSlotId !== null && state.boundary && <PlotEditor key={`${state.farmId}-${selectedSlotId}-${selectedPlot?.id ?? 'empty'}`} state={state} slotId={selectedSlotId} onAction={dispatch} selectedCrop={selectedPlan?.sequence[0]} />}
+            {selectedSlotId !== null && state.boundary && state.layout.beds.some((bed) => bed.slotId === selectedSlotId) && <PlotEditor key={`${state.farmId}-${selectedSlotId}-${selectedPlot?.id ?? 'empty'}`} state={state} slotId={selectedSlotId} onAction={dispatch} selectedCrop={selectedPlan?.sequence[0]} />}
             <div className="field-context"><span className="eyebrow"><MapPin size={13} />YOUR FIELD NOTES</span><div><span>Planting window</span><strong>{displayDate(state.inputs.season.plantingDate).replace(', 2026', '')}</strong></div><div><span>Soil texture</span><strong>{state.inputs.soil.texture ? human(state.inputs.soil.texture) : 'Unknown'}</strong></div><div><span>Priority</span><strong>{human(state.inputs.priority)}</strong></div><button className="text-button" onClick={editField}>Edit field information <Settings2 size={14} /></button></div>
           </aside></div>
+        </>}
+
+        {route === 'layout' && <>
+          <Suspense fallback={<div className="panel layout-loading" role="status">Getting your planning board ready…</div>}><FarmLayoutEditor layout={state.layout} plantedSlotIds={state.plots.map((plot) => plot.slotId)} onSave={saveLayout} onDirtyChange={reportLayoutDirty} onCancel={() => navigate('farm', true)} /></Suspense>
         </>}
 
         {route === 'setup' && <>
@@ -278,7 +326,7 @@ export function OrbitFarmApp() {
         {route === 'lab' && <><div className="page-heading"><div><span className="eyebrow">THE ORBITFARM FIELD LAB</span><h1>Small tests. Clear progress.</h1><p>Open a repeatable scenario and try the real application flow.</p></div><span className="summary-pill"><FlaskConical size={17} />Development test benches</span></div><div className="lab-explainer"><ShieldCheck size={21} /><p>Every bench uses the same interface and behavior as the app. Conditions are synthetic, the clock is fixed, and loading a scenario replaces the saved demo farm.</p></div><section className="panel scanner-preview-panel"><div className="panel-heading"><span className="step-number"><ScanLine size={18} /></span><div><h2>Meet Orbit-1</h2><p>Animation preview · no analysis request is sent and your farm stays unchanged.</p></div></div><OrbitScanner key={scannerPreviewRun} state={scannerPreview} mode="demo" /><div className="heading-actions"><button className="button primary" onClick={() => { setScannerPreview('scanning'); setScannerPreviewRun((current) => current + 1); }}><RefreshCw size={16} />Replay arrival</button><button className="button secondary" disabled={scannerPreview === 'complete'} onClick={() => setScannerPreview('complete')}><CheckCheck size={16} />Show completion</button></div></section><div className="lab-grid">{SCENARIOS.map((scenario, index) => <article className="bench-card" key={scenario.id}><span className={`bench-icon bench-${index}`}><FlaskConical size={23} /></span><span className="bench-id">BENCH 0{index + 1}</span><h2>{scenario.name}</h2><p>{scenario.description}</p><button className="button secondary full-width" onClick={() => loadScenario(scenario.id)}>Load {scenario.id}<ArrowRight size={15} /></button></article>)}</div><section className="panel api-panel"><div><span className="eyebrow">WHEN YOUR ANALYTICS ARE READY</span><h2>Connect the analysis service</h2><p>POST the agreed contract to your backend. Failures stay visible; the app never quietly switches to mock results.</p><span className="small muted">Active provider: {providerMode === 'mock' ? 'Demo fixtures' : 'Connected API'}</span></div><div className="api-controls"><label>API base URL<input type="url" value={apiBaseUrl} onChange={(e) => setApiBaseUrl(e.target.value)} placeholder="https://your-analysis-service.example" /></label><div className="heading-actions"><button className="button secondary" onClick={() => selectProvider('mock')}>Use demo fixtures</button><button className="button primary" onClick={() => selectProvider('api')}>Use API</button></div></div></section></>}
       </main>
       <footer className="app-footer"><span><Sprout size={14} />A little space. A smarter next season.</span><span>Made for NASA Space Apps · Independent project</span></footer>
-      <div className="demo-clock"><span className="clock-label"><span className="live-dot" />DEMO TIME</span><strong>{displayDate(state.demoNow)}</strong><button onClick={() => dispatch({ type: 'advance_day' }, 'Demo time advanced by one day. Observation values are unchanged.')}><CalendarDays size={14} />Advance 1 day <ArrowRight size={14} /></button></div>
+      {route !== 'layout' && <div className="demo-clock"><span className="clock-label"><span className="live-dot" />DEMO TIME</span><strong>{displayDate(state.demoNow)}</strong><button onClick={() => dispatch({ type: 'advance_day' }, 'Demo time advanced by one day. Observation values are unchanged.')}><CalendarDays size={14} />Advance 1 day <ArrowRight size={14} /></button></div>}
     </div>
   </div>;
 }
@@ -315,7 +363,7 @@ function TaskCard({ task, state, onAction, selected = false }: { task: CareTask;
   const plot = state.plots.find((item) => item.id === task.plotId);
   const isDue = getDueTasks(state).some((item) => item.id === task.id);
   const status = task.status === 'done' ? 'Done' : task.status === 'skipped' ? 'Skipped' : task.status === 'snoozed' && !isDue ? 'Snoozed' : isDue ? 'Needs a check' : 'Upcoming';
-  return <article className={`task-card ${status === 'Done' ? 'task-done' : ''}`} data-testid={selected ? 'selected-task' : undefined} aria-label={`${plot ? `Plot ${plotLetter(plot.slotId)} ` : ''}${task.title}`}><div className="task-card-top"><span className="task-symbol"><Droplets size={20} /></span><span className={`task-status ${isDue ? 'attention' : ''}`}>{isDue ? <span className="status-dot" /> : <Check size={12} />}{status}</span></div><p className="task-plot">{plot ? `Plot ${plotLetter(plot.slotId)} · ${cropName(plot.cropId)}` : 'Past planting'}<span> · {isDue ? 'Today' : displayDate(task.snoozedUntilISO ?? task.dueAtISO)}</span></p><h3>{task.title}</h3><p className="task-reason">{task.reason}</p><details className="task-why"><summary>Why this? <ChevronRight size={13} /></summary><p>This reminder uses the recorded planting date and a fixed demonstration schedule. {task.kind === 'water' ? 'Check the soil locally before deciding whether to irrigate.' : 'Inspect crop condition and use a local soil test before deciding whether fertilizer is needed.'}</p><span className="small muted">Demo care schedule · Estimated growth stage</span></details>{isDue && <><button className="button primary full-width" onClick={() => onAction(task, 'complete_task')}><Check size={17} />{task.kind === 'water' ? 'Watered' : 'Done'}</button><div className="task-alternatives"><button onClick={() => onAction(task, 'skip_task')}>Skip</button><button onClick={() => onAction(task, 'snooze_task')}>Remind me tomorrow <ArrowRight size={13} /></button></div></>}</article>;
+  return <article className={`task-card ${status === 'Done' ? 'task-done' : ''}`} data-testid={selected ? 'selected-task' : undefined} aria-label={`${plot ? `${getBedName(state.layout, plot.slotId)} ` : ''}${task.title}`}><div className="task-card-top"><span className="task-symbol"><Droplets size={20} /></span><span className={`task-status ${isDue ? 'attention' : ''}`}>{isDue ? <span className="status-dot" /> : <Check size={12} />}{status}</span></div><p className="task-plot">{plot ? `${getBedName(state.layout, plot.slotId)} · ${cropName(plot.cropId)}` : 'Past planting'}<span> · {isDue ? 'Today' : displayDate(task.snoozedUntilISO ?? task.dueAtISO)}</span></p><h3>{task.title}</h3><p className="task-reason">{task.reason}</p><details className="task-why"><summary>Why this? <ChevronRight size={13} /></summary><p>This reminder uses the recorded planting date and a fixed demonstration schedule. {task.kind === 'water' ? 'Check the soil locally before deciding whether to irrigate.' : 'Inspect crop condition and use a local soil test before deciding whether fertilizer is needed.'}</p><span className="small muted">Demo care schedule · Estimated growth stage</span></details>{isDue && <><button className="button primary full-width" onClick={() => onAction(task, 'complete_task')}><Check size={17} />{task.kind === 'water' ? 'Watered' : 'Done'}</button><div className="task-alternatives"><button onClick={() => onAction(task, 'skip_task')}>Skip</button><button onClick={() => onAction(task, 'snooze_task')}>Remind me tomorrow <ArrowRight size={13} /></button></div></>}</article>;
 }
 
 function PlotEditor({ state, slotId, selectedCrop, onAction }: { state: FarmState; slotId: number; selectedCrop?: CropId; onAction: (action: FarmAction, message?: string) => void }) {
@@ -324,13 +372,13 @@ function PlotEditor({ state, slotId, selectedCrop, onAction }: { state: FarmStat
   const [plantedOn, setPlantedOn] = useState(plot?.plantedOn ?? getFarmDate(state.demoNow));
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState(!plot);
-  if (plot && !editing) return <section className="plot-summary"><div className="plot-summary-top"><span className="crop-portrait small-portrait"><CropSprite cropId={plot.cropId} size={42} /></span><div><span className="eyebrow">PLOT {plotLetter(slotId)}</span><h3>{cropName(plot.cropId)}</h3></div><span className="growth-dot" /></div><div className="plot-detail"><span>Estimated stage</span><strong>{getGrowthStage(plot, state.demoNow)}</strong></div><div className="plot-detail"><span>Planted</span><strong>{displayDate(plot.plantedOn)}</strong></div><button className="text-button" onClick={() => setEditing(true)}>Edit planting <Settings2 size={14} /></button></section>;
-  return <form className="plot-editor" onSubmit={(event) => { event.preventDefault(); if (!/^\d{4}-\d{2}-\d{2}$/.test(plantedOn) || !Number.isFinite(Date.parse(plantedOn))) { setError('Choose a valid planting date.'); return; } onAction(plot ? { type: 'edit_plot', plotId: plot.id, cropId, plantedOn } : { type: 'plant', slotId, cropId, plantedOn }, `${cropName(cropId)} ${plot ? 'updated' : 'planted'} in Plot ${plotLetter(slotId)}.`); setError(null); setEditing(false); }}><div className="plot-editor-heading"><span className="eyebrow">PLOT {plotLetter(slotId)}</span><h3>{plot ? 'A little change of plan.' : 'Make room for something good.'}</h3></div><Select label="Crop" value={cropId} onChange={(value) => setCropId(value as CropId)} options={CROP_CATALOG.map((crop) => ({ value: crop.id, label: crop.name }))} /><label>Planting date<input type="date" value={plantedOn} onChange={(event) => setPlantedOn(event.target.value)} /></label>{error && <p className="form-error" role="alert">{error}</p>}<button className="button primary full-width" type="submit"><Sprout size={16} />{plot ? 'Save planting' : 'Plant crop'}</button>{plot && <div className="task-alternatives"><button type="button" onClick={() => setEditing(false)}>Cancel</button><button className="danger-text" type="button" onClick={() => { if (window.confirm(`Remove ${cropName(plot.cropId)} from Plot ${plotLetter(slotId)}?`)) onAction({ type: 'remove_plot', plotId: plot.id }, 'Planting removed. Your journal history is preserved.'); }}><Trash2 size={13} />Remove crop</button></div>}</form>;
+  if (plot && !editing) return <section className="plot-summary"><div className="plot-summary-top"><span className="crop-portrait small-portrait"><CropSprite cropId={plot.cropId} size={42} /></span><div><span className="eyebrow">{getBedName(state.layout, slotId)}</span><h3>{cropName(plot.cropId)}</h3></div><span className="growth-dot" /></div><div className="plot-detail"><span>Estimated stage</span><strong>{getGrowthStage(plot, state.demoNow)}</strong></div><div className="plot-detail"><span>Planted</span><strong>{displayDate(plot.plantedOn)}</strong></div><button className="text-button" onClick={() => setEditing(true)}>Edit planting <Settings2 size={14} /></button></section>;
+  return <form className="plot-editor" onSubmit={(event) => { event.preventDefault(); if (!/^\d{4}-\d{2}-\d{2}$/.test(plantedOn) || !Number.isFinite(Date.parse(plantedOn))) { setError('Choose a valid planting date.'); return; } onAction(plot ? { type: 'edit_plot', plotId: plot.id, cropId, plantedOn } : { type: 'plant', slotId, cropId, plantedOn }, `${cropName(cropId)} ${plot ? 'updated' : 'planted'} in ${getBedName(state.layout, slotId)}.`); setError(null); setEditing(false); }}><div className="plot-editor-heading"><span className="eyebrow">{getBedName(state.layout, slotId)}</span><h3>{plot ? 'A little change of plan.' : 'Make room for something good.'}</h3></div><Select label="Crop" value={cropId} onChange={(value) => setCropId(value as CropId)} options={CROP_CATALOG.map((crop) => ({ value: crop.id, label: crop.name }))} /><label>Planting date<input type="date" value={plantedOn} onChange={(event) => setPlantedOn(event.target.value)} /></label>{error && <p className="form-error" role="alert">{error}</p>}<button className="button primary full-width" type="submit"><Sprout size={16} />{plot ? 'Save planting' : 'Plant crop'}</button>{plot && <div className="task-alternatives"><button type="button" onClick={() => setEditing(false)}>Cancel</button><button className="danger-text" type="button" onClick={() => { if (window.confirm(`Remove ${cropName(plot.cropId)} from ${getBedName(state.layout, slotId)}?`)) onAction({ type: 'remove_plot', plotId: plot.id }, 'Planting removed. Your journal history is preserved.'); }}><Trash2 size={13} />Remove crop</button></div>}</form>;
 }
 
 function JournalRow({ entry, state, onUndo }: { entry: JournalEntry; state: FarmState; onUndo: () => void }) {
   const plot = state.plots.find((item) => item.id === entry.plotId);
   const label = entry.action === 'watered' ? 'Irrigation logged' : entry.action === 'skipped' ? 'Task skipped' : entry.action === 'snoozed' ? 'Reminder moved to tomorrow' : 'Care task completed';
   const latest = [...state.journal].reverse().find((item) => item.taskId === entry.taskId && !item.undone)?.id === entry.id;
-  return <article className={`journal-row ${entry.undone ? 'undone' : ''}`} data-testid="journal-entry"><span className="journal-row-icon">{entry.action === 'watered' ? <Droplets size={22} /> : entry.action === 'snoozed' ? <CalendarDays size={22} /> : <Check size={22} />}</span><div><span className="small muted">{displayDate(entry.createdAtISO)}{plot ? ` · Plot ${plotLetter(plot.slotId)} · ${cropName(plot.cropId)}` : ' · Past planting'}</span><h3>{label}</h3><p>{entry.undone ? 'Undone · the task has been restored.' : 'Your action is recorded on this device.'}</p></div>{!entry.undone && latest && state.tasks.some((task) => task.id === entry.taskId) && <button className="button secondary compact" onClick={onUndo}><Undo2 size={15} />Undo</button>}{entry.undone && <span className="muted small">Undone</span>}</article>;
+  return <article className={`journal-row ${entry.undone ? 'undone' : ''}`} data-testid="journal-entry"><span className="journal-row-icon">{entry.action === 'watered' ? <Droplets size={22} /> : entry.action === 'snoozed' ? <CalendarDays size={22} /> : <Check size={22} />}</span><div><span className="small muted">{displayDate(entry.createdAtISO)}{plot ? ` · ${getBedName(state.layout, plot.slotId)} · ${cropName(plot.cropId)}` : ' · Past planting'}</span><h3>{label}</h3><p>{entry.undone ? 'Undone · the task has been restored.' : 'Your action is recorded on this device.'}</p></div>{!entry.undone && latest && state.tasks.some((task) => task.id === entry.taskId) && <button className="button secondary compact" onClick={onUndo}><Undo2 size={15} />Undo</button>}{entry.undone && <span className="muted small">Undone</span>}</article>;
 }

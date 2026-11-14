@@ -1,4 +1,6 @@
-import type { CSSProperties } from 'react';
+import { useId } from 'react';
+import type { FarmLayout, LayoutPoint } from '../domain/orbitFarm-types';
+import { getPlotLabel } from '../domain/orbitFarm-layout';
 import { ORBIT_SCANNER_SPRITE } from './orbitFarm-scanner';
 import './orbitFarm-scenes.css';
 
@@ -21,6 +23,7 @@ interface SceneTask {
 }
 
 interface FarmSceneProps {
+  layout: FarmLayout;
   plots: ScenePlot[];
   selectedSlotId: number | null;
   onSelectSlot: (slotId: number) => void;
@@ -34,11 +37,6 @@ const CROP_NAMES: Record<CropId, string> = {
   chickpea: 'Chickpea',
   sorghum: 'Sorghum',
 };
-
-const SLOT_POSITIONS = [
-  { x: 176, y: 205 }, { x: 354, y: 205 }, { x: 532, y: 205 },
-  { x: 176, y: 337 }, { x: 354, y: 337 }, { x: 532, y: 337 },
-];
 
 export function CropSprite({ cropId, size = 36 }: { cropId: CropId; size?: number }) {
   return (
@@ -114,8 +112,8 @@ function WorldBackground({ scanning }: { scanning: boolean }) {
       <path d="M56 160H744V466H720V486H82V470H56Z" fill="#AFC58A" />
       <path d="M48 150H736V454H712V477H72V462H48Z" fill="#D8E8B6" />
       <path d="M72 150H712V166H72ZM48 174H64V441H48ZM75 461H713V477H75Z" fill="#C8DBA5" />
-      <path d="M149 309H710V332H149ZM326 173H350V455H326ZM504 173H528V455H504ZM396 447H448V493H396Z" fill="#F7E8BF" />
-      <path d="M149 323H710V330H149ZM342 175H350V455H342ZM520 175H528V455H520ZM438 447H448V493H438Z" fill="#E3D3AA" />
+      <path d="M396 447H448V493H396Z" fill="#F7E8BF" />
+      <path d="M438 447H448V493H438Z" fill="#E3D3AA" />
       <g transform="translate(76 39)">
         <path d="M12 82H138V119H12Z" fill="#ACBF89" />
         <path d="M15 38H132V109H15Z" fill="#203D32" />
@@ -142,7 +140,7 @@ function WorldBackground({ scanning }: { scanning: boolean }) {
         <path d="M35 29H48V42H35Z" fill="#203D32" /><path d="M39 33H44V38H39Z" fill="#F4C95D" />
       </g>
       <Tree x={61} y={222} />
-      <Tree x={680} y={365} scale={0.44} />
+      <Tree x={738} y={365} scale={0.44} />
       <g transform="translate(83 373)">
         <path d="M0 5H31V48H0Z" fill="#203D32" /><path d="M4 9H27V44H4Z" fill="#CA865A" /><path d="M4 12H27V22H4Z" fill="#BDE4F0" /><path d="M0 22H31V27H0ZM0 36H31V41H0Z" fill="#64785B" /><path d="M7 0H25V5H7Z" fill="#D3E7DF" />
       </g>
@@ -170,45 +168,92 @@ function isTaskDue(task: SceneTask, now: number) {
   return Date.parse(task.dueAtISO) <= now;
 }
 
-export function FarmScene({ plots, selectedSlotId, onSelectSlot, isScanning = false, tasks = [], demoNow }: FarmSceneProps) {
+function insideBed(point: LayoutPoint, points: LayoutPoint[]) {
+  let inside = false;
+  for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
+    const a = points[i], b = points[j];
+    if ((a.y > point.y) !== (b.y > point.y) && point.x < (b.x - a.x) * (point.y - a.y) / (b.y - a.y) + a.x) inside = !inside;
+  }
+  return inside;
+}
+
+export function getSchematicLabelPosition(points: LayoutPoint[]) {
+  const minX = Math.min(...points.map(p => p.x)), maxX = Math.max(...points.map(p => p.x));
+  const minY = Math.min(...points.map(p => p.y)), maxY = Math.max(...points.map(p => p.y));
+  let best = points[0], clearance = -1;
+  for (let xi = 1; xi < 18; xi++) for (let yi = 1; yi < 18; yi++) {
+    const p = { x: minX + (maxX - minX) * xi / 18, y: minY + (maxY - minY) * yi / 18 };
+    if (!insideBed(p, points)) continue;
+    let distance = Infinity;
+    for (let i = 0; i < points.length; i++) {
+      const a = points[i], b = points[(i + 1) % points.length];
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const t = Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / (dx * dx + dy * dy)));
+      distance = Math.min(distance, Math.hypot(p.x - a.x - t * dx, p.y - a.y - t * dy));
+    }
+    const centerX = (minX + maxX) / 2, centerY = (minY + maxY) / 2;
+    if (distance > clearance + 1e-7 || (Math.abs(distance - clearance) < 1e-7 && Math.hypot(p.x - centerX, p.y - centerY) < Math.hypot(best.x - centerX, best.y - centerY))) { best = p; clearance = distance; }
+  }
+  return { point: best, clearance, minX, maxX, minY, maxY };
+}
+
+export function FarmScene({ layout, plots, selectedSlotId, onSelectSlot, isScanning = false, tasks = [], demoNow }: FarmSceneProps) {
   const now = Date.parse(demoNow);
+  const id = useId().replaceAll(':', '');
+  const toWorld = (p: LayoutPoint) => ({ x: 160 + p.x / layout.width * 534, y: 194 + p.y / layout.height * 244 });
   return (
     <div className={`of-farm-scene${isScanning ? ' of-farm-scene-scanning' : ''}`} data-testid="farm-scene">
       <WorldBackground scanning={isScanning} />
-      {SLOT_POSITIONS.map((position, slotId) => {
-        const plot = plots.find((item) => item.slotId === slotId);
-        const dueTask = plot && tasks.find((task) => task.plotId === plot.id && isTaskDue(task, now));
-        const cropName = plot ? CROP_NAMES[plot.cropId] : 'Empty';
-        const name = `Plot ${String.fromCharCode(65 + slotId)}`;
-        const style = { left: `${position.x / 8}%`, top: `${position.y / 5.2}%`, width: '18%', height: '18.46%' } satisfies CSSProperties;
-        return (
-          <button
-            key={slotId}
-            type="button"
-            className={`of-plot${plot ? ' of-plot-planted' : ' of-plot-empty'}${selectedSlotId === slotId ? ' of-plot-selected' : ''}`}
-            style={style}
-            aria-label={`${name} · ${cropName}${dueTask ? ` · ${dueTask.title}` : ''}`}
-            aria-pressed={selectedSlotId === slotId}
-            data-testid={`plot-slot-${slotId}`}
-            onClick={() => onSelectSlot(slotId)}
+      <svg className="of-bed-layer" viewBox="0 0 800 520" aria-label="Your planting beds">
+        <defs>
+          <pattern id={`${id}-soil`} width="18" height="28" patternUnits="userSpaceOnUse">
+            <rect width="18" height="28" fill="#A96545" />
+            <path d="M0 3H18V9H0Z" fill="#CB8A5E" /><path d="M0 22H18V27H0Z" fill="#8E553E" />
+          </pattern>
+          {layout.beds.map(bed => <clipPath key={bed.slotId} id={`${id}-clip-${bed.slotId}`}><polygon points={bed.points.map(toWorld).map(p => `${p.x},${p.y}`).join(' ')} /></clipPath>)}
+        </defs>
+        {layout.beds.map((bed) => {
+          const plot = plots.find(item => item.slotId === bed.slotId);
+          const dueTask = plot && tasks.find(task => task.plotId === plot.id && isTaskDue(task, now));
+          const cropName = plot ? CROP_NAMES[plot.cropId] : 'Empty';
+          const points = bed.points.map(toWorld).map(p => `${p.x},${p.y}`).join(' ');
+          const label = getSchematicLabelPosition(bed.points);
+          const center = toWorld(label.point);
+          const broad = label.clearance >= 1.5 && label.maxX - label.minX >= 5;
+          const cols = Math.max(1, Math.floor((label.maxX - label.minX) * 534 / layout.width / 43));
+          const rows = Math.max(1, Math.floor((label.maxY - label.minY) * 244 / layout.height / 34));
+          const shortName = getPlotLabel(bed.slotId).replace('Plot ', '');
+          return <g
+            key={bed.slotId}
+            className={`of-bed-shape${selectedSlotId === bed.slotId ? ' of-bed-shape-selected' : ''}`}
+            role="button"
+            tabIndex={0}
+            aria-label={`${bed.name} · ${cropName}${dueTask ? ` · ${dueTask.title}` : ''}`}
+            aria-pressed={selectedSlotId === bed.slotId}
+            data-testid={`plot-slot-${bed.slotId}`}
+            onClick={() => onSelectSlot(bed.slotId)}
+            onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onSelectSlot(bed.slotId); } }}
           >
-            <svg className="of-plot-soil" viewBox="0 0 144 96" aria-hidden="true" shapeRendering="crispEdges">
-              <path d="M0 0H144V96H0Z" fill="#203D32" />
-              <path d="M5 5H139V89H5Z" fill="#A96545" />
-              <path d="M7 7H137V13H7ZM7 33H137V39H7ZM7 59H137V65H7Z" fill="#CB8A5E" />
-              <path d="M9 24H136V29H9ZM9 50H136V55H9ZM9 76H136V81H9Z" fill="#8E553E" />
-              <path d="M4 89H140V93H4Z" fill="#6F513B" />
-            </svg>
-            {plot ? (
-              <span className="of-crop-field" aria-hidden="true">
-                {Array.from({ length: 6 }, (_, index) => <CropSprite key={index} cropId={plot.cropId} />)}
-              </span>
-            ) : <span className="of-plant-plus" aria-hidden="true">+</span>}
-            <span className="of-plot-label"><strong>{String.fromCharCode(65 + slotId)}</strong><span>{cropName === 'Empty' ? 'Plant here' : cropName}</span></span>
-            {dueTask && <span className="of-task-marker" aria-hidden="true"><svg viewBox="0 0 16 20" width="13" height="16" shapeRendering="crispEdges"><path d="M6 0H10V4H12V7H14V11H16V16H13V19H3V16H0V11H2V7H4V4H6Z" fill="#203D32" /><path d="M6 5H10V9H12V12H13V15H10V17H5V15H3V12H5V9H6Z" fill="#BDE4F0" /><path d="M5 11H8V15H5Z" fill="#FFF8E8" /></svg></span>}
-          </button>
-        );
-      })}
+            <polygon className="of-bed-ground" points={points} fill={`url(#${id}-soil)`} stroke="#203D32" strokeWidth="5" strokeLinejoin="round" />
+            <g clipPath={`url(#${id}-clip-${bed.slotId})`} pointerEvents="none" aria-hidden="true">
+              {plot ? Array.from({ length: rows * cols }, (_, index) => {
+                const col = index % cols, row = Math.floor(index / cols);
+                const at = toWorld({ x: label.minX + (label.maxX - label.minX) * (col + .5) / cols, y: label.minY + (label.maxY - label.minY) * (row + .5) / rows });
+                return <g key={index} transform={`translate(${at.x - 17} ${at.y - 20})`}><CropSprite cropId={plot.cropId} size={34} /></g>;
+              }) : <text x={center.x} y={center.y - 12} className="of-bed-plus" textAnchor="middle">+</text>}
+            </g>
+            <polygon className="of-bed-selection" points={points} fill="none" stroke="#FFF8E8" strokeWidth="3" strokeLinejoin="round" pointerEvents="none" />
+            <g className="of-bed-label" transform={`translate(${center.x} ${center.y + (broad ? plot ? 20 : 15 : 0)})`} pointerEvents="none" aria-hidden="true">
+              <rect x={broad ? -48 : -13} y="-9" width={broad ? 96 : 26} height="22" fill="#FFF8E8" stroke="#203D32" strokeWidth="2" />
+              <text y="6" textAnchor="middle" className="of-bed-label-text">{broad ? `${shortName}  ${plot ? cropName : 'Plant here'}` : shortName}</text>
+            </g>
+            {dueTask && <g transform={`translate(${center.x + (broad ? 32 : 5)} ${center.y - 32})`} className="of-bed-task" pointerEvents="none" aria-hidden="true">
+              <rect x="-5" y="-5" width="29" height="32" fill="#F4C95D" stroke="#203D32" strokeWidth="2" />
+              <path d="M6 0H10V4H12V7H14V11H16V16H13V19H3V16H0V11H2V7H4V4H6Z" fill="#203D32" /><path d="M6 5H10V9H12V12H13V15H10V17H5V15H3V12H5V9H6Z" fill="#BDE4F0" />
+            </g>}
+          </g>;
+        })}
+      </svg>
       {isScanning && <div className="of-scanning-caption" role="status">Orbit-1 is checking the latest observations…</div>}
     </div>
   );

@@ -11,6 +11,27 @@
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}.scan-progress>span{width:70%;transform:none}}
 
 /* Keep working instructions readable beside the compact pixel artwork. */
+.farm-view-actions{display:flex;align-items:center;justify-content:flex-end;gap:14px;flex-wrap:wrap}
+.edit-layout-button{min-height:40px;white-space:nowrap}
+.farm-bed-controls{display:flex;align-items:flex-end;gap:16px;padding:14px 19px 16px;background:#f0f4e1;border-top:1px solid #dce5ce}
+.farm-bed-controls>.of-select-field{min-width:0;flex:1;max-width:340px}
+.farm-bed-controls .of-select-field>span{font-size:11px}
+.bed-count{font-size:11px;color:#6c796e;line-height:1.5;margin-left:auto;padding-bottom:12px}
+.layout-loading{min-height:260px;display:grid;place-items:center;font-size:14px}
+.plot-summary .eyebrow,.plot-editor .eyebrow,.task-plot,.journal-row .small{overflow-wrap:anywhere;min-width:0}
+@media(max-width:760px){
+  .farm-window-toolbar{flex-wrap:wrap;align-items:center}
+  .farm-window-toolbar>div:first-child{flex:1;min-width:0}
+  .farm-view-actions{gap:10px;flex-wrap:nowrap}
+  .edit-layout-button{font-size:11px!important;gap:5px}
+  .farm-bed-controls{padding:13px 12px;flex-wrap:wrap;gap:9px}
+  .farm-bed-controls>.of-select-field{max-width:none;width:100%;flex-basis:100%}
+  .bed-count{margin-left:0;padding:0;font-size:10px}
+}
+@media(max-width:450px){
+  .farm-window-toolbar>div:first-child{flex-basis:100%}
+  .farm-view-actions{width:100%;justify-content:space-between}
+}
 .source-evidence{margin-top:24px;display:grid;gap:14px}
 .source-evidence>p{font-size:12px;color:var(--muted)}
 .source-evidence>article{padding:16px;border:1px solid var(--line);background:#fffef9;border-radius:4px}

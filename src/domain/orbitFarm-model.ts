@@ -1,6 +1,7 @@
 import type { CareTask, FarmAction, FarmState, JournalEntry, Plot, ScenarioId, AnalysisRequest } from './orbitFarm-types';
 import { CROP_CATALOG, DEFAULT_INPUTS, DEMO_BOUNDARY, DEMO_NOW, makeMockAnalysis } from './orbitFarm-fixtures';
 import { dateSchema, validateAnalysisRequest, validateBoundary, validateFarmInputs } from './orbitFarm-validation';
+import { createDefaultLayout, farmLayoutSchema } from './orbitFarm-layout';
 
 export function getFarmDate(nowISO: string, timeZone = 'Asia/Jerusalem'): string {
   const parts = new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date(nowISO));
@@ -65,7 +66,7 @@ export function createScenarioState(scenarioId: ScenarioId = 'dry-week'): FarmSt
   const tasks = plots.map((plot, i) => taskForPlot(plot, `2026-11-${14 + i}T09:00:00.000Z`));
   if (scenarioId === 'dry-week' && tasks[0]) tasks[0].reason = 'Simulated regional conditions suggest a dry spell. Check the soil locally before irrigating.';
   if (tasks[1]) { tasks[1].kind = 'soil'; tasks[1].title = 'Check soil nutrients'; tasks[1].reason = 'A local soil test can guide nutrient decisions. Satellite data alone cannot determine a fertilizer dose.'; }
-  const state: FarmState = { version: 1, farmId: 'farm-demo-01', name: empty ? 'My new farm' : 'Meadow Farm', boundary: empty ? null : structuredClone(DEMO_BOUNDARY), boundaryVersion: 1, inputs, analysis: null, plots, tasks, journal: [], demoNow: DEMO_NOW, scenarioId, selectedPlanId: null, pendingRequestId: null, analysisError: null };
+  const state: FarmState = { version: 2, farmId: 'farm-demo-01', name: empty ? 'My new farm' : 'Meadow Farm', boundary: empty ? null : structuredClone(DEMO_BOUNDARY), boundaryVersion: 1, inputs, analysis: null, layout: createDefaultLayout(), plots, tasks, journal: [], demoNow: DEMO_NOW, scenarioId, selectedPlanId: null, pendingRequestId: null, analysisError: null };
   if (!empty && scenarioId !== 'api-unavailable') state.analysis = makeMockAnalysis(buildAnalysisRequest(state, 'd5f4cd61-186f-42fb-b09b-42b0d6549571'), scenarioId);
   return state;
 }
@@ -104,8 +105,17 @@ export function farmReducer(state: FarmState, action: FarmAction): FarmState {
     case 'analysis_failed':
       return action.requestId === state.pendingRequestId ? { ...state, pendingRequestId: null, analysisError: action.message } : state;
     case 'select_plan': return state.analysis?.rotationPlans.some(p => p.planId === action.planId) ? { ...state, selectedPlanId: action.planId } : state;
+    case 'set_layout': {
+      const parsed = farmLayoutSchema.safeParse(action.layout);
+      if (!parsed.success) return state;
+      const layout = structuredClone(parsed.data);
+      const slots = new Set(layout.beds.map(bed => bed.slotId));
+      const plots = state.plots.filter(plot => slots.has(plot.slotId));
+      const plotIds = new Set(plots.map(plot => plot.id));
+      return { ...state, layout, plots, tasks: state.tasks.filter(task => plotIds.has(task.plotId)) };
+    }
     case 'plant': {
-      if (!state.boundary || !Number.isInteger(action.slotId) || action.slotId < 0 || action.slotId > 5 || state.plots.some(p => p.slotId === action.slotId) || !CROP_CATALOG.some(c => c.id === action.cropId) || !dateSchema.safeParse(action.plantedOn).success) return state;
+      if (!state.boundary || !state.layout.beds.some(bed => bed.slotId === action.slotId) || state.plots.some(p => p.slotId === action.slotId) || !CROP_CATALOG.some(c => c.id === action.cropId) || !dateSchema.safeParse(action.plantedOn).success) return state;
       const plot: Plot = { id: `plot-${action.slotId}-${state.journal.length}-${state.plots.length}`, slotId: action.slotId, cropId: action.cropId, plantedOn: action.plantedOn };
       return { ...state, plots: [...state.plots, plot], tasks: [...state.tasks, taskForPlot(plot, `${action.plantedOn}T09:00:00.000Z`)] };
     }

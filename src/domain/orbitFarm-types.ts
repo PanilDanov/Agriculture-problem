@@ -100,6 +100,23 @@ export interface Plot {
   plantedOn: string;
 }
 
+export interface LayoutPoint {
+  x: number;
+  y: number;
+}
+
+export interface FarmBed {
+  slotId: number;
+  name: string;
+  points: LayoutPoint[];
+}
+
+export interface FarmLayout {
+  width: 24;
+  height: 12;
+  beds: FarmBed[];
+}
+
 export interface CareTask {
   id: string;
   plotId: string;
@@ -123,13 +140,14 @@ export interface JournalEntry {
 }
 
 export interface FarmState {
-  version: 1;
+  version: 2;
   farmId: string;
   name: string;
   boundary: Polygon | null;
   boundaryVersion: number;
   inputs: FarmInputs;
   analysis: AnalysisResult | null;
+  layout: FarmLayout;
   plots: Plot[];
   tasks: CareTask[];
   journal: JournalEntry[];
@@ -148,6 +166,7 @@ export type FarmAction =
   | { type: 'analysis_received'; analysis: AnalysisResult }
   | { type: 'analysis_failed'; requestId: string; message: string }
   | { type: 'select_plan'; planId: string }
+  | { type: 'set_layout'; layout: FarmLayout }
   | { type: 'plant'; slotId: number; cropId: CropId; plantedOn: string }
   | { type: 'edit_plot'; plotId: string; cropId: CropId; plantedOn: string }
   | { type: 'remove_plot'; plotId: string }

@@ -15,7 +15,8 @@ The development site uses `http://127.0.0.1:5173`. The application uses hash rou
 
 | Address | Purpose |
 | --- | --- |
-| `/#/farm` | Farm, planting slots, care actions, and the selected plot. |
+| `/#/farm` | Farm, custom planting beds, care actions, and the selected bed. |
+| `/#/layout` | Polygon-bed layout editor with draft Undo, Redo, and Cancel. |
 | `/#/setup` | Field boundary and farmer inputs. |
 | `/#/plans` | Crop options and three rotation plans. |
 | `/#/tasks` | Due and upcoming care tasks. |
@@ -37,6 +38,16 @@ Test benches use the same interface, reducer, validation, and providers as the a
 
 The demo clock can advance one day. It changes task scheduling, not observation timestamps or measured soil moisture. Completing a task changes the journal and task status, not satellite measurements.
 
+## Custom bed layouts
+
+`Edit layout` opens a separate draft editor. The classic 3 × 2 arrangement is only the initial preset. Draw simple polygons on a 24 × 12 schematic grid, move entire beds, change individual corners, name beds, or use the row and patchwork presets. The editor allows up to 24 beds with up to 32 corners each. A 0.5-cell snap keeps placement predictable; numeric point and corner controls support keyboard use and touch screens.
+
+Shared edges are allowed. Self-crossing, overlapping, zero-area, and out-of-bounds beds are rejected without replacing the last valid shape. The layout is separate from the geographic field boundary and does not change hectares, satellite sampling, or existing analysis.
+
+Moving or reshaping a bed preserves its planting, care status, and journal. Removing a planted bed asks for confirmation when saving; associated current planting/tasks are removed, while journal history remains. Cancel discards the draft. Stable bed identifiers keep crops attached to the same bed even when its position or name changes.
+
+Saved farms use state version 2. Existing version-1 farms are migrated to the classic layout while retaining plantings, tasks, journal, and analysis. The existing storage key is retained for this migration. Damaged saved data remains protected by the recovery flow.
+
 ## Verification commands
 
 ```bash
@@ -55,6 +66,8 @@ For local checks against an already installed Google Chrome, set `ORBITFARM_BROW
 Every test gets an isolated browser context. The main journey does not inject a ready farm into localStorage. External map tiles may fail or be blocked in tests; boundary tools and the rest of the application must remain usable.
 
 Boundary regression checks cover closing a four-corner field by clicking its first corner, explicitly finishing a triangle, repeated clicks, coordinate duplicates, Undo, and mobile taps. A stored GeoJSON ring repeats its first coordinate once for closure; the interface counts only the distinct corners the user placed.
+
+Layout checks cover a seventh non-rectangular bed, exact geometry after reload, crop/task/journal preservation during moves, overlap rejection, draft Undo/Redo/Cancel, and confirmed deletion. Touch checks draw a polygon and resize the viewport during editing at 320 and 390 px. These checks operate the real editor instead of seeding a finished layout into browser storage.
 
 All selection fields share the custom listbox component. Browser checks cover keyboard navigation, incremental text search, dismissal, touch scrolling, menu placement near viewport edges, and resizing at 320 and 390 px. Headings and the wordmark use locally bundled Chakra Petch; body text uses Inter.
 

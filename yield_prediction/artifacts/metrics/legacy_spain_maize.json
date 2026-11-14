@@ -1,0 +1,54 @@
+{
+  "crop": "maize",
+  "country_code": "ES",
+  "train_rows": 806,
+  "test_rows": 144,
+  "train_years": [
+    2001,
+    2002,
+    2003,
+    2004,
+    2005,
+    2006,
+    2007,
+    2008,
+    2009,
+    2010,
+    2011,
+    2012,
+    2013,
+    2014,
+    2015,
+    2016,
+    2017
+  ],
+  "test_years": [
+    2018,
+    2019,
+    2020
+  ],
+  "features": [
+    "mean_temperature_c",
+    "mean_max_temperature_c",
+    "gdd_base10_c_days",
+    "precipitation_mm",
+    "water_balance_mm",
+    "mean_radiation_mj_m2_day",
+    "awc",
+    "bulk_density"
+  ],
+  "model": {
+    "n": 144,
+    "mae_t_ha": 1.8627701827092733,
+    "rmse_t_ha": 2.3344926069755525,
+    "r2": 0.6218986649006546,
+    "bias_t_ha": -1.541290766309741
+  },
+  "region_median": {
+    "n": 144,
+    "mae_t_ha": 1.5229305555555555,
+    "rmse_t_ha": 1.9846620654128724,
+    "r2": 0.7267272403834406,
+    "bias_t_ha": -1.3067222222222223
+  }
+}

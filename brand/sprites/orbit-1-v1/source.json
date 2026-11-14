@@ -1,0 +1,14 @@
+{
+  "createdOn": "2026-11-14",
+  "generator": "built-in image_gen",
+  "useCase": "stylized-concept",
+  "sprite": "../../../public/assets/orbit-1/orbit-1-scanner-v1.png",
+  "dimensions": {
+    "width": 1536,
+    "height": 1024
+  },
+  "background": "transparent",
+  "character": "Orbit-1",
+  "emblem": "Original orbitFarm sprout-in-orbit emblem",
+  "prompt": "Use case: stylized-concept\nAsset type: transparent game sprite for the orbitFarm web application, an animated satellite analysis companion named Orbit-1.\nPrimary request: create ONE charming original cozy 16-bit pixel-art Earth-observation satellite, NASA mission-inspired in function, with an original orbitFarm sprout-in-orbit emblem on its central body. It flies in and scans farmland; its scanning light and motion will be added in code, so draw only the spacecraft.\nSubject: a small friendly ivory cubic satellite body, crisp dark forest-green stepped pixel outlines, two broad symmetrical blue solar panel wings with neat square photovoltaic cells, a tiny ochre antenna on top, a small cyan downward-facing optical sensor underneath. Two tiny dark sensor dots and a modest friendly expression; primarily a spacecraft rather than a toy robot. A clearly visible green sprout with a thin orbital arc on the front panel as the orbitFarm emblem, no lettering. Slight top-down three-quarter view showing a little top and right side, front facing viewer, wings horizontal, optical sensor centered pointing straight down. Preserve readable simple silhouette at 160px wide.\nStyle/medium: professional hand-crafted 16-bit game pixel art matching a cozy pixel farm, deliberate clean chunky pixels, flat limited palette, minimal two-step highlights, a little warm personality, not a 3D render.\nComposition/framing: one isolated complete sprite centered on a wide 3:2 transparent canvas, about 80 percent of width and 55 percent of height; generous transparent padding, no crop, no floor or cast shadow. Pixel edges crisp, solid interior, true alpha transparency outside.\nColor palette: outlines #203D32, body #FFF8E8, green emblem #286B45, blue panels #77B3C4 and #BDE4F0, ochre #F4C95D, small clay accents #C96A4B.\nConstraints: no words or letters, no NASA logo, no flag, no scene, no farm, no space background, no stars, no scan beam, no glowing fog, no gradient, no blur, no drop shadow, no frame, no multiple sprites or sprite sheet. Actual transparent background."
+}

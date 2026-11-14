@@ -9,9 +9,21 @@ Frontend work continues on the `frontend` branch. All project content, code, com
 - [Project overview](orbitFarm.md)
 - [Product specification](docs/orbitFarm-product.md)
 - [24-hour delivery plan](docs/orbitFarm-delivery-plan.md)
+- [Local development and test benches](docs/orbitFarm-development.md)
 - [Proposed analysis request contract](docs/orbitFarm-analysis-contract.md)
 - [Example analysis request](contracts/orbitFarm-analysis-request.example.json)
 - [Brandbook](brand/orbitFarm-brandbook.md)
 - [Editable Figma design](https://www.figma.com/design/ZD6mSeYogRklG9vO6eMUCJ)
 
-The initial commit contains planning and design artifacts. Application implementation, CI, and automated tests are not implemented yet.
+Development now prioritizes the working website and reproducible test benches. PWA installation and home-screen behavior are deferred. Mock data remains visibly labeled; the local backend and authentic NASA data are separate integrations.
+
+## Run the website
+
+Use Node.js 22.12 or newer; CI uses Node.js 24.
+
+```bash
+npm ci
+npm run dev
+```
+
+Open `http://127.0.0.1:5173/#/farm` for the application or `http://127.0.0.1:5173/#/lab` for test benches. Run `npm run verify` for type checks, domain tests, a production build, and browser tests. Before the first browser test run, install Chromium with `npx playwright install chromium`. Check actual command and GitHub Actions results before treating a revision as verified.

@@ -1,0 +1,100 @@
+.of-orbit-scanner {
+  --of-scan-ink: #203d32;
+  --of-scan-green: #286b45;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  min-width: 0;
+  margin-block: 0 24px;
+  border: 1px solid #d6dec9;
+  border-radius: 8px;
+  background: #fffdf7;
+  color: var(--of-scan-ink);
+  font-family: Inter, system-ui, sans-serif;
+  isolation: isolate;
+}
+.of-orbit-scanner *, .of-orbit-scanner *::before, .of-orbit-scanner *::after { box-sizing: border-box; }
+.of-scanner-topline { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding: 20px 24px; font-size: 10px; line-height: 1.5; letter-spacing: .1em; }
+.of-scanner-mission { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
+.of-scanner-mission > span:first-child { width: 7px; height: 7px; background: var(--of-scan-green); box-shadow: 0 0 0 3px #ddebcf; }
+.of-scanner-slash { margin-inline: 3px; color: #a9b89e; }
+.of-scanner-source { padding: 4px 8px; border: 1px solid #d6dec9; border-radius: 3px; background: #f1f5e8; font-size: 10px; letter-spacing: 0; }
+.of-scanner-scene { position: relative; width: min(100%, 680px); aspect-ratio: 2 / 1; margin: -12px auto 0; overflow: hidden; container-type: inline-size; }
+.of-scanner-orbit, .of-scanner-ground { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.of-scanner-orbit { color: #bfd0b2; }
+.of-scanner-corner { position: absolute; z-index: 2; width: 13px; height: 13px; border: solid #c3d3b7; }
+.of-scanner-corner-tl { top: 12%; left: 9%; border-width: 1px 0 0 1px; }
+.of-scanner-corner-tr { top: 12%; right: 9%; border-width: 1px 1px 0 0; }
+.of-scanner-corner-bl { bottom: 10%; left: 9%; border-width: 0 0 1px 1px; }
+.of-scanner-corner-br { bottom: 10%; right: 9%; border-width: 0 1px 1px 0; }
+.of-scanner-flight { position: absolute; top: 5%; left: 33%; width: 34%; animation: of-scanner-arrive 900ms cubic-bezier(.16, 1, .3, 1) both; }
+.of-scanner-pass { animation: of-scanner-sweep 6s 900ms ease-in-out infinite; }
+.of-scanner-hover { position: relative; width: 100%; animation: of-scanner-hover 3s 900ms ease-in-out infinite; }
+.of-scanner-sprite { position: relative; z-index: 2; display: block; width: 100%; height: auto; image-rendering: pixelated; user-select: none; }
+.of-scanner-sensor { position: absolute; z-index: 3; top: 75.5%; left: 46.7%; width: 5%; height: 3%; background: #bde4f0; animation: of-scanner-sensor 2.4s 800ms ease-in-out infinite; }
+.of-scanner-beam { position: absolute; z-index: 1; left: -21%; top: 75%; width: 138%; height: 87%; overflow: hidden; clip-path: polygon(50% 0, 100% 100%, 0 100%); background: #77b3c422; border-bottom: 2px solid #77b3c477; transform-origin: 50% 0; animation: of-scanner-beam-on 700ms 450ms both; }
+.of-scanner-beam::before, .of-scanner-beam::after { content: ''; position: absolute; top: 0; width: 1px; height: 180%; background: #77b3c459; transform-origin: top; }
+.of-scanner-beam::before { left: 50%; transform: rotate(51deg); }
+.of-scanner-beam::after { right: 50%; transform: rotate(-51deg); }
+.of-scanner-beam > span { position: absolute; left: 0; width: 100%; height: 2px; background: #77b3c499; animation: of-scanner-wave 2.4s 900ms linear infinite both; }
+.of-scanner-beam > span:nth-child(2) { animation-delay: 1.7s; }
+.of-scanner-beam > span:nth-child(3) { animation-delay: 2.5s; }
+.of-scanner-footprint { position: absolute; left: 29%; top: 77%; width: 42%; height: 8%; border: 1px solid #77b3c488; border-radius: 50%; background: #bde4f033; animation: of-scanner-footprint 6s 900ms ease-in-out infinite, of-scanner-beam-on 700ms 450ms both; }
+.of-scanner-footprint > span { position: absolute; inset: 22% 15%; border: 1px solid #77b3c455; border-radius: 50%; }
+.of-scanner-footprint > span + span { inset: -35% -10%; border-color: #77b3c42b; }
+.of-scanner-field-label { position: absolute; bottom: 1%; left: 0; width: 100%; text-align: center; font-size: 8px; letter-spacing: .16em; color: #63745f; }
+.of-scanner-lock { position: absolute; top: 15%; right: 12%; font: 20px/1 'Pixelify Sans', monospace; color: #839c74; }
+.of-scanner-plant { transform-box: fill-box; transform-origin: center bottom; animation: of-scanner-plant 3.4s ease-in-out infinite; }
+.of-scanner-copy { padding: 14px 24px 28px; text-align: center; }
+.of-scanner-kicker { display: block; font-size: 9px; font-weight: 600; line-height: 1.5; letter-spacing: .15em; color: #6b7b62; }
+.of-scanner-copy h2 { margin: 10px 0 8px; color: var(--of-scan-ink); font: 700 clamp(23px, 3vw, 32px)/1.15 'Pixelify Sans', ui-monospace, monospace; text-wrap: balance; }
+.of-scanner-copy p { margin: 0 auto; max-width: 44ch; color: #57665b; font-size: 13px; line-height: 1.7; }
+.of-scanner-status { display: inline-flex; align-items: center; justify-content: center; gap: 7px; margin-top: 16px; padding: 7px 10px; border-radius: 3px; background: #edf3e5; color: #45623e; font-size: 10px; line-height: 1.5; }
+.of-scanner-status > span { flex: none; width: 5px; height: 5px; background: #286b45; animation: of-scanner-sensor 2.4s ease-in-out infinite; }
+.of-scanner-telemetry { display: flex; justify-content: space-between; gap: 10px; padding: 12px 24px; border-top: 1px solid #e9eddf; color: #67765f; font-size: 8px; line-height: 1.5; letter-spacing: .08em; }
+.of-orbit-scanner[data-state='complete'] .of-scanner-flight { animation: of-scanner-settle 650ms ease-out both; }
+.of-orbit-scanner[data-state='complete'] :is(.of-scanner-pass, .of-scanner-hover, .of-scanner-plant, .of-scanner-sensor, .of-scanner-status > span) { animation: none; }
+.of-orbit-scanner[data-state='complete'] :is(.of-scanner-beam, .of-scanner-footprint) { animation: of-scanner-beam-off 450ms ease-out both; }
+.of-orbit-scanner[data-state='complete'] .of-scanner-beam > span { animation: none; }
+.of-orbit-scanner-compact { display: grid; grid-template-columns: minmax(180px, .8fr) minmax(0, 1fr); align-items: center; }
+.of-orbit-scanner-compact .of-scanner-topline { grid-column: 1 / -1; padding-block: 14px 0; }
+.of-orbit-scanner-compact .of-scanner-copy { padding: 20px 24px 20px 0; text-align: left; }
+.of-orbit-scanner-compact .of-scanner-copy h2 { font-size: 24px; }
+.of-orbit-scanner-compact .of-scanner-kicker { display: none; }
+.of-orbit-scanner-compact .of-scanner-telemetry { grid-column: 1 / -1; }
+.scanner-preview-panel { margin-block: 28px; }
+.scanner-preview-panel > .of-orbit-scanner { margin-block: 20px 16px; }
+.scanner-preview-panel > .heading-actions { flex-wrap: wrap; }
+
+@keyframes of-scanner-arrive { from { opacity: 0; transform: translate(85%, -75%) rotate(-12deg); } 65% { opacity: 1; } to { opacity: 1; transform: translate(0, 0) rotate(0); } }
+@keyframes of-scanner-sweep { 0%, 50%, 100% { transform: translateX(0); } 25% { transform: translateX(-30%); } 75% { transform: translateX(30%); } }
+@keyframes of-scanner-hover { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-5px) rotate(1deg); } }
+@keyframes of-scanner-sensor { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+@keyframes of-scanner-wave { from { top: 0; opacity: 0; } 15% { opacity: .8; } to { top: 100%; opacity: 0; } }
+@keyframes of-scanner-beam-on { from { opacity: 0; } to { opacity: 1; } }
+@keyframes of-scanner-beam-off { from { opacity: 1; } to { opacity: 0; } }
+@keyframes of-scanner-footprint { 0%, 50%, 100% { transform: translateX(0); } 25% { transform: translateX(-24%); } 75% { transform: translateX(24%); } }
+@keyframes of-scanner-plant { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(3deg); } }
+@keyframes of-scanner-settle { from { transform: translateY(0); } to { transform: translateY(-8px); } }
+
+@media (max-width: 520px) {
+  .of-scanner-topline { padding: 16px; gap: 6px; font-size: 9px; }
+  .of-scanner-source { font-size: 9px; }
+  .of-scanner-scene { margin-top: 0; }
+  .of-scanner-copy { padding: 16px 16px 24px; }
+  .of-scanner-copy p { font-size: 12px; }
+  .of-scanner-kicker { font-size: 8px; }
+  .of-scanner-field-label { font-size: 6px; }
+  .of-scanner-telemetry { padding: 10px 16px; font-size: 7px; flex-wrap: wrap; }
+  .of-orbit-scanner-compact { display: block; }
+  .of-orbit-scanner-compact .of-scanner-scene { width: 80%; }
+  .of-orbit-scanner-compact .of-scanner-copy { padding: 12px 16px 20px; text-align: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .of-orbit-scanner *, .of-orbit-scanner *::before, .of-orbit-scanner *::after { animation: none !important; transition: none !important; }
+  .of-orbit-scanner[data-state='complete'] :is(.of-scanner-beam, .of-scanner-footprint) { opacity: 0; }
+  .of-scanner-beam > span { top: 45%; opacity: .6; }
+  .of-scanner-beam > span:nth-child(2) { top: 70%; }
+  .of-scanner-beam > span:nth-child(3) { top: 95%; }
+}

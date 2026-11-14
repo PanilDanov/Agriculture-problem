@@ -2,7 +2,7 @@
 
 This document guides the team's first 24 hours. All code, comments, file contents, user interface text, errors, help text, and demo content must be in English. The product name is **orbitFarm**; trademark availability has not been checked.
 
-Status: the specification, delivery plan, and starter Figma design are prepared. Figma includes five screen drafts. The application, server, CI, and automated tests have not been implemented; the requirements below describe the intended product.
+Status: the specification, delivery plan, and starter Figma design are prepared. Figma includes five screen drafts. The active delivery is a working browser application with reproducible mock-data test benches. PWA installation and home-screen behavior are deferred. Requirements below describe the product; successful checks must be established by actual test runs, and an authentic backend integration is separate work.
 
 ## Product in one sentence
 
@@ -43,7 +43,7 @@ On desktop, place narrow navigation on the left, the farm in the center, and `To
 
 On a phone, the farm occupies the upper part of the screen. Details for the selected planting area open in a bottom panel. Bottom navigation uses `Farm / Plans / Tasks / Journal`. Main actions work by touch without hover; map navigation must not conflict with boundary drawing. Provide `Finish boundary`, `Undo point`, and `Cancel`. Early demonstrations may use `Use demo boundary`.
 
-The MVP must include on-device persistence, farm renaming, planting-area editing, planting dates, tasks with due times, action history, undo, the latest analysis time, retry, clear errors, a confirmed demo reset, and installation instructions. Deleting a planting area requires confirmation or a safe undo. Farm export/import is optional if time remains. Accounts and synchronization are outside the first 24 hours.
+The website MVP must include on-device persistence, farm renaming, planting-area editing, planting dates, tasks with due times, action history, undo, the latest analysis time, retry, clear errors, and a confirmed demo reset. Deleting a planting area requires confirmation or a safe undo. Farm export/import is optional if time remains. Accounts and synchronization are outside the first 24 hours. Installation instructions belong to the later PWA stage.
 
 ## States and English copy
 
@@ -77,8 +77,8 @@ The scan visualizes requesting or processing available data; it does not command
 
 ## First-release boundaries
 
-**Included:** one region and one farm, 3–4 reviewed crops, the current rotation plus two alternatives covering two seasons, a game-style planting schematic, care tasks, a journal, PWA support, a mock/API adapter, and error test benches. At least one genuine NASA observation is required for the final demonstration. Every remaining synthetic signal is labeled individually.
+**Included:** one region and one farm, 3–4 reviewed crops, the current rotation plus two alternatives covering two seasons, a game-style planting schematic, care tasks, a journal, a mock/API adapter, and error test benches. This stage prioritizes the website; PWA support is deferred. At least one genuine NASA observation remains a requirement for the final competition demonstration. The first working test benches may remain fully synthetic with visible labels.
 
-**After the hackathon:** multi-user accounts, multiple farms, cloud synchronization, push and background tasks, market prices, dosage calculations, yield prediction, IoT, a marketplace, 3D, and a game economy. During the first 24 hours, there are no coins, penalties for missed tasks, or artificial plant deaths driven by timers.
+**Later work:** PWA installation and offline-shell behavior after the website is stable; then multi-user accounts, multiple farms, cloud synchronization, push and background tasks, market prices, dosage calculations, yield prediction, IoT, a marketplace, 3D, and a game economy. During the first 24 hours, there are no coins, penalties for missed tasks, or artificial plant deaths driven by timers.
 
 Choose the demo region with the analytics team during the first hour, based on available data and suitable crops. Fixtures may remain synthetic until then; this does not justify claiming support for every climate zone. Sprint outcomes, the data contract, and tests are described in the [orbitFarm delivery plan](orbitFarm-delivery-plan.md).

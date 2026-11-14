@@ -1,0 +1,95 @@
+{
+  "name": "orbitFarm",
+  "version": "0.1.0",
+  "description": "Cozy 16-bit pixel farm starter tokens. Confirmed product name: orbitFarm. All product UI uses English.",
+  "color": {
+    "cream": "#FFF8E8",
+    "white": "#FFFFFF",
+    "ink": "#203D32",
+    "green": "#286B45",
+    "mint": "#DDEDC5",
+    "sky": "#BDE4F0",
+    "ochre": "#F4C95D",
+    "clay": "#C96A4B",
+    "muted": "#57665B",
+    "border": "#D6DEC9"
+  },
+  "semantic": {
+    "background": "#FFF8E8",
+    "surface": "#FFFFFF",
+    "text": "#203D32",
+    "textSecondary": "#57665B",
+    "primary": "#286B45",
+    "onPrimary": "#FFFFFF",
+    "selectedBackground": "#DDEDC5",
+    "onSelected": "#203D32",
+    "informationBackground": "#BDE4F0",
+    "onInformation": "#203D32",
+    "attentionBackground": "#F4C95D",
+    "onAttention": "#203D32",
+    "divider": "#D6DEC9",
+    "controlBorder": "#286B45",
+    "focus": "#286B45",
+    "illustrationSoil": "#C96A4B"
+  },
+  "font": {
+    "heading": {
+      "family": "Pixelify Sans",
+      "weights": [700],
+      "fallback": ["ui-monospace", "monospace"]
+    },
+    "body": {
+      "family": "Inter",
+      "weights": [400, 500, 600]
+    },
+    "fallback": ["system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "sans-serif"]
+  },
+  "typography": {
+    "pageTitleDesktop": {"sizePx": 32, "weight": 700, "lineHeight": 1.25},
+    "pageTitleMobile": {"sizePx": 28, "weight": 700, "lineHeight": 1.25},
+    "sectionTitle": {"sizePx": 24, "weight": 700, "lineHeight": 1.25},
+    "body": {"sizePx": 16, "weight": 400, "lineHeight": 1.5},
+    "label": {"sizePx": 14, "weight": 600, "lineHeight": 1.4},
+    "caption": {"sizePx": 12, "weight": 400, "lineHeight": 1.4}
+  },
+  "spacingPx": {"half": 4, "unit": 8, "small": 16, "medium": 24, "large": 32, "xlarge": 48},
+  "radiusPx": {"button": 4, "card": 4, "badge": 4},
+  "pixelArt": {
+    "style": "Original cozy 16-bit farm art; no copied game assets",
+    "spriteBaseGridPx": [16, 32],
+    "scale": "integer",
+    "resampling": "nearest-neighbor",
+    "imageRendering": "pixelated",
+    "imageRenderingScope": "Game artwork only; never body text, forms, or the whole page",
+    "outlineWidthPx": 2,
+    "outlineColor": "#203D32",
+    "shadow": {"offsetXPx": 4, "offsetYPx": 4, "blurPx": 0, "color": "#203D32"},
+    "soilShadowColor": "#C96A4B"
+  },
+  "layout": {
+    "desktopDesignWidthPx": 1440,
+    "mobileDesignWidthPx": 390,
+    "minimumSupportedWidthPx": 320,
+    "cardPaddingDesktopPx": 24,
+    "cardPaddingMobilePx": 16,
+    "buttonMinHeightPx": 48,
+    "touchTargetMinPx": 44,
+    "focusWidthPx": 2,
+    "focusOffsetPx": 3
+  },
+  "motion": {
+    "interactionMs": 160,
+    "panelMs": 240,
+    "spriteFrameCountRange": [2, 4],
+    "spriteAnimationTiming": "steps",
+    "scanIllustrationMaxMs": 2500,
+    "reducedMotion": "Replace movement with a static satellite and a text progress state; never delay a ready API result for animation."
+  },
+  "copy": {
+    "tagline": "From orbit to your next season.",
+    "sourceModes": ["Demo data", "Cached NASA data", "NASA data"],
+    "dataStates": ["Outdated observations", "Data unavailable"],
+    "taskStates": ["Needs a check", "Done", "Skipped", "Snoozed"],
+    "rotationPlans": ["Current", "Save water", "Improve soil"]
+  }
+}

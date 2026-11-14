@@ -1,0 +1,58 @@
+{
+  "product": "orbitFarm",
+  "figmaUrl": "https://www.figma.com/design/ZD6mSeYogRklG9vO6eMUCJ",
+  "fileKey": "ZD6mSeYogRklG9vO6eMUCJ",
+  "fileTitleRename": "Deferred at the user's request. All design content uses orbitFarm.",
+  "direction": "Original cozy 16-bit pixel art",
+  "pages": {
+    "00 Brand": "0:1",
+    "01 Components": "2:2",
+    "02 Screens": "2:3"
+  },
+  "board": "4:2",
+  "farmIllustration": "7:57",
+  "componentReview": "3:60",
+  "componentSets": {
+    "Button": "3:8",
+    "DataBadge": "3:18",
+    "Metric": "3:25",
+    "Task": "3:39"
+  },
+  "localComponents": {
+    "RotationPlan": "7:314",
+    "MobileNavigationItem": "7:323"
+  },
+  "screens": {
+    "FarmDesktop": "7:325",
+    "CareMobile": "7:661",
+    "RotationComparison": "7:950",
+    "DrawBoundary": "7:991",
+    "JournalMobile": "7:1026"
+  },
+  "counts": {
+    "variables": 33,
+    "textStyles": 7,
+    "componentSets": 4,
+    "componentVariants": 16,
+    "screens": 5
+  },
+  "validation": {
+    "editableNativeLayers": true,
+    "flattenedUiImages": 0,
+    "screenBoundsCheck": "All five screen roots passed the composition script's boundary check.",
+    "visuallyReviewed": [
+      "Brandboard",
+      "FarmDesktop",
+      "CareMobile",
+      "RotationComparison",
+      "JournalMobile"
+    ],
+    "additionalScreenshotReview": "Final component-sheet and boundary-screen screenshots were blocked by the Figma Starter tool-call limit.",
+    "applicationTests": "Not implemented. This delivery contains planning and design artifacts."
+  },
+  "previews": [
+    "previews/orbitFarm-brandboard.png",
+    "previews/orbitFarm-farm-desktop.png",
+    "previews/orbitFarm-care-mobile.png"
+  ]
+}

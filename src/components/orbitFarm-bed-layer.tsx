@@ -1,5 +1,6 @@
 import { useId, useMemo, type ComponentType, type ReactNode } from 'react';
 import type { CropId, LayoutPoint } from '../domain/orbitFarm-types';
+import { CROP_CATALOG } from '../domain/orbitFarm-crop-catalog';
 import { planBedAnnotations } from './orbitFarm-bed-annotations';
 import './orbitFarm-bed-layer.css';
 
@@ -21,14 +22,8 @@ export interface FarmBedLayerProps {
   background?: ReactNode;
 }
 
-const CROP_NAMES: Record<CropId, string> = {
-  wheat: 'Wheat',
-  chickpea: 'Chickpea',
-  sorghum: 'Sorghum',
-};
-
 function description(bed: FarmBedVisual): string {
-  return `${bed.name} · ${bed.cropId ? CROP_NAMES[bed.cropId] : 'Empty'}${bed.taskTitle ? ` · ${bed.taskTitle}` : ''}`;
+  return `${bed.name} · ${bed.cropId ? (CROP_CATALOG.find(crop => crop.id === bed.cropId)?.name ?? bed.cropId) : 'Empty'}${bed.taskTitle ? ` · ${bed.taskTitle}` : ''}`;
 }
 
 function Drop({ x = 0, y = 0, size = 14 }: { x?: number; y?: number; size?: number }) {

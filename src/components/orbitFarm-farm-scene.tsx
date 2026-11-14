@@ -1,11 +1,10 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
-import type { FarmLayout, LayoutPoint } from '../domain/orbitFarm-types';
+import type { CropId, FarmLayout, LayoutPoint } from '../domain/orbitFarm-types';
 import { getPlotLabel } from '../domain/orbitFarm-layout';
 import { FarmBedLayer } from './orbitFarm-bed-layer';
+import { CropSprite } from './orbitFarm-crop-sprite';
 import { ORBIT_SCANNER_SPRITE } from './orbitFarm-scanner';
 import './orbitFarm-scenes.css';
-
-type CropId = 'wheat' | 'chickpea' | 'sorghum';
 
 interface ScenePlot {
   id: string;
@@ -33,38 +32,7 @@ interface FarmSceneProps {
   demoNow: string;
 }
 
-export function CropSprite({ cropId, size = 36 }: { cropId: CropId; size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 32 32" fill="none" aria-hidden="true" className="of-crop-sprite" shapeRendering="crispEdges">
-      <path d="M8 28H26V31H8Z" fill="#694B32" opacity=".35" />
-      {cropId === 'wheat' ? (
-        <>
-          <path d="M14 7H18V30H14ZM6 12H10V26H6ZM23 11H27V28H23Z" fill="#61713C" />
-          <path d="M13 2H19V7H21V11H17V15H13V11H10V7H13ZM5 6H11V11H13V16H9V20H5V16H2V11H5ZM22 5H28V10H30V15H26V19H22V15H19V10H22Z" fill="#E3AB45" />
-          <path d="M13 2H16V7H13ZM10 7H14V10H10ZM17 7H21V10H17ZM5 6H8V11H5ZM2 11H6V14H2ZM9 11H13V14H9ZM22 5H25V10H22ZM19 10H23V13H19ZM26 10H30V13H26Z" fill="#F8D979" />
-          <path d="M14 17H18V20H14ZM6 22H10V25H6ZM23 21H27V24H23Z" fill="#C18A39" />
-        </>
-      ) : cropId === 'chickpea' ? (
-        <>
-          <path d="M13 19H19V31H13Z" fill="#516D3D" />
-          <path d="M8 4H23V8H28V13H31V22H27V27H5V23H1V13H4V8H8Z" fill="#244F39" />
-          <path d="M8 5H20V9H25V14H28V21H23V25H7V21H3V14H7Z" fill="#43804B" />
-          <path d="M9 7H18V11H13V15H6V11H9ZM19 12H25V16H19ZM6 19H11V23H6Z" fill="#84AC62" />
-          <path d="M12 17H17V22H12ZM22 18H26V23H22ZM5 14H9V18H5Z" fill="#C4D985" />
-          <path d="M13 18H16V21H13ZM23 19H26V22H23Z" fill="#E0E9AA" />
-        </>
-      ) : (
-        <>
-          <path d="M14 12H18V31H14Z" fill="#3D6C3C" />
-          <path d="M14 21H9V18H4V15H9V17H14ZM18 24H23V21H28V18H23V20H18Z" fill="#5B924C" />
-          <path d="M11 1H21V5H25V15H21V19H11V15H7V5H11Z" fill="#814D31" />
-          <path d="M11 3H17V7H21V11H17V16H11V12H9V7H11Z" fill="#BD7E41" />
-          <path d="M12 3H16V6H12ZM17 8H21V11H17ZM10 11H14V14H10Z" fill="#E3B55E" />
-        </>
-      )}
-    </svg>
-  );
-}
+export { CropSprite } from './orbitFarm-crop-sprite';
 
 function SatelliteDrawing() {
   return (

@@ -16,7 +16,7 @@ A web app and installable PWA that turns a farmer's boundary, Earth observations
 
 **Journey:** Draw farm → Analyze → Compare rotations → Plant → Care → Log action.
 
-**24-hour release:** one farm, one demo region, 3–4 crops, a current two-season plan and two rotation alternatives, a schematic planting layout, and a care journal. All application copy, code, comments, and project files use English. React + TypeScript + Vite, Vercel, and interchangeable mock/API providers.
+**24-hour release:** one farm, one demo region, 10 plantable crops with three synthetic recommendation profiles, a current two-season plan and two rotation alternatives, a schematic planting layout, and a care journal. All application copy, code, comments, and project files use English. React + TypeScript + Vite, Vercel, and interchangeable mock/API providers.
 
 **Visual direction:** original cozy 16-bit farm graphics, pixel headings, crisp game windows, and readable body text. Stardew Valley is a mood reference; its assets are not part of this project.
 

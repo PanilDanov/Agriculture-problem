@@ -17,6 +17,7 @@ Frontend work continues on the `frontend` branch. All project content, code, com
 - [Example analysis request](contracts/orbitFarm-analysis-request.example.json)
 - [Brandbook](brand/orbitFarm-brandbook.md)
 - [Crop sprite pack · 10 crops, 4 images each](brand/sprites/crops-v1/README.md)
+- [Plantable crop catalog · IDs and demo behavior](docs/orbitFarm-crop-catalog.md)
 - [Editable Figma design](https://www.figma.com/design/ZD6mSeYogRklG9vO6eMUCJ)
 
 Development now prioritizes the working website and reproducible test benches. PWA installation and home-screen behavior are deferred. Mock data remains visibly labeled; the local backend and authentic NASA data are separate integrations.

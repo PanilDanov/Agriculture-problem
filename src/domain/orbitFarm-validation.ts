@@ -1,9 +1,10 @@
 import area from '@turf/area';
 import type { Polygon } from 'geojson';
 import { z } from 'zod';
+import { CROP_IDS } from './orbitFarm-crop-catalog';
 import type { AnalysisRequest, AnalysisResult, FarmInputs } from './orbitFarm-types';
 
-export const cropIdSchema = z.enum(['wheat', 'chickpea', 'sorghum']);
+export const cropIdSchema = z.enum(CROP_IDS);
 export const scenarioIdSchema = z.enum(['normal', 'dry-week', 'missing-data', 'stale-data', 'api-unavailable', 'empty-farm']);
 export const textureSchema = z.enum(['sand', 'loamy_sand', 'sandy_loam', 'loam', 'silt_loam', 'silt', 'sandy_clay_loam', 'clay_loam', 'silty_clay_loam', 'sandy_clay', 'silty_clay', 'clay']);
 export const isoSchema = z.string().datetime({ offset: true });

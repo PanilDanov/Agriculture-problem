@@ -1,6 +1,8 @@
 import type { Polygon } from 'geojson';
 
-export type CropId = 'wheat' | 'chickpea' | 'sorghum';
+import type { CROP_IDS } from './orbitFarm-crop-catalog';
+
+export type CropId = (typeof CROP_IDS)[number];
 export type ScenarioId = 'normal' | 'dry-week' | 'missing-data' | 'stale-data' | 'api-unavailable' | 'empty-farm';
 export type Priority = 'balanced' | 'save_water' | 'improve_soil';
 

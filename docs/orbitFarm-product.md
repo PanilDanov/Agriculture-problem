@@ -79,7 +79,7 @@ The scan visualizes requesting or processing available data; it does not command
 
 ## First-release boundaries
 
-**Included:** one region and one farm, 3–4 reviewed crops, the current rotation plus two alternatives covering two seasons, a game-style planting schematic, care tasks, a journal, a mock/API adapter, and error test benches. This stage prioritizes the website; PWA support is deferred. At least one genuine NASA observation remains a requirement for the final competition demonstration. The first working test benches may remain fully synthetic with visible labels.
+**Included:** one region and one farm, 10 plantable crops with three synthetic recommendation profiles, the current rotation plus two alternatives covering two seasons, a game-style planting schematic, care tasks, a journal, a mock/API adapter, and error test benches. This stage prioritizes the website; PWA support is deferred. At least one genuine NASA observation remains a requirement for the final competition demonstration. The first working test benches may remain fully synthetic with visible labels.
 
 **Later work:** PWA installation and offline-shell behavior after the website is stable; then multi-user accounts, multiple farms, cloud synchronization, push and background tasks, market prices, dosage calculations, yield prediction, IoT, a marketplace, 3D, and a game economy. During the first 24 hours, there are no coins, penalties for missed tasks, or artificial plant deaths driven by timers.
 

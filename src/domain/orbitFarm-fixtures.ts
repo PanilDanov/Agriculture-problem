@@ -1,12 +1,8 @@
 import type { Polygon } from 'geojson';
-import type { AnalysisRequest, AnalysisResult, Crop, CropId, FarmInputs, ScenarioId } from './orbitFarm-types';
+import type { AnalysisRequest, AnalysisResult, CropId, FarmInputs, ScenarioId } from './orbitFarm-types';
 import { validateAnalysisRequest, validateAnalysisResult, validateBoundary } from './orbitFarm-validation';
-
-export const CROP_CATALOG: Crop[] = [
-  { id: 'wheat', name: 'Wheat', daysToHarvest: 130, color: '#e9bb51', description: 'Golden grain for your next season. Illustrative demo crop profile.' },
-  { id: 'chickpea', name: 'Chickpea', daysToHarvest: 110, color: '#79a861', description: 'A legume to explore in a diverse rotation. Illustrative demo crop profile.' },
-  { id: 'sorghum', name: 'Sorghum', daysToHarvest: 105, color: '#c78054', description: 'A grain option in the water-saving demo. Illustrative demo crop profile.' },
-];
+import { CROP_CATALOG } from './orbitFarm-crop-catalog';
+export { CROP_CATALOG } from './orbitFarm-crop-catalog';
 
 export const SCENARIOS: Array<{ id: ScenarioId; name: string; description: string }> = [
   { id: 'dry-week', name: 'Dry week', description: 'Low regional moisture, a care reminder, and a water-saving rotation.' },
@@ -35,19 +31,21 @@ export function makeMockAnalysis(value: AnalysisRequest, scenario: ScenarioId): 
   const observationDate = stale ? '2026-10-01T06:00:00.000Z' : '2026-11-13T06:00:00.000Z';
   const quality = stale ? 'stale' : 'good';
   const source = { dataset: `orbitFarm ${scenario} synthetic fixture`, url: `fixture://orbitFarm/${scenario}`, version: 'demo-v1' };
-  const profiles: Record<CropId, [number, number, number]> = { wheat: [76, 65, 82], chickpea: [87, 84, 88], sorghum: [92, 96, 80] };
+  const profiles: Partial<Record<CropId, [number, number, number]>> = { wheat: [76, 65, 82], chickpea: [87, 84, 88], sorghum: [92, 96, 80] };
   const ph = request.localInputs.soil.ph;
   const soilPh = ph === null ? 0 : Math.max(0, 100 - Math.abs(ph - 6.8) * 18);
   const waterKnownZero = request.localInputs.irrigation.waterBudget?.volumeM3 === 0;
-  const cropOptions = CROP_CATALOG.map(crop => {
-    const [temperature, water, soilTexture] = profiles[crop.id];
+  const cropOptions = CROP_CATALOG.flatMap(crop => {
+    const profile = profiles[crop.id];
+    if (!profile) return [];
+    const [temperature, water, soilTexture] = profile;
     const score = complete ? Math.round(.35 * temperature + .25 * soilPh + .30 * (waterKnownZero ? 0 : water) + .10 * soilTexture) : null;
-    return {
+    return [{
       cropId: crop.id, name: crop.name, score, scoreStatus: score === null ? 'insufficient_data' as const : 'complete' as const,
       reasons: score === null
         ? [stale ? 'The regional observation is outdated. A fresh observation is needed before scoring.' : missing ? 'Regional soil moisture is missing. Missing data is not zero moisture.' : 'Add the missing soil or irrigation information to complete the four-factor comparison.', 'This is a synthetic example, not an agronomic recommendation.']
         : [crop.id === 'sorghum' ? 'Lower water demand in this synthetic comparison.' : crop.id === 'chickpea' ? 'Adds a legume to the example rotation.' : 'A familiar baseline for comparing the next season.', 'Based on simulated regional conditions and the entered field information.'],
-    };
+    }];
   }).sort((a, b) => (b.score ?? -1) - (a.score ?? -1));
   const current = request.localInputs.currentPlan;
   return validateAnalysisResult({

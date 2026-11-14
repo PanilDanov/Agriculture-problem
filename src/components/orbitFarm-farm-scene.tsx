@@ -1,6 +1,7 @@
-import { useId } from 'react';
+import { useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { FarmLayout, LayoutPoint } from '../domain/orbitFarm-types';
 import { getPlotLabel } from '../domain/orbitFarm-layout';
+import { planBedContent } from './orbitFarm-bed-content';
 import { ORBIT_SCANNER_SPRITE } from './orbitFarm-scanner';
 import './orbitFarm-scenes.css';
 
@@ -198,11 +199,28 @@ export function getSchematicLabelPosition(points: LayoutPoint[]) {
 }
 
 export function FarmScene({ layout, plots, selectedSlotId, onSelectSlot, isScanning = false, tasks = [], demoNow }: FarmSceneProps) {
-  const now = Date.parse(demoNow);
   const id = useId().replaceAll(':', '');
-  const toWorld = (p: LayoutPoint) => ({ x: 160 + p.x / layout.width * 534, y: 194 + p.y / layout.height * 244 });
+  const scene = useRef<HTMLDivElement>(null);
+  const [renderedWidth, setRenderedWidth] = useState(800);
+  useLayoutEffect(() => {
+    const element = scene.current;
+    if (!element) return;
+    const measure = () => { const width = element.getBoundingClientRect().width; if (width > 0) setRenderedWidth(Math.round(width * 10) / 10); };
+    measure();
+    if (typeof ResizeObserver === 'undefined') { window.addEventListener('resize', measure); return () => window.removeEventListener('resize', measure); }
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+  const beds = useMemo(() => layout.beds.map(bed => {
+    const plot = plots.find(item => item.slotId === bed.slotId);
+    const dueTask = plot && tasks.find(task => task.plotId === plot.id && isTaskDue(task, Date.parse(demoNow)));
+    const worldPoints = bed.points.map(p => ({ x: 160 + p.x / layout.width * 534, y: 194 + p.y / layout.height * 244 }));
+    const shortName = getPlotLabel(bed.slotId).replace('Plot ', '');
+    return { bed, plot, dueTask, worldPoints, shortName, content: planBedContent(worldPoints, { pixelsPerUnit: renderedWidth / 800, label: shortName, hasTask: Boolean(dueTask), empty: !plot }) };
+  }), [layout, plots, tasks, demoNow, renderedWidth]);
   return (
-    <div className={`of-farm-scene${isScanning ? ' of-farm-scene-scanning' : ''}`} data-testid="farm-scene">
+    <div ref={scene} className={`of-farm-scene${isScanning ? ' of-farm-scene-scanning' : ''}`} data-testid="farm-scene">
       <WorldBackground scanning={isScanning} />
       <svg className="of-bed-layer" viewBox="0 0 800 520" aria-label="Your planting beds">
         <defs>
@@ -210,46 +228,35 @@ export function FarmScene({ layout, plots, selectedSlotId, onSelectSlot, isScann
             <rect width="18" height="28" fill="#A96545" />
             <path d="M0 3H18V9H0Z" fill="#CB8A5E" /><path d="M0 22H18V27H0Z" fill="#8E553E" />
           </pattern>
-          {layout.beds.map(bed => <clipPath key={bed.slotId} id={`${id}-clip-${bed.slotId}`}><polygon points={bed.points.map(toWorld).map(p => `${p.x},${p.y}`).join(' ')} /></clipPath>)}
+          {beds.map(({bed,worldPoints}) => <clipPath key={bed.slotId} id={`${id}-clip-${bed.slotId}`}><polygon points={worldPoints.map(p => `${p.x},${p.y}`).join(' ')} /></clipPath>)}
         </defs>
-        {layout.beds.map((bed) => {
-          const plot = plots.find(item => item.slotId === bed.slotId);
-          const dueTask = plot && tasks.find(task => task.plotId === plot.id && isTaskDue(task, now));
+        {beds.map(({ bed, plot, dueTask, worldPoints, shortName, content }) => {
           const cropName = plot ? CROP_NAMES[plot.cropId] : 'Empty';
-          const points = bed.points.map(toWorld).map(p => `${p.x},${p.y}`).join(' ');
-          const label = getSchematicLabelPosition(bed.points);
-          const center = toWorld(label.point);
-          const broad = label.clearance >= 1.5 && label.maxX - label.minX >= 5;
-          const cols = Math.max(1, Math.floor((label.maxX - label.minX) * 534 / layout.width / 43));
-          const rows = Math.max(1, Math.floor((label.maxY - label.minY) * 244 / layout.height / 34));
-          const shortName = getPlotLabel(bed.slotId).replace('Plot ', '');
+          const points = worldPoints.map(p => `${p.x},${p.y}`).join(' ');
+          const badge = content.annotation;
           return <g
             key={bed.slotId}
-            className={`of-bed-shape${selectedSlotId === bed.slotId ? ' of-bed-shape-selected' : ''}`}
+            className={`of-bed-shape${dueTask ? ' of-bed-needs-care' : ''}${selectedSlotId === bed.slotId ? ' of-bed-shape-selected' : ''}`}
             role="button"
             tabIndex={0}
             aria-label={`${bed.name} · ${cropName}${dueTask ? ` · ${dueTask.title}` : ''}`}
             aria-pressed={selectedSlotId === bed.slotId}
             data-testid={`plot-slot-${bed.slotId}`}
+            data-annotation-mode={badge?.mode ?? 'none'}
             onClick={() => onSelectSlot(bed.slotId)}
             onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onSelectSlot(bed.slotId); } }}
           >
+            <title>{`${bed.name} · ${cropName}${dueTask ? ` · ${dueTask.title}` : ''}`}</title>
             <polygon className="of-bed-ground" points={points} fill={`url(#${id}-soil)`} stroke="#203D32" strokeWidth="5" strokeLinejoin="round" />
             <g clipPath={`url(#${id}-clip-${bed.slotId})`} pointerEvents="none" aria-hidden="true">
-              {plot ? Array.from({ length: rows * cols }, (_, index) => {
-                const col = index % cols, row = Math.floor(index / cols);
-                const at = toWorld({ x: label.minX + (label.maxX - label.minX) * (col + .5) / cols, y: label.minY + (label.maxY - label.minY) * (row + .5) / rows });
-                return <g key={index} transform={`translate(${at.x - 17} ${at.y - 20})`}><CropSprite cropId={plot.cropId} size={34} /></g>;
-              }) : <text x={center.x} y={center.y - 12} className="of-bed-plus" textAnchor="middle">+</text>}
+              {plot && content.crops.map((crop, index) => <g key={index} data-testid={`bed-crop-${bed.slotId}-${index}`} data-bed-id={bed.slotId} transform={`translate(${crop.x} ${crop.y})`}><CropSprite cropId={plot.cropId} size={crop.width} /></g>)}
             </g>
             <polygon className="of-bed-selection" points={points} fill="none" stroke="#FFF8E8" strokeWidth="3" strokeLinejoin="round" pointerEvents="none" />
-            <g className="of-bed-label" transform={`translate(${center.x} ${center.y + (broad ? plot ? 20 : 15 : 0)})`} pointerEvents="none" aria-hidden="true">
-              <rect x={broad ? -48 : -13} y="-9" width={broad ? 96 : 26} height="22" fill="#FFF8E8" stroke="#203D32" strokeWidth="2" />
-              <text y="6" textAnchor="middle" className="of-bed-label-text">{broad ? `${shortName}  ${plot ? cropName : 'Plant here'}` : shortName}</text>
-            </g>
-            {dueTask && <g transform={`translate(${center.x + (broad ? 32 : 5)} ${center.y - 32})`} className="of-bed-task" pointerEvents="none" aria-hidden="true">
-              <rect x="-5" y="-5" width="29" height="32" fill="#F4C95D" stroke="#203D32" strokeWidth="2" />
-              <path d="M6 0H10V4H12V7H14V11H16V16H13V19H3V16H0V11H2V7H4V4H6Z" fill="#203D32" /><path d="M6 5H10V9H12V12H13V15H10V17H5V15H3V12H5V9H6Z" fill="#BDE4F0" />
+            {badge && <g className="of-bed-badge" data-testid={`bed-annotation-${bed.slotId}`} pointerEvents="none" aria-hidden="true">
+              <rect data-testid={`bed-annotation-box-${bed.slotId}`} x={badge.x} y={badge.y} width={badge.width} height={badge.height} rx={2 / (renderedWidth / 800)} fill={dueTask ? '#F4C95D' : '#FFF8E8'} stroke="#203D32" strokeWidth="1.2" vectorEffect="non-scaling-stroke" />
+              <text className="of-bed-badge-text" x={badge.showTask || badge.showPlus ? badge.x + badge.fontSize * .55 : badge.x + badge.width / 2} y={badge.y + badge.height / 2} textAnchor={badge.showTask || badge.showPlus ? 'start' : 'middle'} dominantBaseline="central" style={{ fontSize: badge.fontSize }}>{shortName}</text>
+              {badge.showTask && <svg x={badge.x + badge.width - badge.fontSize * 1.7} y={badge.y + (badge.height - badge.fontSize * 1.15) / 2} width={badge.fontSize * 1.15} height={badge.fontSize * 1.15} viewBox="0 0 16 20"><path d="M6 0H10V4H12V7H14V11H16V16H13V19H3V16H0V11H2V7H4V4H6Z" fill="#203D32" /><path d="M6 5H10V9H12V12H13V15H10V17H5V15H3V12H5V9H6Z" fill="#BDE4F0" /></svg>}
+              {badge.showPlus && <path d={`M${badge.x + badge.width - badge.fontSize * 1.7} ${badge.y + badge.height / 2}h${badge.fontSize * 1.15}m${-badge.fontSize * .575} ${-badge.fontSize * .575}v${badge.fontSize * 1.15}`} stroke="#49653E" strokeWidth="1.6" vectorEffect="non-scaling-stroke" />}
             </g>}
           </g>;
         })}

@@ -34,14 +34,22 @@ export function BoundaryMap({ boundary, onChange, error }: BoundaryMapProps) {
   const [tilesUnavailable, setTilesUnavailable] = useState(false);
   const emittedBoundaryRef = useRef<string | null>(null);
   const closedRef = useRef(closed);
+  const pointsRef = useRef(points);
+  const finishRef = useRef<() => void>(() => {});
   closedRef.current = closed;
+
+  const replacePoints = (next: MapPoint[]) => {
+    pointsRef.current = next;
+    setPoints(next);
+  };
 
   useEffect(() => {
     if (emittedBoundaryRef.current === JSON.stringify(boundary)) {
       emittedBoundaryRef.current = null;
       return;
     }
-    setPoints(pointsFromBoundary(boundary));
+    replacePoints(pointsFromBoundary(boundary));
+    closedRef.current = Boolean(boundary);
     setClosed(Boolean(boundary));
   }, [boundary]);
 
@@ -64,10 +72,17 @@ export function BoundaryMap({ boundary, onChange, error }: BoundaryMapProps) {
     tiles.on('tileerror', () => setTilesUnavailable(true));
     drawingRef.current = L.layerGroup().addTo(map);
     map.on('click', (event: L.LeafletMouseEvent) => {
-      if (closedRef.current) return;
+      if (closedRef.current || event.originalEvent.detail > 1) return;
+      const previous = pointsRef.current;
+      // A closing click belongs to the first corner, not to a new vertex.
+      const cornerIndex = previous.findIndex((corner) => map.latLngToContainerPoint(corner).distanceTo(event.containerPoint) <= 12);
+      if (cornerIndex !== -1) {
+        if (cornerIndex === 0 && previous.length >= 3) finishRef.current();
+        return;
+      }
       const point = event.latlng.wrap();
       setPointError(null);
-      setPoints((previous) => [...previous, [Number(point.lat.toFixed(6)), Number(point.lng.toFixed(6))]]);
+      replacePoints([...previous, [Number(point.lat.toFixed(6)), Number(point.lng.toFixed(6))]]);
     });
     const observer = new ResizeObserver(() => map.invalidateSize({ animate: false }));
     observer.observe(containerRef.current);
@@ -91,8 +106,12 @@ export function BoundaryMap({ boundary, onChange, error }: BoundaryMapProps) {
       }
     }
     points.forEach((point, index) => {
-      L.circleMarker(point, { radius: 6, color: '#203D32', weight: 2, fillColor: '#FFF8E8', fillOpacity: 1 })
-        .bindTooltip(`Corner ${index + 1}`, { direction: 'top' })
+      L.circleMarker(point, { radius: 6, color: '#203D32', weight: 2, fillColor: '#FFF8E8', fillOpacity: 1, bubblingMouseEvents: false })
+        .bindTooltip(index === 0 && !closed && points.length >= 3 ? 'Click to close boundary' : `Corner ${index + 1}`, { direction: 'top' })
+        .on('click', (event: L.LeafletMouseEvent) => {
+          L.DomEvent.stopPropagation(event.originalEvent);
+          if (!closedRef.current && index === 0 && pointsRef.current.length >= 3) finishRef.current();
+        })
         .addTo(layer);
     });
   }, [points, closed, error]);
@@ -111,9 +130,8 @@ export function BoundaryMap({ boundary, onChange, error }: BoundaryMapProps) {
       setPointError('Enter a latitude from -90 to 90 and a longitude from -180 to 180.');
       return;
     }
-    const last = points.at(-1);
-    if (last && last[0] === lat && last[1] === lon) { setPointError('This corner was already added. Choose another position.'); return; }
-    setPoints((previous) => [...previous, [lat, lon]]);
+    if (pointsRef.current.some((point) => point[0] === lat && point[1] === lon)) { setPointError('This corner was already added. Choose another position.'); return; }
+    replacePoints([...pointsRef.current, [lat, lon]]);
     mapRef.current?.panTo([lat, lon], { animate: false });
     setPointError(null);
   };
@@ -124,22 +142,27 @@ export function BoundaryMap({ boundary, onChange, error }: BoundaryMapProps) {
   };
 
   const finish = () => {
-    if (points.length < 3) { setPointError('Add at least three corners to close your boundary.'); return; }
-    const ring = points.map(([lat, lon]) => [lon, lat]);
+    if (closedRef.current) return;
+    if (pointsRef.current.length < 3) { setPointError('Add at least three corners to close your boundary.'); return; }
+    const ring = pointsRef.current.map(([lat, lon]) => [lon, lat]);
+    closedRef.current = true;
     setClosed(true);
     setPointError(null);
     emitBoundary({ type: 'Polygon', coordinates: [[...ring, [...ring[0]]]] });
   };
+  finishRef.current = finish;
 
   const undo = () => {
-    setPoints((previous) => previous.slice(0, -1));
+    replacePoints(pointsRef.current.slice(0, -1));
+    closedRef.current = false;
     setClosed(false);
     setPointError(null);
     if (boundary) emitBoundary(null);
   };
 
   const clear = () => {
-    setPoints([]);
+    replacePoints([]);
+    closedRef.current = false;
     setClosed(false);
     setPointError(null);
     emitBoundary(null);
@@ -147,7 +170,7 @@ export function BoundaryMap({ boundary, onChange, error }: BoundaryMapProps) {
 
   return (
     <div className="of-boundary-editor">
-      <div className="of-map-instruction"><span className="of-map-instruction-dot" /><span>{closed ? 'Boundary closed. Confirm your field to continue.' : 'Click the map to place the corners of your field.'}</span></div>
+      <div className="of-map-instruction"><span className="of-map-instruction-dot" /><span>{closed ? 'Boundary closed. Confirm your field to continue.' : 'Place each corner, then click the first corner or Finish boundary to close.'}</span></div>
       <div ref={containerRef} className="of-boundary-map" aria-label="Field boundary map" data-testid="boundary-map" />
       {tilesUnavailable && <p className="of-map-tile-note" role="status">Map tiles unavailable. Boundary tools still work.</p>}
       <div className="of-map-toolbar">
@@ -158,7 +181,7 @@ export function BoundaryMap({ boundary, onChange, error }: BoundaryMapProps) {
           <button type="button" className="of-map-button of-map-button-primary" onClick={finish} disabled={points.length < 3 || closed}>Finish boundary</button>
         </div>
       </div>
-      <div className="of-map-shortcut"><span>Just exploring?</span><button type="button" onClick={() => { const demo = structuredClone(DEMO_BOUNDARY); setPoints(pointsFromBoundary(demo)); setClosed(true); setPointError(null); emitBoundary(demo); }} className="of-map-text-button">Use demo boundary</button></div>
+      <div className="of-map-shortcut"><span>Just exploring?</span><button type="button" onClick={() => { const demo = structuredClone(DEMO_BOUNDARY); replacePoints(pointsFromBoundary(demo)); closedRef.current = true; setClosed(true); setPointError(null); emitBoundary(demo); }} className="of-map-text-button">Use demo boundary</button></div>
       <details className="of-coordinate-entry">
         <summary>Enter coordinates instead</summary>
         <div className="of-coordinate-fields">

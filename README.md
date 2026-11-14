@@ -2,6 +2,8 @@
 
 **From orbit to your next season.**
 
+[Open orbitFarm](https://orbitfarm.vercel.app/) · [Test benches](https://orbitfarm.vercel.app/#/lab)
+
 A cozy 16-bit farm companion that turns Earth observations and local knowledge into explainable crop rotations and everyday care reminders.
 
 Frontend work continues on the `frontend` branch. All project content, code, comments, and interface copy must be in English.
@@ -10,6 +12,7 @@ Frontend work continues on the `frontend` branch. All project content, code, com
 - [Product specification](docs/orbitFarm-product.md)
 - [24-hour delivery plan](docs/orbitFarm-delivery-plan.md)
 - [Local development and test benches](docs/orbitFarm-development.md)
+- [Vercel deployment and updates](docs/orbitFarm-deployment.md)
 - [Proposed analysis request contract](docs/orbitFarm-analysis-contract.md)
 - [Example analysis request](contracts/orbitFarm-analysis-request.example.json)
 - [Brandbook](brand/orbitFarm-brandbook.md)

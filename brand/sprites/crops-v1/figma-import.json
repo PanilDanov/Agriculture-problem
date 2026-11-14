@@ -1,0 +1,215 @@
+{
+  "status": "blocked_tool_rate_limit",
+  "destinationFileKey": "ZD6mSeYogRklG9vO6eMUCJ",
+  "reason": "Figma MCP Starter-plan tool call limit reached before any file mutation.",
+  "canvasMutated": false,
+  "fallback": "orbitFarm-crops-figma.svg",
+  "fallbackImageCount": 40,
+  "fallbackDimensions": [
+    1440,
+    1792
+  ],
+  "embeddedSourcePixelsUnchanged": true,
+  "images": [
+    {
+      "id": "crop-wheat-seedling",
+      "source": "png/wheat-seedling.png",
+      "sha256": "280b5129286af573e4b618a578921eb6dadcb7b23f7a227c5135208fa56daa6e"
+    },
+    {
+      "id": "crop-wheat-growing",
+      "source": "png/wheat-growing.png",
+      "sha256": "336975e2bf7e4089126ec547d168b7856e2a62f45fcfc6acc46712361165cf0c"
+    },
+    {
+      "id": "crop-wheat-ready",
+      "source": "png/wheat-ready.png",
+      "sha256": "87ecaba854f0784fd3a3dacde5a3d7bf7adc463c1046df89a51819907dc933ab"
+    },
+    {
+      "id": "crop-wheat-harvest",
+      "source": "png/wheat-harvest.png",
+      "sha256": "2cd36f6b0e73433b9e954cc5302e9e51b38ffa815d52c42105ddd4d626ca8792"
+    },
+    {
+      "id": "crop-barley-seedling",
+      "source": "png/barley-seedling.png",
+      "sha256": "171b6432fbb875a04d9aae0859c9e94456f67237a762a40064a4609e9b9ba00e"
+    },
+    {
+      "id": "crop-barley-growing",
+      "source": "png/barley-growing.png",
+      "sha256": "f35cc2eec6d03d0ced94181e4359da0ea9c0b7a5120b4835d2c8a996e3abfc9e"
+    },
+    {
+      "id": "crop-barley-ready",
+      "source": "png/barley-ready.png",
+      "sha256": "965f17c9e1fb827fa4fc35534aeaa5b575241ebbbb09dd3b52b54dee2bfe77bc"
+    },
+    {
+      "id": "crop-barley-harvest",
+      "source": "png/barley-harvest.png",
+      "sha256": "2bf5b3f8afabbe9047925ce06c5243558bc5c2dffe9eb5cd44fe8f291002e4d7"
+    },
+    {
+      "id": "crop-maize-seedling",
+      "source": "png/maize-seedling.png",
+      "sha256": "b020128c4240cb969a138642b5b04415bd2e40026b4fe3f86cffd4fd4945a330"
+    },
+    {
+      "id": "crop-maize-growing",
+      "source": "png/maize-growing.png",
+      "sha256": "a6e0e1a2c1811d8448d261fb4e68dee9f96197b2d9c135379fa2592563db516f"
+    },
+    {
+      "id": "crop-maize-ready",
+      "source": "png/maize-ready.png",
+      "sha256": "d82fa3650e99e93f2d7d5ba035db0182319a50209e8a2aea1e37c16a04fe2e96"
+    },
+    {
+      "id": "crop-maize-harvest",
+      "source": "png/maize-harvest.png",
+      "sha256": "dede8be5c8f556acd4a629d1f67b015170efee9d479d89d32dd0507cdee7194c"
+    },
+    {
+      "id": "crop-sorghum-seedling",
+      "source": "png/sorghum-seedling.png",
+      "sha256": "c35e1a7704634a2a773187a08f95ba6ecbca95ed0a96009cfa987f76c2d0dc6c"
+    },
+    {
+      "id": "crop-sorghum-growing",
+      "source": "png/sorghum-growing.png",
+      "sha256": "864402de4f54f411e4491f31bda9f24882060ee38dc46b901d6b026d28bfec75"
+    },
+    {
+      "id": "crop-sorghum-ready",
+      "source": "png/sorghum-ready.png",
+      "sha256": "bc13a03518f7ecdc3bab95c36d7031eef9b173a01f431f9ec71a92ccef3d7f94"
+    },
+    {
+      "id": "crop-sorghum-harvest",
+      "source": "png/sorghum-harvest.png",
+      "sha256": "434a4aebf39c9d24af8fdf1fa15c2f7152c39f88d57b166dec7455cc80fa2641"
+    },
+    {
+      "id": "crop-chickpea-seedling",
+      "source": "png/chickpea-seedling.png",
+      "sha256": "735b88f18732bb5c7281398105604c9d61d47c02c2f107a09848313936b34e73"
+    },
+    {
+      "id": "crop-chickpea-growing",
+      "source": "png/chickpea-growing.png",
+      "sha256": "05c38850d0102f5d3f7a09e3fd56c124025b9109d964b8629883f669b59c8805"
+    },
+    {
+      "id": "crop-chickpea-ready",
+      "source": "png/chickpea-ready.png",
+      "sha256": "2829ea9e2fdbb05613541664bf6abcc71c4ba4937b5625d8e939610307b28ffc"
+    },
+    {
+      "id": "crop-chickpea-harvest",
+      "source": "png/chickpea-harvest.png",
+      "sha256": "eb405f58a76b3263f3facc522b35230d52da755e225f6ef5b449173fa40f4c9e"
+    },
+    {
+      "id": "crop-lentil-seedling",
+      "source": "png/lentil-seedling.png",
+      "sha256": "91e3cc40d7d58720e4e7a78393f5b07ba88bfd57a17947d11765db166c0047ad"
+    },
+    {
+      "id": "crop-lentil-growing",
+      "source": "png/lentil-growing.png",
+      "sha256": "a4a23ef6a3ba1b1285262c96a440758ae29c1ce5a142d47fe719ced74514964e"
+    },
+    {
+      "id": "crop-lentil-ready",
+      "source": "png/lentil-ready.png",
+      "sha256": "236f386643672e0ba31b24d629f19a16737c9360c7459be08666a8a10a59e14d"
+    },
+    {
+      "id": "crop-lentil-harvest",
+      "source": "png/lentil-harvest.png",
+      "sha256": "019e9549890786bceac834f3e8d147b351b60d4230351ef50c5a3b87009175ce"
+    },
+    {
+      "id": "crop-faba-bean-seedling",
+      "source": "png/faba-bean-seedling.png",
+      "sha256": "b9684261274b454a36272e9f0e20a461aa4de1a1aaf652b0b2de2d25a3a43789"
+    },
+    {
+      "id": "crop-faba-bean-growing",
+      "source": "png/faba-bean-growing.png",
+      "sha256": "8ad1d66581c5688f02b1214ab68ca1e5b67433d16c1efaed18bedf1ef5417323"
+    },
+    {
+      "id": "crop-faba-bean-ready",
+      "source": "png/faba-bean-ready.png",
+      "sha256": "1a93db06e0da0cc722511e0b1347b2e25eb99da025acf44a175b1927679c3e8b"
+    },
+    {
+      "id": "crop-faba-bean-harvest",
+      "source": "png/faba-bean-harvest.png",
+      "sha256": "79bad87977911111c6b31c42b3509ae1efc59a36d422d5d7136d4a3386a89288"
+    },
+    {
+      "id": "crop-sunflower-seedling",
+      "source": "png/sunflower-seedling.png",
+      "sha256": "de578c837b1c11ddf55380a5c46884eceb3cb3596c386213ad1bae751372edd6"
+    },
+    {
+      "id": "crop-sunflower-growing",
+      "source": "png/sunflower-growing.png",
+      "sha256": "dc89a5d131d4d87a1d4b5102e389edf66a4a474af847c64980fab357a1cfbf9b"
+    },
+    {
+      "id": "crop-sunflower-ready",
+      "source": "png/sunflower-ready.png",
+      "sha256": "245794a6b48073852bc956f7a2bf4ab2fbbe5c7def20fa6048026a1e1cef7d84"
+    },
+    {
+      "id": "crop-sunflower-harvest",
+      "source": "png/sunflower-harvest.png",
+      "sha256": "37ebfb549c4a3f6e28232024e16109e812d5344e4d928eb9ee06d927fc792889"
+    },
+    {
+      "id": "crop-potato-seedling",
+      "source": "png/potato-seedling.png",
+      "sha256": "823f42dc51117adaef7bbcf774f5361dd8523abc64f980f30b5b9389f845adc4"
+    },
+    {
+      "id": "crop-potato-growing",
+      "source": "png/potato-growing.png",
+      "sha256": "87c51a539c65abc63f967a97260ff9e1985a631f1a8a42038cefecbdcd87185e"
+    },
+    {
+      "id": "crop-potato-ready",
+      "source": "png/potato-ready.png",
+      "sha256": "23eca1331338b2e40f63d899dda027070a5c303a2f0d40f9cd7074d12fd4c7c4"
+    },
+    {
+      "id": "crop-potato-harvest",
+      "source": "png/potato-harvest.png",
+      "sha256": "76dff371be92d02e5c75923faf36031c53ae0fb52ed5debbbd3b4e1e96220516"
+    },
+    {
+      "id": "crop-tomato-seedling",
+      "source": "png/tomato-seedling.png",
+      "sha256": "26f288975142eb88f5e63ce576c999963c58a7c53690ba9302553e7f2712de2e"
+    },
+    {
+      "id": "crop-tomato-growing",
+      "source": "png/tomato-growing.png",
+      "sha256": "c1159f99f46721cc045eca8f5bdccc34c7c7c8565e7703f32cffb353cd0118b9"
+    },
+    {
+      "id": "crop-tomato-ready",
+      "source": "png/tomato-ready.png",
+      "sha256": "1d0c198426c48e9eb64656b34f59bfb41d815b562402f25abd29a90633ac237f"
+    },
+    {
+      "id": "crop-tomato-harvest",
+      "source": "png/tomato-harvest.png",
+      "sha256": "79e17f6cc5a5fef8923c3240b2fdc1f99a653602a9be4553e4093de9899284c3"
+    }
+  ]
+}

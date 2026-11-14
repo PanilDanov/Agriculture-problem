@@ -1,0 +1,1757 @@
+{
+  "name": "orbitFarm crop sprites",
+  "version": "1.0.0",
+  "createdOn": "2026-11-14",
+  "generator": "built-in image_gen",
+  "cropCount": 10,
+  "spriteCount": 40,
+  "stages": [
+    "seedling",
+    "growing",
+    "ready",
+    "harvest"
+  ],
+  "sheetLayout": {
+    "columns": 2,
+    "rows": 2,
+    "order": "left-to-right, top-to-bottom"
+  },
+  "coordinateSystem": "Pixels from top-left; bounds are x/y/width/height; anchors use continuous pixel-edge coordinates.",
+  "alphaBoundsRule": "alpha > 0",
+  "visualAlphaBoundsRule": "alpha > 128, used only for bounds and clipping checks; RGBA pixels are never modified",
+  "limitations": [
+    "Generated pixel-art-style raster artwork; exact native 32x32 pixel-grid compliance is not guaranteed.",
+    "Growth stages are illustrative artwork, not validated phenological observations or timing models.",
+    "Plant scales and ground anchors can vary between generated stages; position them in a common Figma frame before use.",
+    "Near-transparent generated alpha noise may extend to cell edges; visible artwork does not touch a cell boundary."
+  ],
+  "validation": {
+    "allFramesNonEmpty": true,
+    "allFramesRgbaPixelsPreserved": true,
+    "allFramesHaveFullyTransparentAndFullyOpaquePixels": true,
+    "allVisibleArtworkInsideCellBounds": true,
+    "maxBoundaryAlpha": 2
+  },
+  "sprites": [
+    {
+      "name": "crop/wheat/seedling",
+      "cropId": "wheat",
+      "cropName": "Wheat",
+      "stage": "seedling",
+      "file": "png/wheat-seedling.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/wheat-sheet.png",
+      "sourceRect": {
+        "x": 0,
+        "y": 0,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 33,
+        "y": 15,
+        "width": 594,
+        "height": 612
+      },
+      "visualAlphaBounds": {
+        "x": 236,
+        "y": 394,
+        "width": 194,
+        "height": 153
+      },
+      "anchor": {
+        "x": 333.0,
+        "y": 547,
+        "normalizedX": 0.5311,
+        "normalizedY": 0.872408,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "808af4be7b1a801db31679a2cfb41cb5756573b01d7f70ea26c89dbc620ae094",
+      "pngSha256": "280b5129286af573e4b618a578921eb6dadcb7b23f7a227c5135208fa56daa6e"
+    },
+    {
+      "name": "crop/wheat/growing",
+      "cropId": "wheat",
+      "cropName": "Wheat",
+      "stage": "growing",
+      "file": "png/wheat-growing.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/wheat-sheet.png",
+      "sourceRect": {
+        "x": 627,
+        "y": 0,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 0,
+        "y": 25,
+        "width": 587,
+        "height": 602
+      },
+      "visualAlphaBounds": {
+        "x": 130,
+        "y": 239,
+        "width": 306,
+        "height": 308
+      },
+      "anchor": {
+        "x": 283.0,
+        "y": 547,
+        "normalizedX": 0.451356,
+        "normalizedY": 0.872408,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "bb467f97f7825840cf2ba6c2fdda4c493178205a8950e67594a0d95e5587f54a",
+      "pngSha256": "336975e2bf7e4089126ec547d168b7856e2a62f45fcfc6acc46712361165cf0c"
+    },
+    {
+      "name": "crop/wheat/ready",
+      "cropId": "wheat",
+      "cropName": "Wheat",
+      "stage": "ready",
+      "file": "png/wheat-ready.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/wheat-sheet.png",
+      "sourceRect": {
+        "x": 0,
+        "y": 627,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 0,
+        "y": 0,
+        "width": 627,
+        "height": 627
+      },
+      "visualAlphaBounds": {
+        "x": 164,
+        "y": 66,
+        "width": 345,
+        "height": 450
+      },
+      "anchor": {
+        "x": 336.5,
+        "y": 516,
+        "normalizedX": 0.536683,
+        "normalizedY": 0.822967,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "d071c0055e89824b83ff4c1764421f558de9fc03b4924f592a4a63e8e005a171",
+      "pngSha256": "87ecaba854f0784fd3a3dacde5a3d7bf7adc463c1046df89a51819907dc933ab"
+    },
+    {
+      "name": "crop/wheat/harvest",
+      "cropId": "wheat",
+      "cropName": "Wheat",
+      "stage": "harvest",
+      "file": "png/wheat-harvest.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/wheat-sheet.png",
+      "sourceRect": {
+        "x": 627,
+        "y": 627,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 0,
+        "y": 0,
+        "width": 621,
+        "height": 627
+      },
+      "visualAlphaBounds": {
+        "x": 122,
+        "y": 76,
+        "width": 327,
+        "height": 440
+      },
+      "anchor": {
+        "x": 285.5,
+        "y": 516,
+        "normalizedX": 0.455343,
+        "normalizedY": 0.822967,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "39f59e590e38a7181a77cb498f4e683145ab8e5167056bf15f4276be99b59f21",
+      "pngSha256": "2cd36f6b0e73433b9e954cc5302e9e51b38ffa815d52c42105ddd4d626ca8792"
+    },
+    {
+      "name": "crop/barley/seedling",
+      "cropId": "barley",
+      "cropName": "Barley",
+      "stage": "seedling",
+      "file": "png/barley-seedling.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/barley-sheet.png",
+      "sourceRect": {
+        "x": 0,
+        "y": 0,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 25,
+        "y": 15,
+        "width": 602,
+        "height": 612
+      },
+      "visualAlphaBounds": {
+        "x": 226,
+        "y": 433,
+        "width": 170,
+        "height": 116
+      },
+      "anchor": {
+        "x": 311.0,
+        "y": 549,
+        "normalizedX": 0.496013,
+        "normalizedY": 0.875598,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "9ea492ab00dc03e4c88efc1388c633a4a8cba8e9b3f6351d6bc89b36d6cbdc6d",
+      "pngSha256": "171b6432fbb875a04d9aae0859c9e94456f67237a762a40064a4609e9b9ba00e"
+    },
+    {
+      "name": "crop/barley/growing",
+      "cropId": "barley",
+      "cropName": "Barley",
+      "stage": "growing",
+      "file": "png/barley-growing.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/barley-sheet.png",
+      "sourceRect": {
+        "x": 627,
+        "y": 0,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 0,
+        "y": 31,
+        "width": 626,
+        "height": 596
+      },
+      "visualAlphaBounds": {
+        "x": 120,
+        "y": 221,
+        "width": 362,
+        "height": 328
+      },
+      "anchor": {
+        "x": 301.0,
+        "y": 549,
+        "normalizedX": 0.480064,
+        "normalizedY": 0.875598,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "5daad407338437719888ab4a90947111fa1dd499bcdf2585b354e7e987286816",
+      "pngSha256": "f35cc2eec6d03d0ced94181e4359da0ea9c0b7a5120b4835d2c8a996e3abfc9e"
+    },
+    {
+      "name": "crop/barley/ready",
+      "cropId": "barley",
+      "cropName": "Barley",
+      "stage": "ready",
+      "file": "png/barley-ready.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/barley-sheet.png",
+      "sourceRect": {
+        "x": 0,
+        "y": 627,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 0,
+        "y": 0,
+        "width": 627,
+        "height": 627
+      },
+      "visualAlphaBounds": {
+        "x": 84,
+        "y": 62,
+        "width": 470,
+        "height": 450
+      },
+      "anchor": {
+        "x": 319.0,
+        "y": 512,
+        "normalizedX": 0.508772,
+        "normalizedY": 0.816587,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "ec9a95648dcf2eabe5f50d168c3ed581a6e1868ecdd224af2e249fa014c908bd",
+      "pngSha256": "965f17c9e1fb827fa4fc35534aeaa5b575241ebbbb09dd3b52b54dee2bfe77bc"
+    },
+    {
+      "name": "crop/barley/harvest",
+      "cropId": "barley",
+      "cropName": "Barley",
+      "stage": "harvest",
+      "file": "png/barley-harvest.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/barley-sheet.png",
+      "sourceRect": {
+        "x": 627,
+        "y": 627,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 0,
+        "y": 0,
+        "width": 619,
+        "height": 627
+      },
+      "visualAlphaBounds": {
+        "x": 55,
+        "y": 133,
+        "width": 482,
+        "height": 388
+      },
+      "anchor": {
+        "x": 296.0,
+        "y": 521,
+        "normalizedX": 0.472089,
+        "normalizedY": 0.830941,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "554e68a8d1f8fca7883831f02fe28a17fa1606f3459fe949b4653a8cdcb3a473",
+      "pngSha256": "2bf5b3f8afabbe9047925ce06c5243558bc5c2dffe9eb5cd44fe8f291002e4d7"
+    },
+    {
+      "name": "crop/maize/seedling",
+      "cropId": "maize",
+      "cropName": "Maize",
+      "stage": "seedling",
+      "file": "png/maize-seedling.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/maize-sheet.png",
+      "sourceRect": {
+        "x": 0,
+        "y": 0,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 39,
+        "y": 21,
+        "width": 588,
+        "height": 606
+      },
+      "visualAlphaBounds": {
+        "x": 207,
+        "y": 422,
+        "width": 223,
+        "height": 148
+      },
+      "anchor": {
+        "x": 318.5,
+        "y": 570,
+        "normalizedX": 0.507974,
+        "normalizedY": 0.909091,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "e8ddae0e4a32ba5a7cd8512b6e674ca4d8b413e94a04e3aa2027a874bc66a223",
+      "pngSha256": "b020128c4240cb969a138642b5b04415bd2e40026b4fe3f86cffd4fd4945a330"
+    },
+    {
+      "name": "crop/maize/growing",
+      "cropId": "maize",
+      "cropName": "Maize",
+      "stage": "growing",
+      "file": "png/maize-growing.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/maize-sheet.png",
+      "sourceRect": {
+        "x": 627,
+        "y": 0,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 0,
+        "y": 0,
+        "width": 609,
+        "height": 627
+      },
+      "visualAlphaBounds": {
+        "x": 124,
+        "y": 189,
+        "width": 357,
+        "height": 381
+      },
+      "anchor": {
+        "x": 302.5,
+        "y": 570,
+        "normalizedX": 0.482456,
+        "normalizedY": 0.909091,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "f59662b9da3da99866c2d09f681a1721c050d8b7ed61566db9b06d06f96b61cf",
+      "pngSha256": "a6e0e1a2c1811d8448d261fb4e68dee9f96197b2d9c135379fa2592563db516f"
+    },
+    {
+      "name": "crop/maize/ready",
+      "cropId": "maize",
+      "cropName": "Maize",
+      "stage": "ready",
+      "file": "png/maize-ready.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/maize-sheet.png",
+      "sourceRect": {
+        "x": 0,
+        "y": 627,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 0,
+        "y": 3,
+        "width": 627,
+        "height": 624
+      },
+      "visualAlphaBounds": {
+        "x": 129,
+        "y": 35,
+        "width": 381,
+        "height": 519
+      },
+      "anchor": {
+        "x": 319.5,
+        "y": 554,
+        "normalizedX": 0.509569,
+        "normalizedY": 0.883573,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "ed583475b8e1b0579437dd22205ab8389b3472627478626af82075e806c7a375",
+      "pngSha256": "d82fa3650e99e93f2d7d5ba035db0182319a50209e8a2aea1e37c16a04fe2e96"
+    },
+    {
+      "name": "crop/maize/harvest",
+      "cropId": "maize",
+      "cropName": "Maize",
+      "stage": "harvest",
+      "file": "png/maize-harvest.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/maize-sheet.png",
+      "sourceRect": {
+        "x": 627,
+        "y": 627,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 0,
+        "y": 0,
+        "width": 593,
+        "height": 627
+      },
+      "visualAlphaBounds": {
+        "x": 167,
+        "y": 171,
+        "width": 265,
+        "height": 384
+      },
+      "anchor": {
+        "x": 299.5,
+        "y": 555,
+        "normalizedX": 0.477671,
+        "normalizedY": 0.885167,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "1b9882c3f4b57e346c93569d5275230223695c16fbded5bf894c344691d2d382",
+      "pngSha256": "dede8be5c8f556acd4a629d1f67b015170efee9d479d89d32dd0507cdee7194c"
+    },
+    {
+      "name": "crop/sorghum/seedling",
+      "cropId": "sorghum",
+      "cropName": "Sorghum",
+      "stage": "seedling",
+      "file": "png/sorghum-seedling.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/sorghum-sheet.png",
+      "sourceRect": {
+        "x": 0,
+        "y": 0,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 23,
+        "y": 19,
+        "width": 604,
+        "height": 606
+      },
+      "visualAlphaBounds": {
+        "x": 210,
+        "y": 382,
+        "width": 234,
+        "height": 180
+      },
+      "anchor": {
+        "x": 327.0,
+        "y": 562,
+        "normalizedX": 0.521531,
+        "normalizedY": 0.896332,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "10606fd670f1f0780a34241bbfe040a00a0de748c7da93b4d1a47068649bd3d6",
+      "pngSha256": "c35e1a7704634a2a773187a08f95ba6ecbca95ed0a96009cfa987f76c2d0dc6c"
+    },
+    {
+      "name": "crop/sorghum/growing",
+      "cropId": "sorghum",
+      "cropName": "Sorghum",
+      "stage": "growing",
+      "file": "png/sorghum-growing.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/sorghum-sheet.png",
+      "sourceRect": {
+        "x": 627,
+        "y": 0,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 0,
+        "y": 21,
+        "width": 626,
+        "height": 606
+      },
+      "visualAlphaBounds": {
+        "x": 106,
+        "y": 81,
+        "width": 372,
+        "height": 481
+      },
+      "anchor": {
+        "x": 292.0,
+        "y": 562,
+        "normalizedX": 0.46571,
+        "normalizedY": 0.896332,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "6860ca41647ddd03bc01cda20d00a177863f7fd6bfdb341f18111c4551e5aad0",
+      "pngSha256": "864402de4f54f411e4491f31bda9f24882060ee38dc46b901d6b026d28bfec75"
+    },
+    {
+      "name": "crop/sorghum/ready",
+      "cropId": "sorghum",
+      "cropName": "Sorghum",
+      "stage": "ready",
+      "file": "png/sorghum-ready.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/sorghum-sheet.png",
+      "sourceRect": {
+        "x": 0,
+        "y": 627,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 0,
+        "y": 29,
+        "width": 627,
+        "height": 580
+      },
+      "visualAlphaBounds": {
+        "x": 158,
+        "y": 40,
+        "width": 352,
+        "height": 510
+      },
+      "anchor": {
+        "x": 334.0,
+        "y": 550,
+        "normalizedX": 0.532695,
+        "normalizedY": 0.877193,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 2,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "88d968efc01bd9f27721d95abcc37de90d27bc81042f818d529c8e8527d6d529",
+      "pngSha256": "bc13a03518f7ecdc3bab95c36d7031eef9b173a01f431f9ec71a92ccef3d7f94"
+    },
+    {
+      "name": "crop/sorghum/harvest",
+      "cropId": "sorghum",
+      "cropName": "Sorghum",
+      "stage": "harvest",
+      "file": "png/sorghum-harvest.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/sorghum-sheet.png",
+      "sourceRect": {
+        "x": 627,
+        "y": 627,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 1,
+        "y": 0,
+        "width": 612,
+        "height": 627
+      },
+      "visualAlphaBounds": {
+        "x": 190,
+        "y": 147,
+        "width": 201,
+        "height": 402
+      },
+      "anchor": {
+        "x": 290.5,
+        "y": 549,
+        "normalizedX": 0.463317,
+        "normalizedY": 0.875598,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "6a6e403f9f61ade1b12870902b0a06ae5db66ec323fdb022ba3e2f40d5060e86",
+      "pngSha256": "434a4aebf39c9d24af8fdf1fa15c2f7152c39f88d57b166dec7455cc80fa2641"
+    },
+    {
+      "name": "crop/chickpea/seedling",
+      "cropId": "chickpea",
+      "cropName": "Chickpea",
+      "stage": "seedling",
+      "file": "png/chickpea-seedling.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/chickpea-sheet.png",
+      "sourceRect": {
+        "x": 0,
+        "y": 0,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 17,
+        "y": 33,
+        "width": 610,
+        "height": 594
+      },
+      "visualAlphaBounds": {
+        "x": 213,
+        "y": 371,
+        "width": 235,
+        "height": 164
+      },
+      "anchor": {
+        "x": 330.5,
+        "y": 535,
+        "normalizedX": 0.527113,
+        "normalizedY": 0.85327,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "bc0925b528e05c7f47ef307361a942bb1188d3617e77e68f9329374be5d71bbc",
+      "pngSha256": "735b88f18732bb5c7281398105604c9d61d47c02c2f107a09848313936b34e73"
+    },
+    {
+      "name": "crop/chickpea/growing",
+      "cropId": "chickpea",
+      "cropName": "Chickpea",
+      "stage": "growing",
+      "file": "png/chickpea-growing.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/chickpea-sheet.png",
+      "sourceRect": {
+        "x": 627,
+        "y": 0,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 0,
+        "y": 9,
+        "width": 621,
+        "height": 618
+      },
+      "visualAlphaBounds": {
+        "x": 56,
+        "y": 163,
+        "width": 472,
+        "height": 372
+      },
+      "anchor": {
+        "x": 292.0,
+        "y": 535,
+        "normalizedX": 0.46571,
+        "normalizedY": 0.85327,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "6feb835c5496ef515b02dd6aa65e92df7e9d793a254f9b2ddba90071169a8b32",
+      "pngSha256": "05c38850d0102f5d3f7a09e3fd56c124025b9109d964b8629883f669b59c8805"
+    },
+    {
+      "name": "crop/chickpea/ready",
+      "cropId": "chickpea",
+      "cropName": "Chickpea",
+      "stage": "ready",
+      "file": "png/chickpea-ready.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/chickpea-sheet.png",
+      "sourceRect": {
+        "x": 0,
+        "y": 627,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 0,
+        "y": 0,
+        "width": 627,
+        "height": 627
+      },
+      "visualAlphaBounds": {
+        "x": 81,
+        "y": 137,
+        "width": 490,
+        "height": 392
+      },
+      "anchor": {
+        "x": 326.0,
+        "y": 529,
+        "normalizedX": 0.519936,
+        "normalizedY": 0.8437,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "a111f7ee17eb179309b3ca92b6238dd91c5ba3dd319a53e29cfcaf0850d2beab",
+      "pngSha256": "2829ea9e2fdbb05613541664bf6abcc71c4ba4937b5625d8e939610307b28ffc"
+    },
+    {
+      "name": "crop/chickpea/harvest",
+      "cropId": "chickpea",
+      "cropName": "Chickpea",
+      "stage": "harvest",
+      "file": "png/chickpea-harvest.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/chickpea-sheet.png",
+      "sourceRect": {
+        "x": 627,
+        "y": 627,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 0,
+        "y": 0,
+        "width": 613,
+        "height": 627
+      },
+      "visualAlphaBounds": {
+        "x": 116,
+        "y": 249,
+        "width": 353,
+        "height": 280
+      },
+      "anchor": {
+        "x": 292.5,
+        "y": 529,
+        "normalizedX": 0.466507,
+        "normalizedY": 0.8437,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "ab22c11fe98de1d2c280db6c3087d75e82110609e0a8ebbadb9d4c0c278afaa1",
+      "pngSha256": "eb405f58a76b3263f3facc522b35230d52da755e225f6ef5b449173fa40f4c9e"
+    },
+    {
+      "name": "crop/lentil/seedling",
+      "cropId": "lentil",
+      "cropName": "Lentil",
+      "stage": "seedling",
+      "file": "png/lentil-seedling.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/lentil-sheet.png",
+      "sourceRect": {
+        "x": 0,
+        "y": 0,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 0,
+        "y": 19,
+        "width": 627,
+        "height": 608
+      },
+      "visualAlphaBounds": {
+        "x": 259,
+        "y": 374,
+        "width": 144,
+        "height": 147
+      },
+      "anchor": {
+        "x": 331.0,
+        "y": 521,
+        "normalizedX": 0.527911,
+        "normalizedY": 0.830941,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "98d67a5903d3462ca5124aab23a457e164dec380ee6ec148cce2737bc0046b90",
+      "pngSha256": "91e3cc40d7d58720e4e7a78393f5b07ba88bfd57a17947d11765db166c0047ad"
+    },
+    {
+      "name": "crop/lentil/growing",
+      "cropId": "lentil",
+      "cropName": "Lentil",
+      "stage": "growing",
+      "file": "png/lentil-growing.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/lentil-sheet.png",
+      "sourceRect": {
+        "x": 627,
+        "y": 0,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 0,
+        "y": 0,
+        "width": 609,
+        "height": 627
+      },
+      "visualAlphaBounds": {
+        "x": 154,
+        "y": 185,
+        "width": 257,
+        "height": 336
+      },
+      "anchor": {
+        "x": 282.5,
+        "y": 521,
+        "normalizedX": 0.450558,
+        "normalizedY": 0.830941,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "d74e469197d4d0f389feae43b20dace6d2d3cc747c701a9415585eb3667c6119",
+      "pngSha256": "a4a23ef6a3ba1b1285262c96a440758ae29c1ce5a142d47fe719ced74514964e"
+    },
+    {
+      "name": "crop/lentil/ready",
+      "cropId": "lentil",
+      "cropName": "Lentil",
+      "stage": "ready",
+      "file": "png/lentil-ready.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/lentil-sheet.png",
+      "sourceRect": {
+        "x": 0,
+        "y": 627,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 0,
+        "y": 0,
+        "width": 627,
+        "height": 627
+      },
+      "visualAlphaBounds": {
+        "x": 165,
+        "y": 74,
+        "width": 320,
+        "height": 451
+      },
+      "anchor": {
+        "x": 325.0,
+        "y": 525,
+        "normalizedX": 0.518341,
+        "normalizedY": 0.837321,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "b1f3628e156fe2e214aae653a076d6cad57df1856d2d6e94ad69f0eec18dcca7",
+      "pngSha256": "236f386643672e0ba31b24d629f19a16737c9360c7459be08666a8a10a59e14d"
+    },
+    {
+      "name": "crop/lentil/harvest",
+      "cropId": "lentil",
+      "cropName": "Lentil",
+      "stage": "harvest",
+      "file": "png/lentil-harvest.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/lentil-sheet.png",
+      "sourceRect": {
+        "x": 627,
+        "y": 627,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 0,
+        "y": 0,
+        "width": 626,
+        "height": 627
+      },
+      "visualAlphaBounds": {
+        "x": 105,
+        "y": 357,
+        "width": 366,
+        "height": 163
+      },
+      "anchor": {
+        "x": 288.0,
+        "y": 520,
+        "normalizedX": 0.45933,
+        "normalizedY": 0.829346,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "2fb6db27d63d2339f7b5150b0cb5e491eaa8040d81349f702414fffb5f1db819",
+      "pngSha256": "019e9549890786bceac834f3e8d147b351b60d4230351ef50c5a3b87009175ce"
+    },
+    {
+      "name": "crop/faba-bean/seedling",
+      "cropId": "faba-bean",
+      "cropName": "Faba bean",
+      "stage": "seedling",
+      "file": "png/faba-bean-seedling.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/faba-bean-sheet.png",
+      "sourceRect": {
+        "x": 0,
+        "y": 0,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 0,
+        "y": 21,
+        "width": 627,
+        "height": 606
+      },
+      "visualAlphaBounds": {
+        "x": 124,
+        "y": 276,
+        "width": 410,
+        "height": 279
+      },
+      "anchor": {
+        "x": 329.0,
+        "y": 555,
+        "normalizedX": 0.524721,
+        "normalizedY": 0.885167,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 2,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "d061bc4abaf1c00b97f398b5e60457fb09d511d35d75e96f2a345acca45e45c0",
+      "pngSha256": "b9684261274b454a36272e9f0e20a461aa4de1a1aaf652b0b2de2d25a3a43789"
+    },
+    {
+      "name": "crop/faba-bean/growing",
+      "cropId": "faba-bean",
+      "cropName": "Faba bean",
+      "stage": "growing",
+      "file": "png/faba-bean-growing.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/faba-bean-sheet.png",
+      "sourceRect": {
+        "x": 627,
+        "y": 0,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 0,
+        "y": 0,
+        "width": 627,
+        "height": 627
+      },
+      "visualAlphaBounds": {
+        "x": 99,
+        "y": 59,
+        "width": 404,
+        "height": 496
+      },
+      "anchor": {
+        "x": 301.0,
+        "y": 555,
+        "normalizedX": 0.480064,
+        "normalizedY": 0.885167,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "7c178282afaba7b96272c098bf66d5377507df94e53c41a2ed900a5857eaf7d9",
+      "pngSha256": "8ad1d66581c5688f02b1214ab68ca1e5b67433d16c1efaed18bedf1ef5417323"
+    },
+    {
+      "name": "crop/faba-bean/ready",
+      "cropId": "faba-bean",
+      "cropName": "Faba bean",
+      "stage": "ready",
+      "file": "png/faba-bean-ready.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/faba-bean-sheet.png",
+      "sourceRect": {
+        "x": 0,
+        "y": 627,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 0,
+        "y": 0,
+        "width": 627,
+        "height": 627
+      },
+      "visualAlphaBounds": {
+        "x": 109,
+        "y": 25,
+        "width": 447,
+        "height": 541
+      },
+      "anchor": {
+        "x": 332.5,
+        "y": 566,
+        "normalizedX": 0.530303,
+        "normalizedY": 0.902711,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 2,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "74aa42ac610b6d7d89b34893e4248b4406d840df8b22d9a46d7c2eb331ea0848",
+      "pngSha256": "1a93db06e0da0cc722511e0b1347b2e25eb99da025acf44a175b1927679c3e8b"
+    },
+    {
+      "name": "crop/faba-bean/harvest",
+      "cropId": "faba-bean",
+      "cropName": "Faba bean",
+      "stage": "harvest",
+      "file": "png/faba-bean-harvest.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/faba-bean-sheet.png",
+      "sourceRect": {
+        "x": 627,
+        "y": 627,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 0,
+        "y": 0,
+        "width": 627,
+        "height": 627
+      },
+      "visualAlphaBounds": {
+        "x": 60,
+        "y": 185,
+        "width": 469,
+        "height": 299
+      },
+      "anchor": {
+        "x": 294.5,
+        "y": 484,
+        "normalizedX": 0.469697,
+        "normalizedY": 0.77193,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "eb3880630f64a8ee04d44e74b7b4e303778c5920555dcce4121dfa1ad29cfc89",
+      "pngSha256": "79bad87977911111c6b31c42b3509ae1efc59a36d422d5d7136d4a3386a89288"
+    },
+    {
+      "name": "crop/sunflower/seedling",
+      "cropId": "sunflower",
+      "cropName": "Sunflower",
+      "stage": "seedling",
+      "file": "png/sunflower-seedling.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/sunflower-sheet.png",
+      "sourceRect": {
+        "x": 0,
+        "y": 0,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 0,
+        "y": 29,
+        "width": 627,
+        "height": 598
+      },
+      "visualAlphaBounds": {
+        "x": 199,
+        "y": 390,
+        "width": 279,
+        "height": 161
+      },
+      "anchor": {
+        "x": 338.5,
+        "y": 551,
+        "normalizedX": 0.539872,
+        "normalizedY": 0.878788,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "ea277c410faf262e73cbc1e3a20107e4442f3b0dd162d48ac4cf87844761a8f4",
+      "pngSha256": "de578c837b1c11ddf55380a5c46884eceb3cb3596c386213ad1bae751372edd6"
+    },
+    {
+      "name": "crop/sunflower/growing",
+      "cropId": "sunflower",
+      "cropName": "Sunflower",
+      "stage": "growing",
+      "file": "png/sunflower-growing.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/sunflower-sheet.png",
+      "sourceRect": {
+        "x": 627,
+        "y": 0,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 0,
+        "y": 21,
+        "width": 627,
+        "height": 606
+      },
+      "visualAlphaBounds": {
+        "x": 122,
+        "y": 127,
+        "width": 331,
+        "height": 424
+      },
+      "anchor": {
+        "x": 287.5,
+        "y": 551,
+        "normalizedX": 0.458533,
+        "normalizedY": 0.878788,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "817819406bedc71ef809245bbd69d5bab685f52bea5737749e86ff495c54cbe2",
+      "pngSha256": "dc89a5d131d4d87a1d4b5102e389edf66a4a474af847c64980fab357a1cfbf9b"
+    },
+    {
+      "name": "crop/sunflower/ready",
+      "cropId": "sunflower",
+      "cropName": "Sunflower",
+      "stage": "ready",
+      "file": "png/sunflower-ready.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/sunflower-sheet.png",
+      "sourceRect": {
+        "x": 0,
+        "y": 627,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 0,
+        "y": 0,
+        "width": 627,
+        "height": 627
+      },
+      "visualAlphaBounds": {
+        "x": 150,
+        "y": 46,
+        "width": 370,
+        "height": 487
+      },
+      "anchor": {
+        "x": 335.0,
+        "y": 533,
+        "normalizedX": 0.53429,
+        "normalizedY": 0.85008,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "b26b179ca54dd6d3a97910273c446a41f1d3c428978c49e0b6f300fe1fdf5aab",
+      "pngSha256": "245794a6b48073852bc956f7a2bf4ab2fbbe5c7def20fa6048026a1e1cef7d84"
+    },
+    {
+      "name": "crop/sunflower/harvest",
+      "cropId": "sunflower",
+      "cropName": "Sunflower",
+      "stage": "harvest",
+      "file": "png/sunflower-harvest.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/sunflower-sheet.png",
+      "sourceRect": {
+        "x": 627,
+        "y": 627,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 0,
+        "y": 0,
+        "width": 627,
+        "height": 627
+      },
+      "visualAlphaBounds": {
+        "x": 60,
+        "y": 192,
+        "width": 402,
+        "height": 350
+      },
+      "anchor": {
+        "x": 261.0,
+        "y": 542,
+        "normalizedX": 0.416268,
+        "normalizedY": 0.864434,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "163bcfdec209242b550b3b65d2c833b6e5089c5a1972a3fba70b7ebf86027e24",
+      "pngSha256": "37ebfb549c4a3f6e28232024e16109e812d5344e4d928eb9ee06d927fc792889"
+    },
+    {
+      "name": "crop/potato/seedling",
+      "cropId": "potato",
+      "cropName": "Potato",
+      "stage": "seedling",
+      "file": "png/potato-seedling.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/potato-sheet.png",
+      "sourceRect": {
+        "x": 0,
+        "y": 0,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 25,
+        "y": 21,
+        "width": 602,
+        "height": 606
+      },
+      "visualAlphaBounds": {
+        "x": 222,
+        "y": 428,
+        "width": 195,
+        "height": 131
+      },
+      "anchor": {
+        "x": 319.5,
+        "y": 559,
+        "normalizedX": 0.509569,
+        "normalizedY": 0.891547,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "9ee4d3b953eee2221d7db7b1b5ec548ed1e6c92eeac30c4f940df085d630690c",
+      "pngSha256": "823f42dc51117adaef7bbcf774f5361dd8523abc64f980f30b5b9389f845adc4"
+    },
+    {
+      "name": "crop/potato/growing",
+      "cropId": "potato",
+      "cropName": "Potato",
+      "stage": "growing",
+      "file": "png/potato-growing.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/potato-sheet.png",
+      "sourceRect": {
+        "x": 627,
+        "y": 0,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 1,
+        "y": 52,
+        "width": 612,
+        "height": 575
+      },
+      "visualAlphaBounds": {
+        "x": 88,
+        "y": 293,
+        "width": 386,
+        "height": 266
+      },
+      "anchor": {
+        "x": 281.0,
+        "y": 559,
+        "normalizedX": 0.448166,
+        "normalizedY": 0.891547,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "1c56f63b8155d41accb83385f46e18ce62d36ad47be302a5ab9a00a10a7c1273",
+      "pngSha256": "87c51a539c65abc63f967a97260ff9e1985a631f1a8a42038cefecbdcd87185e"
+    },
+    {
+      "name": "crop/potato/ready",
+      "cropId": "potato",
+      "cropName": "Potato",
+      "stage": "ready",
+      "file": "png/potato-ready.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/potato-sheet.png",
+      "sourceRect": {
+        "x": 0,
+        "y": 627,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 0,
+        "y": 0,
+        "width": 627,
+        "height": 613
+      },
+      "visualAlphaBounds": {
+        "x": 106,
+        "y": 163,
+        "width": 443,
+        "height": 371
+      },
+      "anchor": {
+        "x": 327.5,
+        "y": 534,
+        "normalizedX": 0.522329,
+        "normalizedY": 0.851675,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "52cb86d28ea38a4e7e8cbd3538bc5e87537a1c0c5157bcc26c541dad89a72781",
+      "pngSha256": "23eca1331338b2e40f63d899dda027070a5c303a2f0d40f9cd7074d12fd4c7c4"
+    },
+    {
+      "name": "crop/potato/harvest",
+      "cropId": "potato",
+      "cropName": "Potato",
+      "stage": "harvest",
+      "file": "png/potato-harvest.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/potato-sheet.png",
+      "sourceRect": {
+        "x": 627,
+        "y": 627,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 0,
+        "y": 0,
+        "width": 605,
+        "height": 627
+      },
+      "visualAlphaBounds": {
+        "x": 73,
+        "y": 277,
+        "width": 414,
+        "height": 271
+      },
+      "anchor": {
+        "x": 280.0,
+        "y": 548,
+        "normalizedX": 0.446571,
+        "normalizedY": 0.874003,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "fadae47d4bcab78ed4d35f9ed9ac0c4d1c5c4a666b6bae90b2cba05e80e32af9",
+      "pngSha256": "76dff371be92d02e5c75923faf36031c53ae0fb52ed5debbbd3b4e1e96220516"
+    },
+    {
+      "name": "crop/tomato/seedling",
+      "cropId": "tomato",
+      "cropName": "Open-field tomato",
+      "stage": "seedling",
+      "file": "png/tomato-seedling.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/tomato-sheet.png",
+      "sourceRect": {
+        "x": 0,
+        "y": 0,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 0,
+        "y": 17,
+        "width": 627,
+        "height": 610
+      },
+      "visualAlphaBounds": {
+        "x": 209,
+        "y": 406,
+        "width": 232,
+        "height": 153
+      },
+      "anchor": {
+        "x": 325.0,
+        "y": 559,
+        "normalizedX": 0.518341,
+        "normalizedY": 0.891547,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "c8e8e51f0b1700b500cb6caeb30bbf958add2a7d86b83ce122154913d80bfbdb",
+      "pngSha256": "26f288975142eb88f5e63ce576c999963c58a7c53690ba9302553e7f2712de2e"
+    },
+    {
+      "name": "crop/tomato/growing",
+      "cropId": "tomato",
+      "cropName": "Open-field tomato",
+      "stage": "growing",
+      "file": "png/tomato-growing.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/tomato-sheet.png",
+      "sourceRect": {
+        "x": 627,
+        "y": 0,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 0,
+        "y": 19,
+        "width": 613,
+        "height": 608
+      },
+      "visualAlphaBounds": {
+        "x": 102,
+        "y": 207,
+        "width": 360,
+        "height": 351
+      },
+      "anchor": {
+        "x": 282.0,
+        "y": 558,
+        "normalizedX": 0.449761,
+        "normalizedY": 0.889952,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "93c48340b823088bc418ef1a5826bbcde4b7a98c176faa9d2425b71127180c27",
+      "pngSha256": "c1159f99f46721cc045eca8f5bdccc34c7c7c8565e7703f32cffb353cd0118b9"
+    },
+    {
+      "name": "crop/tomato/ready",
+      "cropId": "tomato",
+      "cropName": "Open-field tomato",
+      "stage": "ready",
+      "file": "png/tomato-ready.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/tomato-sheet.png",
+      "sourceRect": {
+        "x": 0,
+        "y": 627,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 0,
+        "y": 0,
+        "width": 627,
+        "height": 627
+      },
+      "visualAlphaBounds": {
+        "x": 104,
+        "y": 69,
+        "width": 453,
+        "height": 461
+      },
+      "anchor": {
+        "x": 330.5,
+        "y": 530,
+        "normalizedX": 0.527113,
+        "normalizedY": 0.845295,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "d68350a0d4d649455e6987b4c6b562bd990b6ea09f959400dc481213fe6af4f3",
+      "pngSha256": "1d0c198426c48e9eb64656b34f59bfb41d815b562402f25abd29a90633ac237f"
+    },
+    {
+      "name": "crop/tomato/harvest",
+      "cropId": "tomato",
+      "cropName": "Open-field tomato",
+      "stage": "harvest",
+      "file": "png/tomato-harvest.png",
+      "width": 627,
+      "height": 627,
+      "sourceFile": "sheets/tomato-sheet.png",
+      "sourceRect": {
+        "x": 627,
+        "y": 627,
+        "width": 627,
+        "height": 627
+      },
+      "alphaBounds": {
+        "x": 0,
+        "y": 0,
+        "width": 589,
+        "height": 627
+      },
+      "visualAlphaBounds": {
+        "x": 102,
+        "y": 253,
+        "width": 383,
+        "height": 285
+      },
+      "anchor": {
+        "x": 293.5,
+        "y": 538,
+        "normalizedX": 0.468102,
+        "normalizedY": 0.858054,
+        "basis": "bottom-center of visualAlphaBounds; not an anatomical root anchor"
+      },
+      "alphaRange": {
+        "min": 0,
+        "max": 255
+      },
+      "maxBoundaryAlpha": 1,
+      "visualBoundaryClipping": false,
+      "sourceRgbaSha256": "fe76d503c4a8d4748e76a386f4f1271e8bc17d34c2abe29b2227fe7712ad54a4",
+      "pngSha256": "79e17f6cc5a5fef8923c3240b2fdc1f99a653602a9be4553e4093de9899284c3"
+    }
+  ]
+}

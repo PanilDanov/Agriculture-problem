@@ -1,0 +1,56 @@
+{
+  "createdOn": "2026-11-14",
+  "generator": "built-in image_gen",
+  "sheets": [
+    {
+      "cropId": "wheat",
+      "file": "sheets/wheat-sheet.png",
+      "originalGeneratedBasename": "exec-6428a8ae-496c-4a87-ba13-5fcdd2e4284b.png"
+    },
+    {
+      "cropId": "barley",
+      "file": "sheets/barley-sheet.png",
+      "originalGeneratedBasename": "exec-0add3c91-37f4-476c-9a5c-23fbec98c89c.png"
+    },
+    {
+      "cropId": "maize",
+      "file": "sheets/maize-sheet.png",
+      "originalGeneratedBasename": "exec-80b04887-9013-4fe7-92b3-5c504dcef202.png"
+    },
+    {
+      "cropId": "sorghum",
+      "file": "sheets/sorghum-sheet.png",
+      "originalGeneratedBasename": "exec-a05f08ef-65f3-47f6-bc91-8d03722dd29a.png"
+    },
+    {
+      "cropId": "chickpea",
+      "file": "sheets/chickpea-sheet.png",
+      "originalGeneratedBasename": "exec-b73c4f1e-c0c7-4f93-863e-2856615bd7be.png"
+    },
+    {
+      "cropId": "lentil",
+      "file": "sheets/lentil-sheet.png",
+      "originalGeneratedBasename": "exec-90dd41f3-8c12-4c79-b195-7fec623c16f9.png"
+    },
+    {
+      "cropId": "faba-bean",
+      "file": "sheets/faba-bean-sheet.png",
+      "originalGeneratedBasename": "exec-d0a268c4-20e6-4d58-a8b6-b3a51b361eb6.png"
+    },
+    {
+      "cropId": "sunflower",
+      "file": "sheets/sunflower-sheet.png",
+      "originalGeneratedBasename": "exec-486dbfc5-60bd-489f-955e-fa558a99eaa7.png"
+    },
+    {
+      "cropId": "potato",
+      "file": "sheets/potato-sheet.png",
+      "originalGeneratedBasename": "exec-b924bbd8-cd19-44ca-a86e-f849c99dd5b7.png"
+    },
+    {
+      "cropId": "tomato",
+      "file": "sheets/tomato-sheet.png",
+      "originalGeneratedBasename": "exec-a0f14ef0-555c-4847-8fa2-f1a4c03c830a.png"
+    }
+  ]
+}

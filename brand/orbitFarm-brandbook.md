@@ -94,6 +94,14 @@ The editable [Figma · Brand & Product v0.1](https://www.figma.com/design/ZD6mSe
 
 The Screens page also includes local **Rotation plan / Base** and **Mobile navigation / Item** components used in the layouts. Satellite analysis is described as a transition between Draw and Compare; the starter set has no separate Scan screen.
 
-The file includes editable pixel farm artwork and a wordmark. A separate logo mark, app icons, sprite atlas, and animation states for **Orbit-1** are **Planned**; individual sprites have not been exported. Additional responsive screens and extended game components remain implementation work.
+The file includes editable pixel farm artwork and a wordmark. A separate logo mark, app icons, and animation states for **Orbit-1** are **Planned**. Additional responsive screens and extended game components remain implementation work.
+
+## Crop sprites v1
+
+The [crop sprite pack](sprites/crops-v1/README.md) contains artwork for wheat, barley, maize, sorghum, chickpea, lentil, faba bean, sunflower, potato, and open-field tomato. Each crop has four images: `Seedling`, `Growing`, `Ready`, and `Harvest item`.
+
+The pack includes transparent PNG assets, the ten original 2×2 sheets, a self-contained [Figma import board](sprites/crops-v1/orbitFarm-crops-figma.svg), naming metadata, and the exact generation prompts. The import board keeps each sprite as a separate raster image layer with vector labels. These assets are prepared locally; they have not been placed into the shared Figma file.
+
+The generated masters are 1254×1254 px, and the losslessly extracted cells are 627×627 px. They follow the cozy pixel-art visual direction but are not guaranteed to align to an exact native 32×32 pixel grid. Growth artwork is illustrative and does not define scientific growth-stage timing.
 
 Shared colors, dimensions, and radii are stored in [orbitFarm-tokens.json](orbitFarm-tokens.json). Components use auto-layout, and instances share the same tokens. This is a hackathon starter brandbook to expand after the working vertical flow is complete.

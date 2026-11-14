@@ -1,7 +1,7 @@
 .of-farm-scene {
   position: relative;
   width: 100%;
-  aspect-ratio: 20 / 13;
+  aspect-ratio: auto;
   isolation: isolate;
   overflow: visible;
 }

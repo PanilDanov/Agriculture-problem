@@ -11,7 +11,6 @@ export interface BedAnnotation extends ContentRectangle {
   fontSize: number;
   mode: 'full' | 'compact' | 'id';
   showTask: boolean;
-  showPlus: boolean;
 }
 
 export interface BedContentPlan {
@@ -139,14 +138,14 @@ export function planBedContent(points: LayoutPoint[], options: BedContentOptions
   const text = options.label.trim() || '?';
   const fontSize = 11 / scale, height = 22 / scale;
   const textWidth = Math.max(22, Math.ceil(text.length * 11 + 2 * 11 * .55));
-  const wantsIcon = options.hasTask || options.empty;
+  const wantsIcon = options.hasTask;
   const modes: Array<'compact' | 'id'> = wantsIcon ? ['compact', 'id'] : ['id'];
   const annotations: BedAnnotation[] = [];
   for (const mode of modes) {
     const width = (textWidth + (mode === 'compact' ? 17 : 0)) / scale;
     const rect = findRectangle(points, width, height, margin);
     if (rect) {
-      annotations.push({ ...rect, fontSize, mode, showTask: mode === 'compact' && options.hasTask, showPlus: mode === 'compact' && !options.hasTask && options.empty });
+      annotations.push({ ...rect, fontSize, mode, showTask: mode === 'compact' && options.hasTask });
     }
   }
   if (options.empty) return { annotation: annotations[0] ?? null, crops: [] };

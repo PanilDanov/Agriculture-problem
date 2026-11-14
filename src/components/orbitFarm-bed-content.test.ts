@@ -43,29 +43,29 @@ describe('bed content containment', () => {
 });
 
 describe('responsive bed content planning', () => {
-  it('combines the empty-bed plus with its ID in one fully contained badge', () => {
+  it('uses a plain ID badge for an empty bed', () => {
     const shape = rectangle(100, 100, 130, 80);
     const result = planBedContent(shape, options({ empty: true }));
-    expect(result.annotation).toMatchObject({ mode: 'compact', showPlus: true, showTask: false });
+    expect(result.annotation).toMatchObject({ mode: 'id', showTask: false });
     expect(result.crops).toEqual([]);
     expectFootprintInside(result.annotation!, shape);
   });
 
-  it('gives a task indicator priority over an empty indicator in the same badge', () => {
+  it('keeps a task indicator in the shared badge', () => {
     const shape = rectangle(100, 100, 130, 80);
     const result = planBedContent(shape, options({ hasTask: true, empty: true }));
-    expect(result.annotation).toMatchObject({ mode: 'compact', showTask: true, showPlus: false });
+    expect(result.annotation).toMatchObject({ mode: 'compact', showTask: true });
     expectFootprintInside(result.annotation!, shape);
   });
 
-  it('uses an ID-only fallback instead of crowding a small badge with a plus', () => {
+  it('keeps a small ID badge inside a narrow bed', () => {
     const shape = rectangle(100, 100, 36, 36);
     const result = planBedContent(shape, options({ empty: true }));
-    expect(result.annotation).toMatchObject({ mode: 'id', showPlus: false, showTask: false });
+    expect(result.annotation).toMatchObject({ mode: 'id', showTask: false });
     expectFootprintInside(result.annotation!, shape);
   });
 
-  it('omits the entire badge on a thin H-like bed instead of clipping the plus or its text', () => {
+  it('omits the entire badge on a thin H-like bed instead of clipping its text', () => {
     const result = planBedContent(rectangle(100, 100, 70, 20), options({ empty: true }));
     expect(result.annotation).toBeNull();
     expect(result.crops).toEqual([]);
@@ -148,9 +148,9 @@ describe('responsive bed content planning', () => {
   });
 
   it('reserves enough text space for a wide four-letter ID beside its icon', () => {
-    const result = planBedContent(rectangle(100, 100, 200, 100), options({ empty: true, label: 'WWWW' }));
+    const result = planBedContent(rectangle(100, 100, 200, 100), options({ hasTask: true, label: 'WWWW' }));
     const badge = result.annotation!;
-    expect(badge).toMatchObject({ mode: 'compact', showPlus: true });
+    expect(badge).toMatchObject({ mode: 'compact', showTask: true });
     expect(badge.width).toBeGreaterThanOrEqual(73);
     const textRight = badge.fontSize * .55 + badge.fontSize * 4;
     const iconLeft = badge.width - badge.fontSize * .55 - badge.fontSize * 1.15;

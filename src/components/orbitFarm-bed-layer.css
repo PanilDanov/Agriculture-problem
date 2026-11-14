@@ -1,0 +1,21 @@
+.of-farm-canvas{position:relative;width:100%;aspect-ratio:20/13;isolation:isolate}
+.of-farm-canvas>.of-bed-layer{position:absolute;inset:0;display:block;width:100%;height:100%;overflow:visible}
+.of-bed-callout-leader{stroke:#61734f;stroke-width:1.3;stroke-linecap:round;opacity:.9}
+.of-bed-callout{cursor:pointer;outline:none;-webkit-tap-highlight-color:transparent}
+.of-bed-callout rect{transition:stroke 120ms ease,fill 120ms ease}
+.of-bed-callout text,.of-bed-callout svg{pointer-events:none}
+.of-bed-callout:hover rect,.of-bed-callout:focus-visible rect{stroke:#286b45;stroke-width:2}
+.of-bed-legend{padding:13px 19px 15px;background:#f0f4e1;border-top:1px solid #dce5ce;min-width:0}
+.of-bed-legend-heading{display:flex;align-items:baseline;flex-wrap:wrap;gap:5px 12px;margin-bottom:10px;font-size:12px;line-height:1.6}
+.of-bed-legend-heading strong{font-weight:600;color:#3e5c3d}
+.of-bed-legend-heading>span{font-size:11px;color:#78836d}
+.of-bed-legend-items{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.of-bed-legend-items>button{appearance:none;display:inline-flex;align-items:center;justify-content:center;gap:7px;min-width:44px;min-height:44px;max-width:100%;padding:9px 12px;border:1px solid #b7c7a9;border-radius:4px;background:#fffef7;color:#294d35;font:600 12px/1.4 Inter,sans-serif;box-shadow:2px 2px #dce4d0;cursor:pointer;transition:background 120ms ease,border-color 120ms ease}
+.of-bed-legend-items>button>span{overflow-wrap:anywhere;min-width:0}
+.of-bed-legend-items>button svg{display:block;flex:none}
+.of-bed-legend-items>button:hover{background:#e9f1de;border-color:#779760}
+.of-bed-legend-items>button[aria-pressed=true]{background:#e0edcf;border-color:#286b45;box-shadow:inset 0 0 0 1px #286b45}
+.of-bed-legend-items>.of-bed-legend-needs-care{background:#fbefc6;border-color:#c8aa56}
+.of-bed-legend-items>button:focus-visible{outline:2px solid #286b45;outline-offset:3px}
+@media(max-width:760px){.of-bed-legend{padding:12px}.of-bed-legend-heading{gap:3px 8px}.of-bed-legend-heading>span{font-size:11px}.of-bed-legend-items{gap:7px}.of-bed-legend-items>button{padding:9px 11px}}
+@media(prefers-reduced-motion:reduce){.of-bed-callout rect,.of-bed-legend-items>button{transition:none}}

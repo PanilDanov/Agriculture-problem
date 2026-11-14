@@ -48,16 +48,29 @@ describe('request and response meaning', () => {
     state.inputs.irrigation.volumeM3 = null;
     expect(buildAnalysisRequest(state, REQUEST_ID).localInputs.irrigation.waterBudget).toBeNull();
   });
-  it('rejects incomplete dates, impossible dates, and reversed seasons', () => {
+  it('leaves the planting calendar and planning period to the analysis service', () => {
     const payload = request();
-    expect(() => validateAnalysisRequest({ ...payload, season: { plantingDate: '11-20', endDate: '2027-04-30' } })).toThrow(/date/i);
-    expect(() => validateAnalysisRequest({ ...payload, season: { plantingDate: '2026-02-30', endDate: '2027-04-30' } })).toThrow(/date/i);
-    expect(() => validateAnalysisRequest({ ...payload, season: { plantingDate: '2027-05-01', endDate: '2027-04-30' } })).toThrow(/Season end/);
+    expect(payload).not.toHaveProperty('season');
+    expect(payload).not.toHaveProperty('farmTimeZone');
+    expect(createScenarioState().inputs).not.toHaveProperty('season');
+    expect(payload.localInputs.irrigation.waterBudget).toEqual({ volumeM3: 10000, basis: 'field_inlet' });
+    expect(() => validateAnalysisRequest({ ...payload, season: { plantingDate: '2026-11-20', endDate: '2027-04-30' } })).toThrow();
+    expect(() => validateAnalysisRequest({ ...payload, farmTimeZone: 'Asia/Jerusalem' })).toThrow();
+    const datedBudget = structuredClone(payload);
+    Object.assign(datedBudget.localInputs.irrigation.waterBudget!, { periodStartDate: '2026-11-20', periodEndDate: '2027-04-30' });
+    expect(() => validateAnalysisRequest(datedBudget)).toThrow();
   });
-  it('rejects a water allocation for a different period and contradictory irrigation access', () => {
+  it('validates soil sampling dates as calendar dates without times or offsets', () => {
+    for (const sampledOn of ['11-20', '2026-02-30', '2026-11-20T00:00:00Z']) {
+      const payload = request();
+      payload.localInputs.soil.sampledOn = sampledOn;
+      expect(() => validateAnalysisRequest(payload)).toThrow(/date/i);
+    }
     const payload = request();
-    payload.localInputs.irrigation.waterBudget!.periodEndDate = '2026-12-31';
-    expect(() => validateAnalysisRequest(payload)).toThrow(/allocation period/);
+    payload.localInputs.soil.sampledOn = '2028-02-29';
+    expect(validateAnalysisRequest(payload).localInputs.soil.sampledOn).toBe('2028-02-29');
+  });
+  it('rejects contradictory irrigation access', () => {
     const noAccess = request();
     noAccess.localInputs.irrigation.availability = 'none';
     expect(() => validateAnalysisRequest(noAccess)).toThrow(/No irrigation access/);
@@ -102,8 +115,21 @@ describe('request and response meaning', () => {
     payload.localInputs.currentPlan = [{ seasonIndex: 2, cropId: 'wheat' }, { seasonIndex: 1, cropId: 'chickpea' }];
     expect(makeMockAnalysis(payload, 'normal').rotationPlans[0]).toMatchObject({ sequence: ['chickpea', 'wheat'], baselineOrigin: 'farmer' });
   });
+  it('preserves server planting recommendations as calendar dates and accepts absent recommendations', () => {
+    const response = makeMockAnalysis(request(), 'normal');
+    response.cropOptions[0].recommendedPlantingDate = '2028-02-29';
+    expect(validateAnalysisResult(response).cropOptions[0].recommendedPlantingDate).toBe('2028-02-29');
+    for (const invalidDate of ['2026-02-30', '11-20', '2026-11-20T00:00:00Z', '2026-11-20T23:00:00-07:00']) {
+      response.cropOptions[0].recommendedPlantingDate = invalidDate;
+      expect(() => validateAnalysisResult(response)).toThrow(/date/i);
+    }
+    response.cropOptions[0].recommendedPlantingDate = null;
+    expect(validateAnalysisResult(response).cropOptions[0].recommendedPlantingDate).toBeNull();
+    delete response.cropOptions[0].recommendedPlantingDate;
+    expect(validateAnalysisResult(response).cropOptions[0]).not.toHaveProperty('recommendedPlantingDate');
+  });
   it('accepts documented additional response metadata while still validating used fields', () => {
-    const response = { ...makeMockAnalysis(request(), 'normal'), modelVersion: 'backend-v1', season: request().season, missingFields: [] };
+    const response = { ...makeMockAnalysis(request(), 'normal'), modelVersion: 'backend-v1', planningPeriod: { startDate: '2026-11-20', endDate: '2027-04-30' }, missingFields: [] };
     expect(validateAnalysisResult(response)).toMatchObject({ modelVersion: 'backend-v1' });
     const invalid = structuredClone(response); invalid.signals[0].unit = 'mm';
     expect(() => validateAnalysisResult(invalid)).toThrow(/unit/);
@@ -152,16 +178,16 @@ describe('farm state transitions', () => {
     expect(undone.journal[0].undone).toBe(true);
     expect(farmReducer(undone, { type: 'undo_action', entryId: done.journal[0].id })).toBe(undone);
   });
-  it('marks a task due exactly at its due instant', () => {
+  it('marks a task due on its calendar date', () => {
     const state = createScenarioState('dry-week');
-    expect(getDueTasks({ ...state, demoNow: '2026-11-14T08:59:59.999Z' })).toHaveLength(0);
-    expect(getDueTasks({ ...state, demoNow: '2026-11-14T09:00:00.000Z' })).toHaveLength(1);
+    expect(getDueTasks({ ...state, demoToday: '2026-11-13' })).toHaveLength(0);
+    expect(getDueTasks({ ...state, demoToday: '2026-11-14' })).toHaveLength(1);
   });
-  it('keeps reminders hidden until their snooze time and preserves a skipped action across days', () => {
+  it('keeps reminders hidden until their snooze date and preserves a skipped action across days', () => {
     const state = createScenarioState('dry-week');
     const taskId = getDueTasks(state)[0].id;
     const snoozed = farmReducer(state, { type: 'snooze_task', taskId });
-    expect(getDueTasks({ ...snoozed, demoNow: '2026-11-15T11:59:59.999Z' }).some(t => t.id === taskId)).toBe(false);
+    expect(getDueTasks({ ...snoozed, demoToday: '2026-11-14' }).some(t => t.id === taskId)).toBe(false);
     expect(getDueTasks(farmReducer(snoozed, { type: 'advance_day' })).some(t => t.id === taskId)).toBe(true);
     const skipped = farmReducer(state, { type: 'skip_task', taskId });
     expect(getDueTasks(farmReducer(skipped, { type: 'advance_day' })).some(t => t.id === taskId)).toBe(false);
@@ -217,12 +243,15 @@ describe('farm state transitions', () => {
     const snoozed = farmReducer(state, { type: 'snooze_task', taskId: futureTask.id });
     expect(getDueTasks(farmReducer(snoozed, { type: 'advance_day' })).some(t => t.id === futureTask.id)).toBe(false);
   });
-  it('advances a farm-local day across the autumn daylight-saving transition', () => {
-    const before = '2026-10-24T21:30:00.000Z';
-    expect(getFarmDate(before)).toBe('2026-10-25');
-    const after = addDemoDay(before);
-    expect(getFarmDate(after)).toBe('2026-10-26');
-    expect(new Date(after).getTime() - new Date(before).getTime()).toBe(25 * 3600000);
+  it('advances calendar days without timezone or daylight-saving adjustments', () => {
+    expect(getFarmDate('2026-10-24T23:30:00-07:00')).toBe('2026-10-24');
+    expect(getFarmDate('2026-10-24T00:30:00+14:00')).toBe('2026-10-24');
+    expect(getFarmDate('2026-10-24')).toBe('2026-10-24');
+    expect(addDemoDay('2026-10-24')).toBe('2026-10-25');
+    expect(addDemoDay('2026-10-25')).toBe('2026-10-26');
+    expect(addDemoDay('2028-02-28')).toBe('2028-02-29');
+    expect(addDemoDay('2028-02-29')).toBe('2028-03-01');
+    expect(addDemoDay('2026-12-31')).toBe('2027-01-01');
   });
   it('separates planned, estimated growing, and harvest-ready stages', () => {
     const plot = { id: 'a', slotId: 0, cropId: 'wheat' as const, plantedOn: '2026-11-20' };
@@ -265,7 +294,7 @@ describe('persistent state', () => {
     const initial = createScenarioState('dry-week');
     const completed = farmReducer(initial, { type: 'complete_task', taskId: getDueTasks(initial)[0].id });
     completed.journal[0].previousStatus = 'snoozed';
-    completed.journal[0].previousSnoozedUntilISO = null;
+    completed.journal[0].previousSnoozedUntil = null;
     storage.setItem(STORAGE_KEY, JSON.stringify(completed));
     expect(loadFarm(storage).error).toMatch(/saved farm/);
   });

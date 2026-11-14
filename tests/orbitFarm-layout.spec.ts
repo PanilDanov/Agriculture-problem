@@ -138,7 +138,7 @@ test('draw a seventh L-shaped bed, plant it, and preserve its exact shape after 
   await expect(page).toHaveURL(/#\/farm$/);
   await expect(page.getByTestId('plot-slot-6')).toHaveAccessibleName(/Orchard lane.*Empty/);
   const saved = await readFarm(page);
-  expect(saved.version).toBe(2);
+  expect(saved.version).toBe(3);
   expect(saved.layout.beds).toHaveLength(7);
   expect(saved.layout.beds.find((bed) => bed.slotId === 6)).toMatchObject({ name: 'Orchard lane', points: L_SHAPE });
 
@@ -303,6 +303,9 @@ test('keyboard selection resets a high corner index before editing a shorter pol
   await page.getByRole('button', { name: 'Patchwork', exact: true }).click();
   await page.getByRole('button', { name: 'Select Plot C', exact: true }).click();
   await page.getByRole('button', { name: 'Edit corner 8', exact: true }).click();
+  await expect(page.getByLabel('Corner X', { exact: true })).toHaveValue('20');
+  await expect(page.getByLabel('Corner Y', { exact: true })).toHaveValue('4');
+  await expect(page.locator('.of-layout-pending')).toHaveCount(0);
   await page.getByTestId('layout-bed-3').focus();
   await page.getByTestId('layout-bed-3').press('ArrowLeft');
   await expect(page.getByLabel('Corner X', { exact: true })).toHaveValue('5.5');

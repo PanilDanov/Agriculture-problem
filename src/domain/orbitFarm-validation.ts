@@ -47,12 +47,10 @@ export function validateBoundary(value: unknown): { valid: boolean; errors: stri
   return { valid: true, errors: [], areaHa };
 }
 
-export const seasonSchema = z.object({ plantingDate: dateSchema, endDate: dateSchema }).strict().refine(s => s.endDate >= s.plantingDate, { path: ['endDate'], message: 'Season end must be on or after the planting date.' });
 const prioritySchema = z.enum(['balanced', 'save_water', 'improve_soil']);
 const availabilitySchema = z.enum(['available', 'none', 'unknown']);
 const methodSchema = z.enum(['drip', 'sprinkler', 'surface']).nullable();
 export const farmInputsSchema = z.object({
-  season: seasonSchema,
   soil: z.object({ ph: z.number().finite().min(0).max(14).nullable(), texture: textureSchema.nullable(), source: z.enum(['farmer_reported', 'soil_test', 'synthetic', 'unknown']).optional() }).strict(),
   irrigation: z.object({ availability: availabilitySchema, method: methodSchema, volumeM3: z.number().finite().min(0).nullable() }).strict(),
   previousCropId: cropIdSchema.nullable(),
@@ -65,14 +63,13 @@ export const farmInputsSchema = z.object({
 const irrigationSchema = z.object({
   availability: availabilitySchema,
   method: methodSchema,
-  waterBudget: z.object({ volumeM3: z.number().finite().min(0), periodStartDate: dateSchema, periodEndDate: dateSchema, basis: z.literal('field_inlet') }).strict().nullable(),
+  waterBudget: z.object({ volumeM3: z.number().finite().min(0), basis: z.literal('field_inlet') }).strict().nullable(),
   applicationEfficiency: z.number().finite().gt(0).max(1).nullable(),
 }).strict();
 
 export const analysisRequestSchema = z.object({
   schemaVersion: z.literal('1.0'), requestId: z.string().uuid(), farmId: z.string().min(1), boundaryVersion: z.number().int().min(1),
-  boundary: polygonSchema, regionLabel: z.string(), farmTimeZone: z.string().refine(value => { try { new Intl.DateTimeFormat('en', { timeZone: value }); return true; } catch { return false; } }, 'Use a valid IANA timezone.'),
-  season: seasonSchema,
+  boundary: polygonSchema, regionLabel: z.string(),
   localInputs: z.object({
     soil: z.object({ ph: z.number().finite().min(0).max(14).nullable(), texture: textureSchema.nullable(), source: z.enum(['farmer_reported', 'soil_test', 'synthetic', 'unknown']), sampledOn: dateSchema.nullable() }).strict(),
     irrigation: irrigationSchema, previousCropId: cropIdSchema.nullable(),
@@ -82,7 +79,6 @@ export const analysisRequestSchema = z.object({
   const boundary = validateBoundary(request.boundary);
   if (!boundary.valid) ctx.addIssue({ code: 'custom', path: ['boundary'], message: boundary.errors[0] });
   const irrigation = request.localInputs.irrigation;
-  if (irrigation.waterBudget && (irrigation.waterBudget.periodStartDate !== request.season.plantingDate || irrigation.waterBudget.periodEndDate !== request.season.endDate)) ctx.addIssue({ code: 'custom', path: ['localInputs', 'irrigation', 'waterBudget'], message: 'The water allocation period must match the whole selected season.' });
   if (irrigation.availability === 'none' && ((irrigation.waterBudget?.volumeM3 ?? 0) > 0 || irrigation.method !== null || irrigation.applicationEfficiency !== null)) ctx.addIssue({ code: 'custom', path: ['localInputs', 'irrigation'], message: 'No irrigation access cannot have a positive allocation, method, or efficiency.' });
   if (irrigation.availability === 'unknown' && (irrigation.waterBudget !== null || irrigation.method !== null || irrigation.applicationEfficiency !== null)) ctx.addIssue({ code: 'custom', path: ['localInputs', 'irrigation'], message: 'Unknown irrigation access requires unknown allocation, method, and efficiency.' });
   if (request.localInputs.currentPlan && new Set(request.localInputs.currentPlan.map(p => p.seasonIndex)).size !== 2) ctx.addIssue({ code: 'custom', path: ['localInputs', 'currentPlan'], message: 'The existing plan must contain seasons 1 and 2.' });
@@ -102,7 +98,7 @@ export const environmentalSignalSchema = z.object({
   if (signal.origin === 'nasa' && !/^https?:\/\//.test(signal.source.url)) ctx.addIssue({ code: 'custom', path: ['source', 'url'], message: 'NASA observations require a source URL.' });
 });
 
-const cropOptionSchema = z.object({ cropId: cropIdSchema, name: z.string().min(1), score: z.number().finite().min(0).max(100).nullable(), scoreStatus: z.enum(['complete', 'insufficient_data']), reasons: z.array(z.string().min(1)).min(1) }).passthrough().refine(option => (option.scoreStatus === 'complete') === (option.score !== null), 'An incomplete score must remain null.');
+const cropOptionSchema = z.object({ cropId: cropIdSchema, name: z.string().min(1), score: z.number().finite().min(0).max(100).nullable(), scoreStatus: z.enum(['complete', 'insufficient_data']), reasons: z.array(z.string().min(1)).min(1), recommendedPlantingDate: dateSchema.nullable().optional() }).passthrough().refine(option => (option.scoreStatus === 'complete') === (option.score !== null), 'An incomplete score must remain null.');
 const rotationPlanSchema = z.object({ planId: z.enum(['current', 'save-water', 'improve-soil']), name: z.string().min(1), sequence: z.tuple([cropIdSchema, cropIdSchema]), reasons: z.array(z.string().min(1)).min(1), tradeoffs: z.array(z.string().min(1)).min(1), baselineOrigin: z.enum(['example', 'farmer']) }).passthrough();
 
 export const analysisResultSchema = z.object({

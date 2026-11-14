@@ -13,10 +13,10 @@ export const SCENARIOS: Array<{ id: ScenarioId; name: string; description: strin
   { id: 'empty-farm', name: 'A fresh start', description: 'Draw a boundary, enter field information, and create your first planting.' },
 ];
 
+export const DEMO_TODAY = '2026-11-14';
 export const DEMO_NOW = '2026-11-14T12:00:00.000Z';
 export const DEMO_BOUNDARY: Polygon = { type: 'Polygon', coordinates: [[[34.79, 30.85], [34.79235, 30.85], [34.79235, 30.852], [34.79, 30.852], [34.79, 30.85]]] };
 export const DEFAULT_INPUTS: FarmInputs = {
-  season: { plantingDate: '2026-11-20', endDate: '2027-04-30' },
   soil: { ph: 7.5, texture: 'sandy_loam', source: 'synthetic' },
   irrigation: { availability: 'available', method: 'drip', volumeM3: 10000 },
   previousCropId: 'wheat', priority: 'save_water',
@@ -32,6 +32,7 @@ export function makeMockAnalysis(value: AnalysisRequest, scenario: ScenarioId): 
   const quality = stale ? 'stale' : 'good';
   const source = { dataset: `orbitFarm ${scenario} synthetic fixture`, url: `fixture://orbitFarm/${scenario}`, version: 'demo-v1' };
   const profiles: Partial<Record<CropId, [number, number, number]>> = { wheat: [76, 65, 82], chickpea: [87, 84, 88], sorghum: [92, 96, 80] };
+  const plantingDates: Partial<Record<CropId, string>> = { wheat: '2026-11-20', chickpea: '2026-12-01', sorghum: '2027-04-01' };
   const ph = request.localInputs.soil.ph;
   const soilPh = ph === null ? 0 : Math.max(0, 100 - Math.abs(ph - 6.8) * 18);
   const waterKnownZero = request.localInputs.irrigation.waterBudget?.volumeM3 === 0;
@@ -41,7 +42,7 @@ export function makeMockAnalysis(value: AnalysisRequest, scenario: ScenarioId): 
     const [temperature, water, soilTexture] = profile;
     const score = complete ? Math.round(.35 * temperature + .25 * soilPh + .30 * (waterKnownZero ? 0 : water) + .10 * soilTexture) : null;
     return [{
-      cropId: crop.id, name: crop.name, score, scoreStatus: score === null ? 'insufficient_data' as const : 'complete' as const,
+      cropId: crop.id, name: crop.name, recommendedPlantingDate: complete ? plantingDates[crop.id] ?? null : null, score, scoreStatus: score === null ? 'insufficient_data' as const : 'complete' as const,
       reasons: score === null
         ? [stale ? 'The regional observation is outdated. A fresh observation is needed before scoring.' : missing ? 'Regional soil moisture is missing. Missing data is not zero moisture.' : 'Add the missing soil or irrigation information to complete the four-factor comparison.', 'This is a synthetic example, not an agronomic recommendation.']
         : [crop.id === 'sorghum' ? 'Lower water demand in this synthetic comparison.' : crop.id === 'chickpea' ? 'Adds a legume to the example rotation.' : 'A familiar baseline for comparing the next season.', 'Based on simulated regional conditions and the entered field information.'],
@@ -63,7 +64,7 @@ export function makeMockAnalysis(value: AnalysisRequest, scenario: ScenarioId): 
       { planId: 'improve-soil', name: 'Improve soil', sequence: ['chickpea', 'wheat'], reasons: ['Include a legume in the illustrative sequence.'], tradeoffs: ['More crop diversity than the example baseline.', 'Soil nutrient decisions still need a soil test.'], baselineOrigin: 'example' },
     ],
     assumptions: [
-      'All environmental observations and crop profiles in this analysis are synthetic demo fixtures.',
+      'All environmental observations, crop profiles, and planting dates in this analysis are synthetic demo fixtures.',
       'Illustrative scoring weights: temperature 35%, soil pH 25%, water 30%, and soil texture 10%. The score is not a probability.',
       ...(request.localInputs.irrigation.method === 'drip' && request.localInputs.irrigation.applicationEfficiency === null ? ['The demo assumes 0.90 application efficiency for drip irrigation. This is an explicit demo assumption, not a field measurement.'] : []),
     ],

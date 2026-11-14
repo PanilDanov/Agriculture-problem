@@ -18,8 +18,8 @@ interface SceneTask {
   plotId: string;
   title: string;
   status: 'open' | 'done' | 'skipped' | 'snoozed';
-  dueAtISO: string;
-  snoozedUntilISO: string | null;
+  dueOn: string;
+  snoozedUntil: string | null;
 }
 
 interface FarmSceneProps {
@@ -29,7 +29,7 @@ interface FarmSceneProps {
   onSelectSlot: (slotId: number) => void;
   isScanning?: boolean;
   tasks?: SceneTask[];
-  demoNow: string;
+  demoToday: string;
 }
 
 export { CropSprite } from './orbitFarm-crop-sprite';
@@ -125,10 +125,10 @@ function WorldBackground({ scanning }: { scanning: boolean }) {
   );
 }
 
-function isTaskDue(task: SceneTask, now: number) {
+function isTaskDue(task: SceneTask, today: string) {
   if (task.status === 'done' || task.status === 'skipped') return false;
-  if (task.status === 'snoozed' && task.snoozedUntilISO && Date.parse(task.snoozedUntilISO) > now) return false;
-  return Date.parse(task.dueAtISO) <= now;
+  if (task.status === 'snoozed' && task.snoozedUntil && task.snoozedUntil > today) return false;
+  return task.dueOn <= today;
 }
 
 function insideBed(point: LayoutPoint, points: LayoutPoint[]) {
@@ -160,7 +160,7 @@ export function getSchematicLabelPosition(points: LayoutPoint[]) {
   return { point: best, clearance, minX, maxX, minY, maxY };
 }
 
-export function FarmScene({ layout, plots, selectedSlotId, onSelectSlot, isScanning = false, tasks = [], demoNow }: FarmSceneProps) {
+export function FarmScene({ layout, plots, selectedSlotId, onSelectSlot, isScanning = false, tasks = [], demoToday }: FarmSceneProps) {
   const scene = useRef<HTMLDivElement>(null);
   const [renderedWidth, setRenderedWidth] = useState(800);
   useLayoutEffect(() => {
@@ -175,11 +175,11 @@ export function FarmScene({ layout, plots, selectedSlotId, onSelectSlot, isScann
   }, []);
   const beds = useMemo(() => layout.beds.map(bed => {
     const plot = plots.find(item => item.slotId === bed.slotId);
-    const dueTask = plot && tasks.find(task => task.plotId === plot.id && isTaskDue(task, Date.parse(demoNow)));
+    const dueTask = plot && tasks.find(task => task.plotId === plot.id && isTaskDue(task, demoToday));
     const worldPoints = bed.points.map(p => ({ x: 160 + p.x / layout.width * 534, y: 194 + p.y / layout.height * 244 }));
     const shortName = getPlotLabel(bed.slotId).replace('Plot ', '');
     return { slotId: bed.slotId, name: bed.name, points: worldPoints, label: shortName, cropId: plot?.cropId ?? null, taskTitle: dueTask?.title ?? null };
-  }), [layout, plots, tasks, demoNow, renderedWidth]);
+  }), [layout, plots, tasks, demoToday, renderedWidth]);
   return (
     <div ref={scene} className={`of-farm-scene${isScanning ? ' of-farm-scene-scanning' : ''}`} data-testid="farm-scene">
       <FarmBedLayer

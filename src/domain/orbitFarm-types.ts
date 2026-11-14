@@ -15,7 +15,6 @@ export interface Crop {
 }
 
 export interface FarmInputs {
-  season: { plantingDate: string; endDate: string };
   soil: { ph: number | null; texture: string | null; source?: 'farmer_reported' | 'soil_test' | 'synthetic' | 'unknown' };
   irrigation: {
     availability: 'available' | 'none' | 'unknown';
@@ -33,14 +32,12 @@ export interface AnalysisRequest {
   boundaryVersion: number;
   boundary: Polygon;
   regionLabel: string;
-  farmTimeZone: string;
-  season: FarmInputs['season'];
   localInputs: {
     soil: { ph: number | null; texture: string | null; source: 'farmer_reported' | 'soil_test' | 'synthetic' | 'unknown'; sampledOn: string | null };
     irrigation: {
       availability: FarmInputs['irrigation']['availability'];
       method: FarmInputs['irrigation']['method'];
-      waterBudget: { volumeM3: number; periodStartDate: string; periodEndDate: string; basis: 'field_inlet' } | null;
+      waterBudget: { volumeM3: number; basis: 'field_inlet' } | null;
       applicationEfficiency: number | null;
     };
     previousCropId: CropId | null;
@@ -68,6 +65,7 @@ export interface CropOption {
   score: number | null;
   scoreStatus: 'complete' | 'insufficient_data';
   reasons: string[];
+  recommendedPlantingDate?: string | null;
 }
 
 export interface RotationPlan {
@@ -125,9 +123,9 @@ export interface CareTask {
   kind: 'water' | 'soil';
   title: string;
   reason: string;
-  dueAtISO: string;
+  dueOn: string;
   status: 'open' | 'done' | 'skipped' | 'snoozed';
-  snoozedUntilISO: string | null;
+  snoozedUntil: string | null;
 }
 
 export interface JournalEntry {
@@ -135,14 +133,14 @@ export interface JournalEntry {
   taskId: string;
   plotId: string;
   action: 'watered' | 'done' | 'skipped' | 'snoozed';
-  createdAtISO: string;
+  createdOn: string;
   undone: boolean;
   previousStatus?: CareTask['status'];
-  previousSnoozedUntilISO?: string | null;
+  previousSnoozedUntil?: string | null;
 }
 
 export interface FarmState {
-  version: 2;
+  version: 3;
   farmId: string;
   name: string;
   boundary: Polygon | null;
@@ -153,7 +151,7 @@ export interface FarmState {
   plots: Plot[];
   tasks: CareTask[];
   journal: JournalEntry[];
-  demoNow: string;
+  demoToday: string;
   scenarioId: ScenarioId;
   selectedPlanId: string | null;
   pendingRequestId: string | null;

@@ -14,11 +14,14 @@ Frontend work continues on the `frontend` branch. All project content, code, com
 - [Local development and test benches](docs/orbitFarm-development.md)
 - [Vercel deployment and updates](docs/orbitFarm-deployment.md)
 - [Proposed analysis request contract](docs/orbitFarm-analysis-contract.md)
+- [Backend request guide: current fields, allowed values, and examples](docs/orbitFarm-backend-request-guide.md)
 - [Example analysis request](contracts/orbitFarm-analysis-request.example.json)
 - [Brandbook](brand/orbitFarm-brandbook.md)
 - [Crop sprite pack · 10 crops, 4 images each](brand/sprites/crops-v1/README.md)
 - [Plantable crop catalog · IDs and demo behavior](docs/orbitFarm-crop-catalog.md)
 - [Editable Figma design](https://www.figma.com/design/ZD6mSeYogRklG9vO6eMUCJ)
+
+The analysis request sends no planting date, season end, or timezone. The backend chooses recommended crop planting dates and the planning horizon. Planting, care, reminder, and journal dates use `YYYY-MM-DD` without timezone conversion.
 
 Development now prioritizes the working website and reproducible test benches. PWA installation and home-screen behavior are deferred. Mock data remains visibly labeled; the local backend and authentic NASA data are separate integrations.
 

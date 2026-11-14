@@ -1,4 +1,6 @@
 import { expect, test as base, type Page } from '@playwright/test';
+import { makeMockAnalysis } from '../src/domain/orbitFarm-fixtures';
+import type { AnalysisRequest } from '../src/domain/orbitFarm-types';
 
 const test = base.extend<{ runtimeErrors: string[] }>({
   runtimeErrors: [async ({ page }, use) => {
@@ -32,8 +34,8 @@ test('create a farm, analyze, plant, log care, and preserve it after reload', as
   await page.getByRole('button', { name: 'Create farm', exact: true }).click();
   await page.getByLabel('Farm name', { exact: true }).fill('Sunrise Test Farm');
   await page.getByRole('button', { name: 'Use demo boundary', exact: true }).click();
-  await page.getByLabel('Planting date', { exact: true }).fill('2026-11-01');
-  await page.getByLabel('Season end', { exact: true }).fill('2027-04-30');
+  await expect(page.getByLabel('Planting date', { exact: true })).toHaveCount(0);
+  await expect(page.getByLabel('Season end', { exact: true })).toHaveCount(0);
   await page.getByLabel('Soil pH', { exact: true }).fill('7.5');
   await page.getByRole('combobox', { name: 'Soil texture', exact: true }).click();
   await page.getByRole('option', { name: 'sandy loam', exact: true }).click();
@@ -66,7 +68,7 @@ test('create a farm, analyze, plant, log care, and preserve it after reload', as
   await expect(page.getByRole('status').filter({ hasText: 'Irrigation logged' })
     .getByRole('button', { name: 'Undo', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Advance 1 day', exact: true }).click();
-  const clockNotice = page.getByRole('status').filter({ hasText: 'Demo time advanced by one day.' });
+  const clockNotice = page.getByRole('status').filter({ hasText: 'Demo date advanced by one day.' });
   await expect(clockNotice).toBeVisible();
   await expect(clockNotice.getByRole('button', { name: 'Undo', exact: true })).toHaveCount(0);
   await navigate(page, 'Journal');
@@ -123,23 +125,66 @@ test('an explicitly selected API and its URL survive reload without a mock fallb
     && candidate.url() === `${apiBaseUrl}/v1/analysis`);
   await page.getByRole('button', { name: 'Analyze field', exact: true }).click();
   const sent = await request;
-  expect(sent.postDataJSON()).toMatchObject({ schemaVersion: '1.0', boundaryVersion: 1 });
+  const payload = sent.postDataJSON();
+  expect(payload).toMatchObject({ schemaVersion: '1.0', boundaryVersion: 1 });
+  expect(payload).not.toHaveProperty('season');
+  expect(payload).not.toHaveProperty('farmTimeZone');
+  expect(payload.localInputs.irrigation.waterBudget).toEqual({ volumeM3: 10000, basis: 'field_inlet' });
   await expect(page.getByRole('alert')).toContainText('Analysis unavailable');
   await expect(page.getByRole('article', { name: 'Save water plan' })).toHaveCount(0);
 });
 
-test('a reversed season is rejected without losing the form', async ({ page }) => {
+test('a new farm can be analyzed without entering a planting calendar', async ({ page }) => {
   await visit(page, 'farm');
   await page.getByRole('button', { name: 'Create farm', exact: true }).click();
-  await page.getByLabel('Farm name', { exact: true }).fill('Invalid Date Farm');
+  await page.getByLabel('Farm name', { exact: true }).fill('Server Calendar Farm');
   await page.getByRole('button', { name: 'Use demo boundary', exact: true }).click();
-  await page.getByLabel('Planting date', { exact: true }).fill('2027-05-01');
-  await page.getByLabel('Season end', { exact: true }).fill('2027-04-30');
+  await expect(page.getByLabel('Planting date', { exact: true })).toHaveCount(0);
+  await expect(page.getByLabel('Season end', { exact: true })).toHaveCount(0);
+  await expect(page.locator('input[type="date"]')).toHaveCount(0);
   await page.getByRole('button', { name: 'Analyze my farm', exact: true }).click();
-  await expect(page.getByRole('alert')).toContainText(/season end|end date/i);
-  await expect(page.getByLabel('Farm name', { exact: true })).toHaveValue('Invalid Date Farm');
-  await expect(page).toHaveURL(/#\/setup$/);
+  await expect(page).toHaveURL(/#\/plans$/);
+  await expect(page.getByRole('article', { name: 'Save water plan' })).toBeVisible();
+  const farm = await page.evaluate(() => JSON.parse(localStorage.getItem('orbitFarm.farm.v1')!));
+  expect(farm.name).toBe('Server Calendar Farm');
+  expect(farm.inputs).not.toHaveProperty('season');
 });
+
+for (const timezoneId of ['Pacific/Honolulu', 'Pacific/Kiritimati']) {
+  test.describe(`server planting dates in ${timezoneId}`, () => {
+    test.use({ timezoneId });
+    test('preserves the recommended day in results, planting inputs, and saved plantings', async ({ page, baseURL }) => {
+      const apiBaseUrl = `${baseURL}/calendar-analysis`;
+      await page.route('**/calendar-analysis/v1/analysis', async (route) => {
+        const response = makeMockAnalysis(route.request().postDataJSON() as AnalysisRequest, 'normal');
+        response.cropOptions.find(option => option.cropId === 'wheat')!.recommendedPlantingDate = '2028-02-29';
+        response.cropOptions.find(option => option.cropId === 'chickpea')!.recommendedPlantingDate = '2028-03-01';
+        await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(response) });
+      });
+      await visit(page, 'lab');
+      await page.getByLabel('API base URL', { exact: true }).fill(apiBaseUrl);
+      await page.getByRole('button', { name: 'Use API', exact: true }).click();
+      await navigate(page, 'Your farm');
+      await page.getByRole('button', { name: 'Analyze field', exact: true }).click();
+      await expect(page.locator('.crop-option').filter({ has: page.getByRole('heading', { name: 'Wheat', exact: true }) }))
+        .toContainText('Recommended planting: Feb 29, 2028');
+      await page.getByRole('article', { name: 'Save water plan' })
+        .getByRole('button', { name: 'Use this plan', exact: true }).click();
+      await page.getByTestId('plot-slot-3').click();
+      await page.getByRole('combobox', { name: 'Crop', exact: true }).click();
+      await page.getByRole('option', { name: 'Wheat', exact: true }).click();
+      await expect(page.getByLabel('Planting date', { exact: true })).toHaveValue('2028-02-29');
+      await page.getByRole('combobox', { name: 'Crop', exact: true }).click();
+      await page.getByRole('option', { name: 'Chickpea', exact: true }).click();
+      await expect(page.getByLabel('Planting date', { exact: true })).toHaveValue('2028-03-01');
+      await page.getByRole('button', { name: 'Plant crop', exact: true }).click();
+      await expect(page.locator('.plot-summary')).toContainText('Mar 1, 2028');
+      await page.reload();
+      const farm = await page.evaluate(() => JSON.parse(localStorage.getItem('orbitFarm.farm.v1')!));
+      expect(farm.plots.find((plot: { slotId: number }) => plot.slotId === 3).plantedOn).toBe('2028-03-01');
+    });
+  });
+}
 
 test('manual boundary entry rejects a self-crossing field even without map tiles', async ({ page }) => {
   await visit(page, 'farm');

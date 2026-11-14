@@ -3,7 +3,7 @@ import {
   STORAGE_KEY, createDefaultLayout, createScenarioState, farmReducer, getBedName, getDueTasks,
   getPlotLabel, loadFarm, polygonsOverlap, saveFarm, validateBedPolygon, validateFarmLayout,
 } from './orbitFarm-domain';
-import type { FarmLayout, LayoutPoint, StorageLike } from './orbitFarm-types';
+import type { FarmLayout, FarmState, LayoutPoint, StorageLike } from './orbitFarm-types';
 
 const points = (values: number[][]): LayoutPoint[] => values.map(([x, y]) => ({ x, y }));
 const rectangle = (x: number, y: number, width: number, height: number) => points([[x, y], [x + width, y], [x + width, y + height], [x, y + height]]);
@@ -12,6 +12,24 @@ const memoryStorage = (): StorageLike => {
   const values = new Map<string, string>();
   return { getItem: key => values.get(key) ?? null, setItem: (key, value) => { values.set(key, value); } };
 };
+
+function legacyFarm(state: FarmState, version: 1 | 2) {
+  const { layout, demoToday, tasks, journal, ...fields } = state;
+  return {
+    ...fields, version,
+    ...(version === 2 ? { layout } : {}),
+    inputs: { ...state.inputs, season: { plantingDate: '2026-11-20', endDate: '2027-04-30' } },
+    demoNow: `${demoToday}T23:30:00-07:00`,
+    tasks: tasks.map(({ dueOn, snoozedUntil, ...task }) => ({
+      ...task, dueAtISO: `${dueOn}T09:00:00.000Z`,
+      snoozedUntilISO: snoozedUntil === null ? null : `${snoozedUntil}T23:30:00-07:00`,
+    })),
+    journal: journal.map(({ createdOn, previousSnoozedUntil, ...entry }) => ({
+      ...entry, createdAtISO: `${createdOn}T23:30:00-07:00`,
+      ...(previousSnoozedUntil === undefined ? {} : { previousSnoozedUntilISO: previousSnoozedUntil === null ? null : `${previousSnoozedUntil}T23:30:00-07:00` }),
+    })),
+  };
+}
 
 describe('custom bed geometry', () => {
   it('keeps the default six-bed layout valid while allowing triangles and concave beds', () => {
@@ -140,17 +158,43 @@ describe('layout persistence and legacy farm migration', () => {
     const storage = memoryStorage();
     const original = createScenarioState();
     const completed = farmReducer(original, { type: 'complete_task', taskId: getDueTasks(original)[0].id });
-    const { layout: _layout, ...previous } = completed;
-    const legacy = { ...previous, version: 1 };
+    const legacy = legacyFarm(completed, 1);
     const saved = JSON.stringify(legacy);
     storage.setItem(STORAGE_KEY, saved);
     const result = loadFarm(storage);
     expect(result.error).toBeNull();
-    expect(result.state).toEqual({ ...completed, version: 2, layout: createDefaultLayout() });
+    expect(result.state).toEqual({ ...completed, version: 3, layout: createDefaultLayout() });
     expect(storage.getItem(STORAGE_KEY)).toBe(saved);
     expect(saveFarm(result.state, storage)).toBeNull();
-    expect(JSON.parse(storage.getItem(STORAGE_KEY)!)).toMatchObject({ version: 2, layout: createDefaultLayout() });
+    expect(JSON.parse(storage.getItem(STORAGE_KEY)!)).toMatchObject({ version: 3, layout: createDefaultLayout() });
     expect(loadFarm(storage).state.journal).toEqual(completed.journal);
+  });
+  it('migrates version-two dates without timezone shifts and preserves custom layout and Undo history', () => {
+    const storage = memoryStorage();
+    let current = createScenarioState();
+    const taskId = getDueTasks(current)[0].id;
+    current = farmReducer(current, { type: 'snooze_task', taskId });
+    current = farmReducer(current, { type: 'advance_day' });
+    current = farmReducer(current, { type: 'complete_task', taskId });
+    current.layout.beds[0].name = 'Preserved north bed';
+    const saved = JSON.stringify(legacyFarm(current, 2));
+    storage.setItem(STORAGE_KEY, saved);
+    const loaded = loadFarm(storage);
+    expect(loaded.error).toBeNull();
+    expect(loaded.state).toEqual(current);
+    expect(loaded.state.demoToday).toBe('2026-11-15');
+    expect(loaded.state.journal[0].createdOn).toBe('2026-11-14');
+    expect(loaded.state.inputs).not.toHaveProperty('season');
+    expect(storage.getItem(STORAGE_KEY)).toBe(saved);
+    const undone = farmReducer(loaded.state, { type: 'undo_action', entryId: loaded.state.journal[1].id });
+    expect(undone.tasks.find(task => task.id === taskId)).toMatchObject({ status: 'snoozed', snoozedUntil: '2026-11-15' });
+    expect(getDueTasks(undone).some(task => task.id === taskId)).toBe(true);
+    expect(saveFarm(undone, storage)).toBeNull();
+    const persisted = JSON.parse(storage.getItem(STORAGE_KEY)!);
+    expect(persisted.version).toBe(3);
+    expect(persisted).not.toHaveProperty('demoNow');
+    expect(persisted.tasks[0]).not.toHaveProperty('dueAtISO');
+    expect(loadFarm(storage).state).toEqual(undone);
   });
   it('round-trips a custom polygon, name, and nonlegacy bed identifier', () => {
     const storage = memoryStorage();
@@ -166,8 +210,8 @@ describe('layout persistence and legacy farm migration', () => {
   });
   it('preserves damaged legacy data rather than migrating an unsupported planting slot', () => {
     const storage = memoryStorage();
-    const { layout: _layout, ...original } = createScenarioState();
-    const invalid = { ...original, version: 1, plots: [{ ...original.plots[0], slotId: 6 }] };
+    const original = legacyFarm(createScenarioState(), 1);
+    const invalid = { ...original, plots: [{ ...original.plots[0], slotId: 6 }] };
     const saved = JSON.stringify(invalid);
     storage.setItem(STORAGE_KEY, saved);
     expect(loadFarm(storage).error).toMatch(/saved farm/);

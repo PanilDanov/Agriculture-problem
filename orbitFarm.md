@@ -8,7 +8,7 @@ A web app and installable PWA that turns a farmer's boundary, Earth observations
 
 - [Product specification](docs/orbitFarm-product.md): the user journey, MVP scope, screens, data boundaries, and English interface copy.
 - [Four delivery sprints](docs/orbitFarm-delivery-plan.md): a 24-hour plan with visible results, reproducible test benches, the analytics contract, and release checks.
-- [Proposed analysis contract](docs/orbitFarm-analysis-contract.md) and [request example](contracts/orbitFarm-analysis-request.example.json): frontend inputs, backend responsibilities, periods, units, and the initial scoring policy.
+- [Proposed analysis contract](docs/orbitFarm-analysis-contract.md) and [request example](contracts/orbitFarm-analysis-request.example.json): frontend inputs, server-selected planting dates and planning horizon, units, and the initial scoring policy.
 - [Brandbook](brand/orbitFarm-brandbook.md) and [design tokens](brand/orbitFarm-tokens.json): the original cozy 16-bit pixel-art direction and implementation foundations.
 - [Figma brand and product design](https://www.figma.com/design/ZD6mSeYogRklG9vO6eMUCJ): editable brand foundations, components, and five product screens.
 
@@ -19,6 +19,8 @@ A web app and installable PWA that turns a farmer's boundary, Earth observations
 **24-hour release:** one farm, one demo region, 10 plantable crops with three synthetic recommendation profiles, a current two-season plan and two rotation alternatives, a schematic planting layout, and a care journal. All application copy, code, comments, and project files use English. React + TypeScript + Vite, Vercel, and interchangeable mock/API providers.
 
 **Visual direction:** original cozy 16-bit farm graphics, pixel headings, crisp game windows, and readable body text. Stardew Valley is a mood reference; its assets are not part of this project.
+
+**Dates:** planting date and season end are absent from field setup and the analysis request. The backend chooses recommended planting dates and the planning horizon. Business dates use `YYYY-MM-DD` without time or timezone conversion; recorded actual planting dates remain separate from recommendations.
 
 **Data:** start with explicitly labeled fixtures. By the final demonstration, at least one authentic NASA source from the challenge Resources must pass through the same contract into the interface. A cached authentic snapshot supports a reliable presentation. Every synthetic and real signal remains individually identifiable.
 

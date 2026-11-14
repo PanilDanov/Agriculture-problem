@@ -25,7 +25,7 @@ The development site uses `http://127.0.0.1:5173`. The application uses hash rou
 
 ## Test benches
 
-Test benches use the same interface, reducer, validation, and providers as the application. Loading a scenario replaces the saved demo state only after the application's reset confirmation. Each scenario has a fixed clock and visible `Demo data` labeling.
+Test benches use the same interface, reducer, validation, and providers as the application. Loading a scenario replaces the saved demo state only after the application's reset confirmation. Each scenario has a fixed calendar date and visible `Demo data` labeling.
 
 | Scenario | What to inspect |
 | --- | --- |
@@ -36,7 +36,9 @@ Test benches use the same interface, reducer, validation, and providers as the a
 | `api-unavailable` | Analysis stays an error and offers retry; no silent successful mock fallback. |
 | `empty-farm` | Boundary entry, input validation, and the complete creation journey. |
 
-The demo clock can advance one day. It changes task scheduling, not observation timestamps or measured soil moisture. Completing a task changes the journal and task status, not satellite measurements.
+The demo date can advance one calendar day. Business dates use `YYYY-MM-DD`: `demoToday`, task `dueOn`/`snoozedUntil`, journal `createdOn`/`previousSnoozedUntil`, and plot `plantedOn`. Date comparison, growth stages, and next-day reminders use calendar dates without a farm timezone or daylight-saving rules. Technical `generatedAt`, `observedAt`, and `fetchedAt` metadata remain ISO timestamps. Advancing the day leaves observations and measured soil moisture unchanged. Completing a task changes the journal and task status, not satellite measurements.
+
+Field setup sends no planting date, season end, or timezone. The backend chooses planting recommendations and the planning horizon. A crop option can return optional `recommendedPlantingDate` as a calendar date; the actual planting record remains a separate editable date.
 
 ## Custom bed layouts
 
@@ -46,7 +48,7 @@ Shared edges are allowed. Self-crossing, overlapping, zero-area, and out-of-boun
 
 Moving or reshaping a bed preserves its planting, care status, and journal. Removing a planted bed asks for confirmation when saving; associated current planting/tasks are removed, while journal history remains. Cancel discards the draft. Stable bed identifiers keep crops attached to the same bed even when its position or name changes.
 
-Saved farms use state version 2. Existing version-1 farms are migrated to the classic layout while retaining plantings, tasks, journal, and analysis. The existing storage key is retained for this migration. Damaged saved data remains protected by the recovery flow.
+Saved farms use state version 3. Existing version-1 and version-2 farms are migrated to date-only business fields while retaining plantings, tasks, journal, and analysis. Version-1 farms also receive the classic layout. Removed setup-season inputs are discarded; legacy business timestamps retain their written calendar date without timezone conversion. The existing storage key is retained for this migration. Damaged saved data remains protected by the recovery flow.
 
 ## Verification commands
 
@@ -59,7 +61,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-`npm run build` runs the English-content check, type checks, and domain tests before producing `dist/`. `npm run verify` runs the build and Playwright end-to-end checks. Playwright starts the production preview at `http://127.0.0.1:4173`; it does not test the development server. Its browser tests create a farm through the UI, analyze it, choose a plan, plant a crop, record care, and verify persistence after reload and field editing. Separate cases cover invalid dates, manual invalid boundaries, unavailable analysis, API-provider persistence, task-specific Undo notices, runtime errors, and layouts at 390 and 320 px.
+`npm run build` runs the English-content check, type checks, and domain tests before producing `dist/`. `npm run verify` runs the build and Playwright end-to-end checks. Playwright starts the production preview at `http://127.0.0.1:4173`; it does not test the development server. Its browser tests create a farm through the UI, analyze it, choose a plan, plant a crop, record care, and verify persistence after reload and field editing. Separate cases cover date-only scheduling, removed setup-date fields, manual invalid boundaries, unavailable analysis, API-provider persistence, task-specific Undo notices, runtime errors, and layouts at 390 and 320 px.
 
 For local checks against an already installed Google Chrome, set `ORBITFARM_BROWSER_CHANNEL=chrome` when running `npm run test:e2e`. CI uses the Playwright-managed Chromium installed by the workflow.
 

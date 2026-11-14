@@ -16,11 +16,6 @@
     ]
   },
   "regionLabel": "Negev, Israel",
-  "farmTimeZone": "Asia/Jerusalem",
-  "season": {
-    "plantingDate": "2026-11-20",
-    "endDate": "2027-04-30"
-  },
   "localInputs": {
     "soil": {
       "ph": 7.5,
@@ -33,8 +28,6 @@
       "method": "drip",
       "waterBudget": {
         "volumeM3": 10000,
-        "periodStartDate": "2026-11-20",
-        "periodEndDate": "2027-04-30",
         "basis": "field_inlet"
       },
       "applicationEfficiency": null

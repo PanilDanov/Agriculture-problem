@@ -170,7 +170,7 @@ export function BoundaryMap({ boundary, onChange, error }: BoundaryMapProps) {
 
   return (
     <div className="of-boundary-editor">
-      <div className="of-map-instruction"><span className="of-map-instruction-dot" /><span>{closed ? 'Boundary closed. Confirm your field to continue.' : 'Place each corner, then click the first corner or Finish boundary to close.'}</span></div>
+      <div className="of-map-instruction"><span className="of-map-instruction-dot" /><span>{closed ? 'Boundary closed' : 'Place corners, then close the boundary.'}</span></div>
       <div ref={containerRef} className="of-boundary-map" aria-label="Field boundary map" data-testid="boundary-map" />
       {tilesUnavailable && <p className="of-map-tile-note" role="status">Map tiles unavailable. Boundary tools still work.</p>}
       <div className="of-map-toolbar">
@@ -181,7 +181,7 @@ export function BoundaryMap({ boundary, onChange, error }: BoundaryMapProps) {
           <button type="button" className="of-map-button of-map-button-primary" onClick={finish} disabled={points.length < 3 || closed}>Finish boundary</button>
         </div>
       </div>
-      <div className="of-map-shortcut"><span>Just exploring?</span><button type="button" onClick={() => { const demo = structuredClone(DEMO_BOUNDARY); replacePoints(pointsFromBoundary(demo)); closedRef.current = true; setClosed(true); setPointError(null); emitBoundary(demo); }} className="of-map-text-button">Use demo boundary</button></div>
+      <div className="of-map-shortcut"><button type="button" onClick={() => { const demo = structuredClone(DEMO_BOUNDARY); replacePoints(pointsFromBoundary(demo)); closedRef.current = true; setClosed(true); setPointError(null); emitBoundary(demo); }} className="of-map-text-button">Use demo boundary</button></div>
       <details className="of-coordinate-entry">
         <summary>Enter coordinates instead</summary>
         <div className="of-coordinate-fields">
@@ -189,7 +189,6 @@ export function BoundaryMap({ boundary, onChange, error }: BoundaryMapProps) {
           <label htmlFor={`${fieldId}-lon`}>Longitude<input id={`${fieldId}-lon`} type="number" step="any" min="-180" max="180" value={longitude} onChange={(event) => setLongitude(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); addPoint(); } }} /></label>
           <button type="button" className="of-map-button" onClick={addPoint} disabled={closed}>Add point</button>
         </div>
-        <p>Coordinates are stored as longitude, latitude. You can also use these controls with a keyboard.</p>
       </details>
       {(pointError || error) && <p className="of-boundary-error" role="alert">{pointError || error}</p>}
     </div>

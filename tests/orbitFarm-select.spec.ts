@@ -3,6 +3,8 @@ import { expect, test, type Page } from '@playwright/test';
 test.beforeEach(async ({ page }) => {
   await page.route(/^https:\/\/(?:[abc]\.)?tile\.openstreetmap\.org\//, (route) => route.abort());
   await page.goto('/#/setup');
+  // Wait for the lazy map to occupy its final space before measuring or dragging menus.
+  await expect(page.getByTestId('boundary-map')).toBeVisible();
 });
 
 async function expectMenuInViewport(page: Page) {
@@ -47,7 +49,7 @@ test('custom selects support keyboard navigation, typeahead, selection, and dism
   await expect(page.getByRole('combobox', { name: 'Irrigation access', exact: true })).toBeFocused();
 
   await texture.click();
-  await page.getByRole('heading', { name: 'The field notes', exact: true }).click();
+  await page.getByRole('heading', { name: 'Field details', exact: true }).click();
   await expect(texture).toHaveAttribute('aria-expanded', 'false');
   await texture.press('s');
   await texture.press('s');
@@ -109,20 +111,20 @@ test('@mobile custom menus stay inside narrow viewports and remain usable after 
   await page.getByRole('option', { name: 'Available', exact: true }).tap();
   await expect(page.getByRole('combobox', { name: 'Irrigation method', exact: true })).toBeVisible();
 
-  // Keep the anchor near the top to exercise resize without offscreen dismissal.
+  // Use an earlier field so the shorter form can keep the anchor visible after resize.
   await page.setViewportSize({ width: 390, height: 844 });
-  await irrigation.evaluate((element) => window.scrollBy(0, element.getBoundingClientRect().top - 100));
-  await irrigation.tap();
+  await texture.evaluate((element) => window.scrollBy(0, element.getBoundingClientRect().top - 100));
+  await texture.tap();
   await page.setViewportSize({ width: 320, height: 568 });
   await expect(async () => {
-    const bounds = (await irrigation.boundingBox())!;
+    const bounds = (await texture.boundingBox())!;
     expect(bounds.y).toBeGreaterThanOrEqual(0);
     expect(bounds.y + bounds.height).toBeLessThanOrEqual(568);
-    await expect(irrigation).toHaveAttribute('aria-expanded', 'true');
+    await expect(texture).toHaveAttribute('aria-expanded', 'true');
     await expectMenuInViewport(page);
   }).toPass({ timeout: 2000 });
-  await page.getByRole('option', { name: 'No irrigation', exact: true }).tap();
-  await expect(irrigation).toHaveText('No irrigation');
+  await page.getByRole('option', { name: 'clay', exact: true }).tap();
+  await expect(texture).toHaveText('clay');
   const widths = await page.evaluate(() => ({ viewport: innerWidth, content: document.documentElement.scrollWidth }));
   expect(widths.content).toBeLessThanOrEqual(widths.viewport);
 });

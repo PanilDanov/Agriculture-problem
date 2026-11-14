@@ -190,7 +190,7 @@ export function FarmScene({ layout, plots, selectedSlotId, onSelectSlot, isScann
         CropSpriteComponent={CropSprite}
         background={<WorldBackground scanning={isScanning} />}
       />
-      {isScanning && <div className="of-scanning-caption" role="status">Orbit-1 is checking the latest observations…</div>}
+      {isScanning && <div className="of-scanning-caption" role="status">Analyzing field…</div>}
     </div>
   );
 }

@@ -81,3 +81,34 @@
   .demo-clock .clock-label{font-size:7px;letter-spacing:.3px}
   .demo-clock strong,.demo-clock>button{font-size:9px}
 }
+/* Keep workspace copy and demo controls compact. */
+.app-body{padding-bottom:0}
+.sidebar .farm-identity{margin-top:32px}
+.topbar{justify-content:flex-end;min-height:60px;height:auto;padding-top:10px;padding-bottom:10px}
+.topbar-right{gap:16px;min-width:0}
+.demo-controls{display:flex;align-items:center;gap:14px;font-size:11px;min-width:0}
+.demo-controls strong{font-size:11px;font-weight:500;white-space:nowrap;color:#75806f}
+.demo-controls>button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:36px;padding:8px 11px;border:1px solid #dce3ce;background:#edf3df;border-radius:4px;color:#466638;font:500 11px/1.4 Inter,sans-serif;white-space:nowrap;cursor:pointer}
+.demo-controls>button:hover{background:#e2ecd3}
+.demo-controls>button:focus-visible{outline:2px solid #286b45;outline-offset:3px}
+.page-heading h1{margin:0;font-size:34px;line-height:1.2}
+.page-heading p{margin-top:8px}
+.care-empty{margin:0 0 20px;color:#75806f;font-size:12px;line-height:1.6}
+.journal-layout{grid-template-columns:minmax(0,1fr)}
+.plan-details{margin:20px 0;font-size:12px;line-height:1.6}
+.plan-details>summary,.crop-details>summary{width:fit-content;color:#60794f;cursor:pointer;font-size:11px;font-weight:500}
+.plan-details .plan-reasons{margin-top:12px}
+.plan-details .plan-tradeoffs{margin-top:10px}
+.crop-details{margin-top:8px}
+.crop-details p{margin-top:7px}
+.season-strip{margin-bottom:0}
+@media(max-width:760px){
+  .sidebar .farm-identity{margin-top:0}
+  .topbar{padding:10px 14px;min-height:60px}
+  .topbar-right{max-width:100%;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+  .demo-controls{gap:10px}
+  .demo-controls strong{font-size:10px}
+  .demo-controls>button{min-height:40px;padding:8px;font-size:10px}
+  .page-heading h1{font-size:30px;margin:0}
+  .journal-layout{grid-template-columns:minmax(0,1fr)}
+}

@@ -49,7 +49,7 @@ test('create a farm, analyze, plant, log care, and preserve it after reload', as
   await page.getByRole('button', { name: 'Analyze my farm', exact: true }).click();
 
   await expect(page).toHaveURL(/#\/plans$/);
-  await expect(page.getByRole('heading', { name: 'A good plan grows with you.', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Rotation plans', exact: true })).toBeVisible();
   await expect(page.getByRole('article').filter({ has: page.getByRole('heading', { name: 'Example current plan', exact: true }) })).toBeVisible();
   await expect(page.getByRole('article', { name: 'Improve soil plan' })).toBeVisible();
   await page.getByRole('article', { name: 'Save water plan' })
@@ -218,7 +218,7 @@ test('@mobile farm actions and navigation fit the viewport', async ({ page }, te
   await page.evaluate(() => document.fonts.ready);
   await page.screenshot({ path: testInfo.outputPath('orbitFarm-mobile.png'), fullPage: true });
   await navigate(page, 'Tasks');
-  await expect(page.getByRole('heading', { name: 'Your farm tasks', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Tasks', exact: true })).toBeVisible();
   await navigate(page, 'Journal');
-  await expect(page.getByRole('heading', { name: 'Your care journal', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Journal', exact: true })).toBeVisible();
 });

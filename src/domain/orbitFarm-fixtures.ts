@@ -5,12 +5,12 @@ import { CROP_CATALOG } from './orbitFarm-crop-catalog';
 export { CROP_CATALOG } from './orbitFarm-crop-catalog';
 
 export const SCENARIOS: Array<{ id: ScenarioId; name: string; description: string }> = [
-  { id: 'dry-week', name: 'Dry week', description: 'Low regional moisture, a care reminder, and a water-saving rotation.' },
-  { id: 'normal', name: 'A balanced season', description: 'Complete synthetic observations and three crop options.' },
-  { id: 'missing-data', name: 'Missing observations', description: 'An unknown measurement stays unknown and complete scores are withheld.' },
-  { id: 'stale-data', name: 'Outdated observations', description: 'Old observations are labeled and cannot produce a complete score.' },
-  { id: 'api-unavailable', name: 'Analysis unavailable', description: 'A failed analysis remains an error, with an explicit retry.' },
-  { id: 'empty-farm', name: 'A fresh start', description: 'Draw a boundary, enter field information, and create your first planting.' },
+  { id: 'dry-week', name: 'Dry week', description: 'Low soil moisture.' },
+  { id: 'normal', name: 'Normal conditions', description: 'Complete demo observations.' },
+  { id: 'missing-data', name: 'Missing observations', description: 'Missing soil moisture.' },
+  { id: 'stale-data', name: 'Outdated observations', description: 'Outdated observations.' },
+  { id: 'api-unavailable', name: 'Analysis unavailable', description: 'Failed analysis request.' },
+  { id: 'empty-farm', name: 'Empty farm', description: 'No field or plantings.' },
 ];
 
 export const DEMO_TODAY = '2026-11-14';

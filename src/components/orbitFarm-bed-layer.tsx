@@ -142,7 +142,7 @@ export function FarmBedLayer({ beds, pixelsPerUnit, selectedSlotId, onSelectSlot
       </svg>
     </div>
     {legend.length > 0 && <div className="of-bed-legend" aria-label="Small bed identifiers">
-      <div className="of-bed-legend-heading"><strong>Small beds</strong><span>Select a letter to highlight its bed.</span></div>
+      <div className="of-bed-legend-heading"><strong>Beds</strong></div>
       <div className="of-bed-legend-items">
         {legend.map(bed => <button
           key={bed.slotId}

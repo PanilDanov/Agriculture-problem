@@ -245,7 +245,7 @@ test('navigation protects an unsaved layout draft and leaving does not save it',
 
   dialogs.accept = true;
   await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Journal', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Your care journal', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Journal', exact: true })).toBeVisible();
   await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Your farm', exact: true }).click();
   await page.getByRole('button', { name: 'Edit layout', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Select Plot A', exact: true })).toBeVisible();

@@ -209,7 +209,7 @@ test('@mobile small bed annotations reflow after resize and keep details availab
   await expectCleanAnnotations(page);
   await page.getByRole('combobox', { name: 'Selected bed', exact: true }).click();
   await page.getByRole('option', { name: 'Narrow row · Empty', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Make room for something good.', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Plant crop', exact: true })).toBeVisible();
 });
 
 test('@mobile a loaded dense layout keeps all 24 letters visible and its legend selectable', async ({ page }, testInfo) => {

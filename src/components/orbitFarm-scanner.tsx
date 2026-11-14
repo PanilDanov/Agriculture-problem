@@ -22,8 +22,7 @@ export function OrbitScanner({ state = 'scanning', mode = 'demo', compact = fals
       aria-busy={!complete}
     >
       <div className="of-scanner-topline">
-        <span className="of-scanner-mission"><span aria-hidden="true" />ORBIT-1 <span className="of-scanner-slash">/</span> FIELD SCAN</span>
-        <span className="of-scanner-source">{mode === 'demo' ? 'Demo data' : 'Connected analysis service'}</span>
+        <span className="of-scanner-source">{mode === 'demo' ? 'Demo data' : 'Connected API'}</span>
       </div>
 
       <div className="of-scanner-scene" aria-hidden="true">
@@ -65,17 +64,13 @@ export function OrbitScanner({ state = 'scanning', mode = 'demo', compact = fals
           </div>
         </div>
         <div className="of-scanner-footprint"><span /><span /></div>
-        <span className="of-scanner-field-label">{complete ? 'FIELD CHECK COMPLETE' : 'YOUR LITTLE CORNER OF EARTH'}</span>
         <span className="of-scanner-lock">{complete ? '✓' : '+'}</span>
       </div>
 
       <div className="of-scanner-copy" role="status" aria-live="polite" aria-atomic="true">
-        <span className="of-scanner-kicker">{complete ? 'A CLEARER VIEW' : 'A LITTLE PERSPECTIVE FROM SPACE'}</span>
-        <h2 id={titleId}>{complete ? 'Your field is ready for a closer look.' : 'A little visitor. A bigger picture.'}</h2>
-        <p>{complete ? 'The animation preview is complete. Your saved analysis is unchanged.' : 'Orbit-1 is analyzing the latest available observations.'}</p>
-        <span className="of-scanner-status"><span aria-hidden="true" />{complete ? 'Preview complete' : mode === 'demo' ? 'Simulated analysis · waiting for demo results' : 'Waiting for the connected analysis service'}</span>
+        <h2 id={titleId}>{complete ? 'Analysis complete' : 'Analyzing field'}</h2>
+        {complete && <span className="of-scanner-status"><span aria-hidden="true" />Preview only · saved analysis unchanged</span>}
       </div>
-      <div className="of-scanner-telemetry" aria-hidden="true"><span>ORBIT → OBSERVATIONS → YOUR NEXT SEASON</span><span>{complete ? 'PREVIEW COMPLETE' : 'ANALYSIS PENDING'}</span></div>
     </section>
   );
 }

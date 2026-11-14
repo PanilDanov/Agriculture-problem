@@ -8,6 +8,7 @@ A web app and installable PWA that turns a farmer's boundary, Earth observations
 
 - [Product specification](docs/orbitFarm-product.md): the user journey, MVP scope, screens, data boundaries, and English interface copy.
 - [Four delivery sprints](docs/orbitFarm-delivery-plan.md): a 24-hour plan with visible results, reproducible test benches, the analytics contract, and release checks.
+- [Proposed analysis contract](docs/orbitFarm-analysis-contract.md) and [request example](contracts/orbitFarm-analysis-request.example.json): frontend inputs, backend responsibilities, periods, units, and the initial scoring policy.
 - [Brandbook](brand/orbitFarm-brandbook.md) and [design tokens](brand/orbitFarm-tokens.json): the original cozy 16-bit pixel-art direction and implementation foundations.
 - [Figma brand and product design](https://www.figma.com/design/ZD6mSeYogRklG9vO6eMUCJ): editable brand foundations, components, and five product screens.
 

@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "1.0",
+  "requestId": "93cbd94b-a7ef-4d6d-a91b-a8b07be6fd4c",
+  "farmId": "farm-demo-01",
+  "boundaryVersion": 1,
+  "boundary": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [34.79, 30.85],
+        [34.79235, 30.85],
+        [34.79235, 30.852],
+        [34.79, 30.852],
+        [34.79, 30.85]
+      ]
+    ]
+  },
+  "regionLabel": "Negev, Israel",
+  "farmTimeZone": "Asia/Jerusalem",
+  "season": {
+    "plantingDate": "2026-11-20",
+    "endDate": "2027-04-30"
+  },
+  "localInputs": {
+    "soil": {
+      "ph": 7.5,
+      "texture": "sandy_loam",
+      "source": "synthetic",
+      "sampledOn": null
+    },
+    "irrigation": {
+      "availability": "available",
+      "method": "drip",
+      "waterBudget": {
+        "volumeM3": 10000,
+        "periodStartDate": "2026-11-20",
+        "periodEndDate": "2027-04-30",
+        "basis": "field_inlet"
+      },
+      "applicationEfficiency": null
+    },
+    "previousCropId": "wheat",
+    "currentPlan": null
+  },
+  "priorities": ["save_water"]
+}

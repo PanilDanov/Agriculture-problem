@@ -9,6 +9,8 @@ Frontend work continues on the `frontend` branch. All project content, code, com
 - [Project overview](orbitFarm.md)
 - [Product specification](docs/orbitFarm-product.md)
 - [24-hour delivery plan](docs/orbitFarm-delivery-plan.md)
+- [Proposed analysis request contract](docs/orbitFarm-analysis-contract.md)
+- [Example analysis request](contracts/orbitFarm-analysis-request.example.json)
 - [Brandbook](brand/orbitFarm-brandbook.md)
 - [Editable Figma design](https://www.figma.com/design/ZD6mSeYogRklG9vO6eMUCJ)
 

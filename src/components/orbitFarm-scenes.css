@@ -32,7 +32,7 @@
 .of-plot-label { position: absolute; bottom: -13px; left: 50%; display: flex; align-items: center; gap: 6px; width: max-content; max-width: 115%; padding: 4px 7px; transform: translateX(-50%); background: #fff8e8; border: 2px solid #203d32; box-shadow: 2px 2px 0 #203d3226; font-family: Inter, sans-serif; font-size: 11px; line-height: 1.2; white-space: nowrap; pointer-events: none; }
 .of-plot-label strong { font-weight: 700; }
 .of-plot-empty .of-plot-label { background: #e6edc9; }
-.of-plant-plus { position: absolute; inset: 15% 0 auto; color: #f3dbb3; font-family: 'Pixelify Sans', monospace; font-size: clamp(26px, 5vw, 42px); line-height: 1; pointer-events: none; }
+.of-plant-plus { position: absolute; inset: 15% 0 auto; color: #f3dbb3; font-family: var(--display-font); font-size: clamp(26px, 5vw, 42px); line-height: 1; pointer-events: none; }
 .of-task-marker { position: absolute; top: -14px; right: -9px; display: grid; place-items: center; width: 32px; height: 32px; background: #f4c95d; border: 2px solid #203d32; box-shadow: 3px 3px 0 #203d3233; pointer-events: none; }
 .of-satellite-scanning { animation: of-satellite-float 3s ease-in-out infinite; }
 .of-scan-beam { animation: of-scan-light 2.4s ease-in-out infinite; pointer-events: none; }

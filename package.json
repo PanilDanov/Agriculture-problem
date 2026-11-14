@@ -16,8 +16,8 @@
     "verify": "npm run build && npm run test:e2e"
   },
   "dependencies": {
+    "@fontsource/chakra-petch": "^5.2.5",
     "@fontsource/inter": "^5.2.5",
-    "@fontsource/pixelify-sans": "^5.2.5",
     "@turf/area": "^7.2.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.468.0",

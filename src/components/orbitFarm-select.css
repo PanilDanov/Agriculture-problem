@@ -1,0 +1,19 @@
+.of-select-field{min-width:0}
+.of-select-trigger{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-width:0;min-height:46px;padding:10px 13px;border:1px solid #bdcbb8;border-radius:6px;background:#fff;color:var(--ink,#203d32);font:inherit;font-weight:500;text-align:left;transition:border-color .16s ease,box-shadow .16s ease,background .16s ease}
+.of-select-trigger:hover:not(:disabled){border-color:#7e9e73;background:#fffef8}
+.of-select-trigger[aria-expanded=true]{border-color:#678b5b;box-shadow:0 0 0 3px #e7eedc}
+.of-select-trigger:focus-visible{outline:2px solid #286b45;outline-offset:3px}
+.of-select-trigger:disabled{cursor:not-allowed;opacity:.55}
+.of-select-value{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.of-select-chevron{flex-shrink:0;color:#637e5c;transition:transform .18s ease}
+.of-select-trigger[aria-expanded=true] .of-select-chevron{transform:rotate(180deg)}
+.of-select-menu{position:fixed;z-index:2000;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#b3c2a5 transparent;box-sizing:border-box;padding:5px;border:1px solid #c7d3ba;border-radius:9px;background:#fffef8;color:var(--ink,#203d32);box-shadow:0 8px 28px #203d321a,0 2px 6px #203d3210;font-family:var(--body-font,Inter,sans-serif);font-size:13px;font-weight:500;transform-origin:top;animation:of-select-enter .16s ease-out}
+.of-select-menu[data-side=top]{transform-origin:bottom}
+.of-select-option{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:42px;padding:9px 11px;border-radius:5px;cursor:pointer;line-height:1.4;transition:background .1s ease}
+.of-select-option>span{min-width:0;overflow-wrap:anywhere}
+.of-select-option>svg{flex-shrink:0;color:#286b45}
+.of-select-option[aria-selected=true]{color:#246640;background:#f0f5e7}
+.of-select-option.is-active{background:#e7efd9}
+@keyframes of-select-enter{from{opacity:0;transform:scaleY(.97)}to{opacity:1;transform:scaleY(1)}}
+@media(max-width:760px){.of-select-trigger{font-size:16px}.plot-editor .of-select-trigger{font-size:14px}.of-select-menu{font-size:14px}.of-select-option{min-height:44px}}
+@media(prefers-reduced-motion:reduce){.of-select-trigger,.of-select-chevron,.of-select-option{transition:none}.of-select-menu{animation:none}}

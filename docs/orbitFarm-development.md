@@ -54,6 +54,12 @@ For local checks against an already installed Google Chrome, set `ORBITFARM_BROW
 
 Every test gets an isolated browser context. The main journey does not inject a ready farm into localStorage. External map tiles may fail or be blocked in tests; boundary tools and the rest of the application must remain usable.
 
+Boundary regression checks cover closing a four-corner field by clicking its first corner, explicitly finishing a triangle, repeated clicks, coordinate duplicates, Undo, and mobile taps. A stored GeoJSON ring repeats its first coordinate once for closure; the interface counts only the distinct corners the user placed.
+
+All selection fields share the custom listbox component. Browser checks cover keyboard navigation, incremental text search, dismissal, touch scrolling, menu placement near viewport edges, and resizing at 320 and 390 px. Headings and the wordmark use locally bundled Chakra Petch; body text uses Inter.
+
+To run a separate review instance without replacing an existing development server, use `npm run dev -- --port 5175` and open `http://127.0.0.1:5175/`. Browser storage is isolated by port.
+
 The GitHub Actions workflow runs locked dependency installation, the English-content check, Chromium installation, and `npm run verify`. It stores browser diagnostics after failures. A workflow file existing in the branch does not itself establish that a remote run has passed; inspect the actual run result.
 
 ## Data and deployment limits

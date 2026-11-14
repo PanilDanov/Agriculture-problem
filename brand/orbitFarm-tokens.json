@@ -34,9 +34,9 @@
   },
   "font": {
     "heading": {
-      "family": "Pixelify Sans",
+      "family": "Chakra Petch",
       "weights": [700],
-      "fallback": ["ui-monospace", "monospace"]
+      "fallback": ["Inter", "system-ui", "sans-serif"]
     },
     "body": {
       "family": "Inter",

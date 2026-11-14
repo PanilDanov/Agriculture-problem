@@ -35,11 +35,15 @@ test('create a farm, analyze, plant, log care, and preserve it after reload', as
   await page.getByLabel('Planting date', { exact: true }).fill('2026-11-01');
   await page.getByLabel('Season end', { exact: true }).fill('2027-04-30');
   await page.getByLabel('Soil pH', { exact: true }).fill('7.5');
-  await page.getByRole('combobox', { name: 'Soil texture', exact: true }).selectOption('sandy_loam');
-  await page.getByRole('combobox', { name: 'Irrigation access', exact: true }).selectOption('available');
+  await page.getByRole('combobox', { name: 'Soil texture', exact: true }).click();
+  await page.getByRole('option', { name: 'sandy loam', exact: true }).click();
+  await page.getByRole('combobox', { name: 'Irrigation access', exact: true }).click();
+  await page.getByRole('option', { name: 'Available', exact: true }).click();
   await page.getByLabel('Water budget (m³)', { exact: true }).fill('10000');
-  await page.getByRole('combobox', { name: 'Irrigation method', exact: true }).selectOption('drip');
-  await page.getByRole('combobox', { name: 'Main priority', exact: true }).selectOption('save_water');
+  await page.getByRole('combobox', { name: 'Irrigation method', exact: true }).click();
+  await page.getByRole('option', { name: 'Drip', exact: true }).click();
+  await page.getByRole('combobox', { name: 'Main priority', exact: true }).click();
+  await page.getByRole('option', { name: 'Save water', exact: true }).click();
   await page.getByRole('button', { name: 'Analyze my farm', exact: true }).click();
 
   await expect(page).toHaveURL(/#\/plans$/);
@@ -52,7 +56,8 @@ test('create a farm, analyze, plant, log care, and preserve it after reload', as
   await expect(page).toHaveURL(/#\/farm$/);
   await expect(page.getByTestId('farm-name')).toContainText('Sunrise Test Farm');
   await page.getByTestId('plot-slot-3').click();
-  await page.getByRole('combobox', { name: 'Crop', exact: true }).selectOption('chickpea');
+  await page.getByRole('combobox', { name: 'Crop', exact: true }).click();
+  await page.getByRole('option', { name: 'Chickpea', exact: true }).click();
   await page.getByLabel('Planting date', { exact: true }).fill('2026-11-01');
   await page.getByRole('button', { name: 'Plant crop', exact: true }).click();
   await expect(page.getByTestId('plot-slot-3')).toHaveAccessibleName(/Chickpea/);

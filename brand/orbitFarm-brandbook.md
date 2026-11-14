@@ -37,7 +37,7 @@ Contrast was calculated from sRGB relative luminance: `ink/cream` **11.18:1**, `
 
 ## Typography and dimensions
 
-Headings use **Pixelify Sans**, weight 700. Body text uses **Inter**, weights 400/500/600. Heading fallback: `ui-monospace, monospace`; body fallback: `system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`. Pixel styling applies to headings and game objects; longer text, values, and actions remain easy to read. During implementation, store fonts locally with their licenses so the demo does not depend on a CDN.
+Headings and the wordmark use **Chakra Petch**, weight 700, for clear Latin letterforms with squared retro details. Body text uses **Inter**, weights 400/500/600. Heading fallback: `Inter, system-ui, sans-serif`; body fallback: `system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`. Pixel styling remains in game artwork; longer text, values, and actions stay easy to read. Fontsource packages bundle the fonts locally under the SIL Open Font License so the demo does not depend on a CDN.
 
 | Level | Desktop | Mobile | Weight / line height |
 | --- | --- | --- | --- |

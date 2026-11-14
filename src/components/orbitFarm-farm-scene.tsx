@@ -83,9 +83,9 @@ export function SatelliteIcon({ size = 80, className = '' }: { size?: number; cl
   return <svg width={size} height={size / 2} viewBox="0 0 160 80" aria-hidden="true" shapeRendering="crispEdges" className={`of-satellite-icon ${className}`}><SatelliteDrawing /></svg>;
 }
 
-function Tree({ x, y, small = false }: { x: number; y: number; small?: boolean }) {
+function Tree({ x, y, scale = 1 }: { x: number; y: number; scale?: number }) {
   return (
-    <g transform={`translate(${x} ${y}) scale(${small ? 0.74 : 1})`}>
+    <g transform={`translate(${x} ${y}) scale(${scale})`}>
       <path d="M4 87H73V97H4Z" fill="#A8C187" />
       <path d="M31 51H47V89H58V95H23V89H31Z" fill="#203D32" />
       <path d="M35 55H42V88H35Z" fill="#BA8052" />
@@ -142,7 +142,7 @@ function WorldBackground({ scanning }: { scanning: boolean }) {
         <path d="M35 29H48V42H35Z" fill="#203D32" /><path d="M39 33H44V38H39Z" fill="#F4C95D" />
       </g>
       <Tree x={61} y={222} />
-      <Tree x={710} y={344} small />
+      <Tree x={680} y={365} scale={0.44} />
       <g transform="translate(83 373)">
         <path d="M0 5H31V48H0Z" fill="#203D32" /><path d="M4 9H27V44H4Z" fill="#CA865A" /><path d="M4 12H27V22H4Z" fill="#BDE4F0" /><path d="M0 22H31V27H0ZM0 36H31V41H0Z" fill="#64785B" /><path d="M7 0H25V5H7Z" fill="#D3E7DF" />
       </g>

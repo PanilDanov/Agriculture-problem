@@ -33,13 +33,15 @@
         "farm scenery generation",
         "astronaut dog generation",
         "fictional satellite generation",
-        "team avatar generation"
+        "team avatar generation",
+        "team avatar editing"
       ],
       "sourceRecords": [
         "brand/sprites/crops-v1/sources.json",
         "brand/sprites/farm-v2/sources.json",
         "brand/sprites/orbit-1-v1/source.json",
-        "brand/submission/provenance.json"
+        "brand/submission/provenance.json",
+        "brand/submission/provenance-v2.json"
       ]
     }
   ],
@@ -74,14 +76,24 @@
     ],
     "sourceRastersModified": false,
     "historicalPromptsModified": false,
-    "standalonePresentationNote": "Unmodified source PNGs are provenance masters, not watermarked exports. A separate presentation of a source image must retain a visible generation mark."
+    "standalonePresentationNote": "Unmodified source PNGs are provenance masters, not watermarked exports. A separate presentation of a source image must retain a visible generation mark.",
+    "scope": "Runtime website illustrations and composites; the separately generated team avatar is documented in standaloneTeamAvatar."
   },
   "assetProvenance": "docs/asset-provenance.md",
   "submissionGuide": "https://www.spaceappschallenge.org/resources/project-submission-guide",
   "standaloneTeamAvatar": {
-    "path": "brand/submission/orbitFarm-team-avatar-v1.png",
-    "mark": "AI-generated",
-    "method": "Embedded generation mark in the original generated output",
-    "provenance": "brand/submission/provenance.json"
+    "path": "brand/submission/orbitFarm-team-avatar-v2.png",
+    "aiGenerated": true,
+    "mark": null,
+    "embeddedMark": false,
+    "visibleLabelRemovedAtUserRequest": true,
+    "method": "Localized built-in image_gen edit removing the v1 embedded text; separate project/metadata AI disclosure retained.",
+    "provenance": "brand/submission/provenance-v2.json",
+    "competitionWatermarkComplianceClaimed": false,
+    "retainedMarkedAlternative": {
+      "path": "brand/submission/orbitFarm-team-avatar-v1.png",
+      "mark": "AI-generated",
+      "provenance": "brand/submission/provenance.json"
+    }
   }
 }

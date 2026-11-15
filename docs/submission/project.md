@@ -2,7 +2,7 @@
 
 Team: [Team HaHaton](https://www.spaceappschallenge.org/2026/find-a-team/team-robert/?tab=project). Challenge: [Field Shift: Adapting Farms with NASA Data](https://www.spaceappschallenge.org/2026/challenges/adapting-farms-with-nasa-data/).
 
-This file supplies factual project copy. It does not certify submission for judging. The team is preparing the required public demo; its URL must be added to the form. The official limit is **30 seconds for video or seven slides for a presentation**.
+This file supplies factual project copy. The public demo video is ready, its verified duration is **30.000 seconds**, and its URL has been saved in the project form. The project has **not been submitted for judging**; the team owner still needs to review and submit it. The official limit is **30 seconds for video or seven slides for a presentation**.
 
 ## Project name
 
@@ -16,7 +16,7 @@ orbitFarm helps farmers turn Earth observations into understandable crop and rot
 
 - Final project: https://orbitfarm.vercel.app
 - Complete source branch: https://github.com/PanilDanov/Agriculture-problem/tree/codex/submission-ready
-- Demo: supplied separately by the team when ready.
+- [Public 30-second demo](https://drive.google.com/file/d/1VRy5t0WxT--Cl0ZFYI2BOqABsTEwC6Uk/view?usp=sharing).
 
 ## Project details
 
@@ -48,7 +48,7 @@ Full source code, model artifacts and reproducible setup: https://github.com/Pan
 
 ## Super Intelligence disclosure
 
-OpenAI Codex assisted with code, debugging, tests, integration, deployment and documentation. OpenAI image generation produced decorative farm, crop, companion and satellite artwork; prompts/provenance are retained. Observed NASA, MAPA, FAOSTAT and other source datasets are not AI-generated. Trained predictive models are separately documented with their actual inputs and temporal validation. Generated artwork must carry visible identification in submitted visuals. No generated artwork is intended to contain NASA logos, flags or mission identifiers. See [AI_USAGE.md](../../AI_USAGE.md).
+OpenAI Codex assisted with code, debugging, tests, integration, deployment and documentation. OpenAI image generation produced decorative farm, crop, companion and satellite artwork; prompts/provenance are retained. Observed NASA, MAPA, FAOSTAT and other source datasets are not AI-generated. Trained predictive models are separately documented with their actual inputs and temporal validation. The website displays visible artwork marks. The selected team avatar is also AI-generated; its embedded label was removed at the user's explicit request, with AI origin retained in this disclosure and its provenance. This is not a claim that the unmarked avatar satisfies an in-image watermark requirement. No generated artwork is intended to contain NASA logos, flags or mission identifiers. See [AI_USAGE.md](../../AI_USAGE.md).
 
 ## NASA resources
 
@@ -63,6 +63,5 @@ The submission links the public repository and [third-party notices](../../THIRD
 
 ## Team completion steps
 
-1. Upload the final demo publicly, verify its duration and access, and include visible SI-generated labels where generated artwork appears.
-2. Add its URL to the team project form and review the saved copy and source links.
-3. The team owner completes the declarations and **Submit for Judging** before the event deadline. Saving progress alone does not submit a project.
+1. The team owner reviews the saved project copy, public 30-second demo, source links and AI/artwork disclosures, including the selected avatar.
+2. The owner completes the declarations and **Submit for Judging** before the event deadline. Saving progress and the demo URL alone does not submit a project.

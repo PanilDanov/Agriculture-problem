@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "1.0",
+  "asset": "orbitFarm-team-avatar-v2.png",
+  "project": "orbitFarm",
+  "generator": "built-in image_gen",
+  "createdAt": "2026-11-15T16:33:43Z",
+  "purpose": "Team/project avatar version without text burned into the image",
+  "input": {
+    "path": "orbitFarm-team-avatar-v1.png",
+    "role": "Exact edit target; v1 retained unchanged",
+    "sha256": "b3e3c18838bdd78f6d3cbe234a142857b903b7c9d881c789ea1b140d82a3a5a4"
+  },
+  "output": {
+    "format": "PNG",
+    "width": 1254,
+    "height": 1254,
+    "transparentBackground": false,
+    "bytes": 1582714,
+    "sha256": "91b4d8dc7099cc4b921c892861ec653e8220f6e85a36c9a9f7f3d7a35dd3dbf6"
+  },
+  "edit": {
+    "requestedChange": "Remove only the AI-generated text and restore matching navy backdrop; preserve the mascot and composition.",
+    "review": "Visually checked: text absent; recognizable dog, helmet, Earth, stars and circular framing retained."
+  },
+  "disclosure": {
+    "aiGenerated": true,
+    "visibleLabelRemovedAtUserRequest": true,
+    "disclosureLocation": "Project description and metadata",
+    "competitionWatermarkComplianceClaimed": false,
+    "note": "AI-generated artwork; visible label removed at the user's explicit request. This file is not represented as satisfying a competition requirement for a visible in-image AI watermark."
+  },
+  "rights": {
+    "description": "Original orbitFarm mascot portrait based on the team's existing AI-generated dog sprite.",
+    "nasaBranding": false,
+    "flags": false,
+    "missionIdentifiers": false,
+    "agencyEndorsement": false
+  },
+  "prompt": "Use case: precise-object-edit.\nInput image 1 is the exact edit target: our original orbitFarm dog astronaut avatar.\nMake exactly one localized change: remove only the cream text \"AI-generated\" from the dark navy area beneath the suit at the bottom of the circular portrait, and fill those letter pixels with a seamless matching continuation of that same navy background.\nPreserve EVERYTHING else in the target image: the identical dog identity, face, chestnut-and-cream fur, eyes, expression, ears, nose, mouth, tongue, transparent bubble helmet, helmet glints, ivory suit, teal trim, Earth limb, stars, navy colors, circular backdrop, framing, scale, placement, square opaque canvas and exact cozy pixel-art style. Do not redraw or redesign the character, alter the pose, crop, zoom, add content, move the circular boundary or change lighting.\nThe result contains no text. This is still AI-generated artwork; the user requests that disclosure be shown separately in project text rather than burned into this image. Do not add any NASA insignia, flags, mission identifiers, agency branding or new logos.\nReturn one edited square PNG, with the same opaque background and composition."
+}

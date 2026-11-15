@@ -2,7 +2,7 @@
 
 **From orbit to your next season.** An interactive farm planner using NASA Earth observations to help farmers compare crops, explore rotations and record care and harvests.
 
-[Open the application](https://orbitfarm.vercel.app) · [Complete source branch](https://github.com/PanilDanov/Agriculture-problem/tree/codex/submission-ready) · [Team HaHaton](https://www.spaceappschallenge.org/2026/find-a-team/team-robert/?tab=project) · [Submission material](docs/submission/project.md)
+[Open the application](https://orbitfarm.vercel.app) · [30-second demo](https://drive.google.com/file/d/1VRy5t0WxT--Cl0ZFYI2BOqABsTEwC6Uk/view?usp=sharing) · [Complete source branch](https://github.com/PanilDanov/Agriculture-problem/tree/codex/submission-ready) · [Team HaHaton](https://www.spaceappschallenge.org/2026/find-a-team/team-robert/?tab=project) · [Submission material](docs/submission/project.md)
 
 Built for NASA Space Apps Challenge 2026: [Field Shift: Adapting Farms with NASA Data](https://www.spaceappschallenge.org/2026/challenges/adapting-farms-with-nasa-data/). The live application includes the website, field-analysis API and 38 trained model artifacts, hosted together on Vercel Container Runtime.
 

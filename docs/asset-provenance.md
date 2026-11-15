@@ -12,7 +12,8 @@ drawn assets or as NASA imagery. See [AI_USAGE.md](../AI_USAGE.md) and the
 | Ten mature field crop sprites | `public/assets/farm/crops/*-field-v2.png` | [Farm source record](../brand/sprites/farm-v2/sources.json): `image_gen`, ten-crop sheet prompt and 32×32 runtime frames. |
 | Meadow and scene background | `public/assets/farm/orbitFarm-meadow-v2.png` | [Farm source record](../brand/sprites/farm-v2/sources.json): `image_gen`, scenery prompt and 400×280 runtime dimensions. Seasonal terrain and vegetation are code-rendered derivatives of the scene. |
 | Astronaut dog | `public/assets/farm/orbitFarm-dog-astronaut-v1.png` | [Farm source record](../brand/sprites/farm-v2/sources.json): `image_gen`, twelve-frame prompt and 48×34 runtime frames. |
-| NASA team-page dog avatar | `brand/submission/orbitFarm-team-avatar-v1.png` | [Avatar provenance](../brand/submission/provenance.json): built-in `image_gen`, dog identity reference, exact prompt, output dimensions/checksum and embedded **AI-generated** mark. |
+| Active NASA team-page dog avatar, v2 | `brand/submission/orbitFarm-team-avatar-v2.png` | [V2 provenance](../brand/submission/provenance-v2.json): built-in `image_gen` edit of v1; embedded text removed at the user's explicit request. AI origin, exact edit prompt and checksums remain disclosed. |
+| Retained marked avatar alternative, v1 | `brand/submission/orbitFarm-team-avatar-v1.png` | [Original avatar provenance](../brand/submission/provenance.json): built-in `image_gen`, dog identity reference, exact prompt, output dimensions/checksum and embedded **AI-generated** mark. |
 | Fictional Orbit-1 satellite | `public/assets/orbit-1/orbit-1-scanner-v1.png` | [`source.json`](../brand/sprites/orbit-1-v1/source.json) records `image_gen`, date, prompt and project emblem; [component notes](../brand/sprites/orbit-1-v1/README.md) describe code animation. |
 
 The exact image-model version was not recorded. Farm-v2 metadata contains prompts
@@ -30,13 +31,20 @@ crop-illustration groups. Composite marks cover the generated elements within
 that composition, including the farm dog and plants. They do not change data
 source badges or the meaning of a scientific result.
 
-Raster pixels, source masters and historical prompts are unchanged. Therefore,
-the raw PNGs are not themselves watermarked exports. The extraction script can
+Runtime raster pixels, source masters and historical prompts are unchanged.
+The raw runtime PNGs are not themselves watermarked exports. The extraction script can
 rebuild a sprite archive; that archive is not a tracked submission artefact.
 Keep the visible mark when taking website screenshots or recording a
 demo. If a raw sprite is presented separately, give that presentation a visible
 generation mark too. The [2026 submission guide](https://www.spaceappschallenge.org/resources/project-submission-guide)
 requires visible identification of generated images and video.
+
+The selected team-header avatar is the separately generated **v2** portrait.
+Its in-image label was removed at the user's request, while its AI disclosure
+remains in the project description and provenance. This record does not claim
+that the unmarked avatar satisfies an in-image watermark requirement. The
+marked v1 remains available as an alternative; the website's HTML/CSS artwork
+marks are unaffected by the avatar edit.
 
 ## Scope and identity
 

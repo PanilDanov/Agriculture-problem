@@ -54,13 +54,18 @@ identifies artwork; it does not label NASA observations as generated images.
 It remains visible during reduced-motion rendering and does not intercept plot
 selection or other controls.
 
-Historical prompts, source masters and raster assets are preserved unchanged.
+Historical prompts, source masters and runtime raster assets are preserved unchanged.
 The visible mark is rendered in HTML/CSS over or within the illustration group.
-The separate [team avatar](brand/submission/orbitFarm-team-avatar-v1.png), generated
-from the existing dog as an identity reference, has an embedded **AI-generated**
-mark. Its exact prompt, input identity and output checksum are recorded in
-[avatar provenance](brand/submission/provenance.json).
-Screenshots or demo recordings of these views should retain that mark. When
+The selected [team avatar v2](brand/submission/orbitFarm-team-avatar-v2.png) is
+AI-generated artwork based on the existing dog. Its embedded **AI-generated**
+text was removed at the user's explicit request; AI origin remains disclosed
+here and in [v2 provenance](brand/submission/provenance-v2.json), including the
+exact edit prompt and input/output checksums. This does not claim that v2 meets
+a requirement for an in-image generation mark. The original
+[marked v1 alternative](brand/submission/orbitFarm-team-avatar-v1.png) and
+[its provenance](brand/submission/provenance.json) are retained unchanged.
+Screenshots or demo recordings of the marked website views should retain their
+visible artwork marks. When
 presenting a standalone source image separately, include a visible generation
 mark in that presentation as well; the unmodified source PNG is not itself a
 watermarked export.

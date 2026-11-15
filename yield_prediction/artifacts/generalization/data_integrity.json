@@ -1,0 +1,283 @@
+{
+  "original_sha256": "b09d15d5ef1d31c1c98a7ff271f9f6e83dab1c0f152a08685f73b396bfaa2609",
+  "corrected": {
+    "sha256": "ca8da91570a8d42593720cd08ffb40aa5f9e45e0e0d5fd8384f781afcfc06251",
+    "reference_sha256": "ca8da91570a8d42593720cd08ffb40aa5f9e45e0e0d5fd8384f781afcfc06251",
+    "matches_reference": true,
+    "record": "https://zenodo.org/records/17279151",
+    "rows": 40618,
+    "countries": [
+      "AO",
+      "AU",
+      "BE",
+      "BG",
+      "CN",
+      "CZ",
+      "DE",
+      "DK",
+      "ES",
+      "ET",
+      "FI",
+      "FR",
+      "HU",
+      "IT",
+      "MG",
+      "MX",
+      "NL",
+      "PL",
+      "PT",
+      "RO",
+      "SE",
+      "ZA",
+      "ZM"
+    ]
+  },
+  "rows": 40618,
+  "unique_keys": true,
+  "unchanged_columns": [
+    "season_days",
+    "awc",
+    "bulk_density",
+    "latitude",
+    "longitude",
+    "climate_temperature_c",
+    "climate_min_temperature_c",
+    "climate_max_temperature_c",
+    "climate_temperature_sd_c",
+    "climate_precipitation_mm",
+    "climate_precipitation_mm_day",
+    "climate_radiation_mj_m2_day",
+    "climate_et0_mm",
+    "climate_vpd_kpa",
+    "climate_water_balance_mm",
+    "climate_hot_days",
+    "climate_frost_days",
+    "climate_dry_days",
+    "climate_precipitation_sd_mm",
+    "climate_temperature_interannual_sd_c",
+    "observed_yield_t_ha",
+    "sos",
+    "eos",
+    "season_start",
+    "season_end",
+    "midpoint",
+    "pre_forecast_date",
+    "mid_weather_cutoff",
+    "climate_seasons",
+    "climate_through"
+  ],
+  "changed_rows": 1159,
+  "changed_rows_by_country": [
+    {
+      "crop": "maize",
+      "country_code": "ET",
+      "changed_rows": 541
+    },
+    {
+      "crop": "wheat",
+      "country_code": "ES",
+      "changed_rows": 618
+    }
+  ],
+  "changed_cells_by_feature": {
+    "mid_temperature_c": 1135,
+    "mid_min_temperature_c": 1135,
+    "mid_max_temperature_c": 1135,
+    "mid_temperature_sd_c": 1135,
+    "mid_precipitation_mm": 1135,
+    "mid_precipitation_mm_day": 1135,
+    "mid_radiation_mj_m2_day": 1135,
+    "mid_et0_mm": 1135,
+    "mid_vpd_kpa": 1135,
+    "mid_water_balance_mm": 1135,
+    "mid_hot_days": 57,
+    "mid_frost_days": 603,
+    "mid_dry_days": 1062,
+    "mid_weather_through": 1092,
+    "mid_weather_coverage": 57
+  },
+  "distribution": {
+    "original": {
+      "mid_temperature_c": {
+        "missing": 12107,
+        "p05": 3.8122979892205637,
+        "median": 11.738784810126583,
+        "p95": 22.080669425675673
+      },
+      "mid_min_temperature_c": {
+        "missing": 12107,
+        "p05": -12.9155,
+        "median": -1.135,
+        "p95": 15.9825
+      },
+      "mid_max_temperature_c": {
+        "missing": 12107,
+        "p05": 17.391,
+        "median": 25.546,
+        "p95": 35.0985
+      },
+      "mid_temperature_sd_c": {
+        "missing": 12107,
+        "p05": 1.1062322283602164,
+        "median": 3.778242897634551,
+        "p95": 5.776213625655679
+      },
+      "mid_precipitation_mm": {
+        "missing": 12107,
+        "p05": 57.6365,
+        "median": 170.39,
+        "p95": 564.027
+      },
+      "mid_precipitation_mm_day": {
+        "missing": 12107,
+        "p05": 0.7809836559139784,
+        "median": 2.1721014492753623,
+        "p95": 7.217951666889811
+      },
+      "mid_radiation_mj_m2_day": {
+        "missing": 12107,
+        "p05": 9.144616516549778,
+        "median": 14.980752772058825,
+        "p95": 23.843788981938687
+      },
+      "mid_et0_mm": {
+        "missing": 12107,
+        "p05": 94.82499999999999,
+        "median": 171.209,
+        "p95": 403.2085
+      },
+      "mid_vpd_kpa": {
+        "missing": 12107,
+        "p05": 0.44052175,
+        "median": 0.89233,
+        "p95": 2.1016950627386795
+      },
+      "mid_water_balance_mm": {
+        "missing": 12107,
+        "p05": -276.1515,
+        "median": -17.018,
+        "p95": 266.485
+      },
+      "mid_hot_days": {
+        "missing": 12107,
+        "p05": 0.0,
+        "median": 0.0,
+        "p95": 1.0
+      },
+      "mid_frost_days": {
+        "missing": 12107,
+        "p05": 0.0,
+        "median": 2.0,
+        "p95": 38.0
+      },
+      "mid_dry_days": {
+        "missing": 12107,
+        "p05": 10.0,
+        "median": 46.0,
+        "p95": 66.0
+      },
+      "mid_weather_through": {
+        "missing": 12107,
+        "first_date": "2001-03-11",
+        "last_date": "2023-09-07"
+      },
+      "mid_weather_coverage": {
+        "missing": 26,
+        "p05": 0.0,
+        "median": 1.0,
+        "p95": 1.0
+      }
+    },
+    "corrected": {
+      "mid_temperature_c": {
+        "missing": 12088,
+        "p05": 3.8088198179524153,
+        "median": 11.599654929577465,
+        "p95": 22.049501240281376
+      },
+      "mid_min_temperature_c": {
+        "missing": 12088,
+        "p05": -12.91575,
+        "median": -1.147,
+        "p95": 15.963
+      },
+      "mid_max_temperature_c": {
+        "missing": 12088,
+        "p05": 17.37445,
+        "median": 25.549500000000002,
+        "p95": 35.09055
+      },
+      "mid_temperature_sd_c": {
+        "missing": 12088,
+        "p05": 1.1025123641923498,
+        "median": 3.777612174318801,
+        "p95": 5.7760763153130625
+      },
+      "mid_precipitation_mm": {
+        "missing": 12088,
+        "p05": 57.6689,
+        "median": 170.446,
+        "p95": 566.3207499999999
+      },
+      "mid_precipitation_mm_day": {
+        "missing": 12088,
+        "p05": 0.7817849903474904,
+        "median": 2.17295625,
+        "p95": 7.25382859035506
+      },
+      "mid_radiation_mj_m2_day": {
+        "missing": 12088,
+        "p05": 9.136613176162689,
+        "median": 14.995571047794115,
+        "p95": 23.841456432747176
+      },
+      "mid_et0_mm": {
+        "missing": 12088,
+        "p05": 94.8558,
+        "median": 170.75099999999998,
+        "p95": 403.21164999999996
+      },
+      "mid_vpd_kpa": {
+        "missing": 12088,
+        "p05": 0.4407150426439233,
+        "median": 0.8941428571428571,
+        "p95": 2.0989792857142846
+      },
+      "mid_water_balance_mm": {
+        "missing": 12088,
+        "p05": -276.02945,
+        "median": -16.941,
+        "p95": 267.51775
+      },
+      "mid_hot_days": {
+        "missing": 12088,
+        "p05": 0.0,
+        "median": 0.0,
+        "p95": 1.0
+      },
+      "mid_frost_days": {
+        "missing": 12088,
+        "p05": 0.0,
+        "median": 2.0,
+        "p95": 38.0
+      },
+      "mid_dry_days": {
+        "missing": 12088,
+        "p05": 10.0,
+        "median": 46.0,
+        "p95": 66.0
+      },
+      "mid_weather_through": {
+        "missing": 12088,
+        "first_date": "2001-03-11",
+        "last_date": "2023-09-07"
+      },
+      "mid_weather_coverage": {
+        "missing": 0,
+        "p05": 0.0,
+        "median": 1.0,
+        "p95": 1.0
+      }
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "seed": 42,
+  "inner_years": [2015, 2017],
+  "outer_years": [2018, 2020],
+  "outer_groups": 4,
+  "inner_groups": 2,
+  "publication_month": 7,
+  "mid_temporal_validation_years": [2013, 2015, 2017],
+  "mid_temporal_test_years": [2021, 2024]
+}

@@ -37,7 +37,7 @@ def sidra_labels(path):
     return labels, valid
 
 
-def prepare_wheat(archive_path, sidra_path, output):
+def prepare_wheat(archive_path, sidra_path, output, include_benchmark=False):
     all_labels, valid_labels = sidra_labels(sidra_path)
     with ExitStack() as stack:
         archive = stack.enter_context(ZipFile(archive_path))
@@ -58,7 +58,11 @@ def prepare_wheat(archive_path, sidra_path, output):
         fresh = valid_labels.loc[valid_labels.harvest_year.ge(first_year)]
         if fresh.empty:
             raise ValueError("SIDRA contains no harvests after the published CY-Bench wheat records")
-        csv = fresh.to_csv(index=False)
+        supplied = fresh
+        if include_benchmark:
+            benchmark = published.assign(country_code="BR")
+            supplied = pd.concat([benchmark, fresh], ignore_index=True)
+        csv = supplied.to_csv(index=False)
 
         def open_csv(kind):
             if kind == "yield":
@@ -67,6 +71,8 @@ def prepare_wheat(archive_path, sidra_path, output):
 
         data, group = prepare_group(open_csv, "wheat", "BR")
 
+    if include_benchmark:
+        data["label_source"] = np.where(data.harvest_year.ge(first_year), "IBGE SIDRA", "CY-Bench")
     output.parent.mkdir(parents=True, exist_ok=True)
     data.sort_values(KEY).to_csv(output, index=False)
     dump_json(output.with_suffix(".json"), {
@@ -80,7 +86,7 @@ def prepare_wheat(archive_path, sidra_path, output):
         "raw_rows_by_year": {int(year): int(size) for year, size in all_labels.groupby("harvest_year").size().items()},
         "valid_rows_by_year": {int(year): int(size) for year, size in valid_labels.groupby("harvest_year").size().items()},
     })
-    print(f"Brazil wheat: {len(data)} labeled seasons since {first_year}", flush=True)
+    print(f"Brazil wheat: {len(data)} labeled seasons (IBGE additions from {first_year})", flush=True)
 
 
 def main():
@@ -88,8 +94,10 @@ def main():
     parser.add_argument("--archive", type=Path, required=True)
     parser.add_argument("--sidra", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--include-benchmark", action="store_true",
+                        help="Keep earlier benchmark seasons using the same weather pass")
     args = parser.parse_args()
-    prepare_wheat(args.archive, args.sidra, args.output)
+    prepare_wheat(args.archive, args.sidra, args.output, include_benchmark=args.include_benchmark)
 
 
 if __name__ == "__main__":

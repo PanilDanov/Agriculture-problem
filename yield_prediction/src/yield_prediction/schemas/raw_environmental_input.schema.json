@@ -1,0 +1,369 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Raw Environmental Input 1.0",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "as_of",
+    "harvest_year",
+    "region",
+    "calendar",
+    "weather"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "as_of": {
+      "type": "string",
+      "format": "date"
+    },
+    "harvest_year": {
+      "type": "integer",
+      "minimum": 1900,
+      "maximum": 2100
+    },
+    "region": {
+      "type": "object",
+      "required": [
+        "boundary_source",
+        "boundary_version",
+        "match",
+        "aggregation"
+      ],
+      "properties": {
+        "country_code": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$"
+        },
+        "adm_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "boundary_source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "boundary_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "match": {
+          "enum": [
+            "cybench_verified",
+            "unmapped"
+          ]
+        },
+        "latitude": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90
+        },
+        "longitude": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        },
+        "aggregation": {
+          "enum": [
+            "administrative_crop_mask",
+            "field_point"
+          ]
+        },
+        "source_reference": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifact_sha256": {
+          "type": "string",
+          "pattern": "^[a-fA-F0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "calendar": {
+      "type": "object",
+      "required": [
+        "source",
+        "seasons"
+      ],
+      "properties": {
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "seasons": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "harvest_year",
+              "start",
+              "end",
+              "available_on"
+            ],
+            "properties": {
+              "harvest_year": {
+                "type": "integer",
+                "minimum": 1900,
+                "maximum": 2100
+              },
+              "start": {
+                "type": "string",
+                "format": "date"
+              },
+              "end": {
+                "type": "string",
+                "format": "date"
+              },
+              "available_on": {
+                "type": "string",
+                "format": "date"
+              }
+            },
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "source_reference": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifact_sha256": {
+          "type": "string",
+          "pattern": "^[a-fA-F0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "weather": {
+      "type": "object",
+      "required": [
+        "product",
+        "version",
+        "time_standard",
+        "units",
+        "observations"
+      ],
+      "properties": {
+        "product": {
+          "enum": [
+            "CY-Bench AgERA5",
+            "AgERA5",
+            "NASA POWER"
+          ]
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "time_standard": {
+          "type": "string",
+          "minLength": 1
+        },
+        "units": {
+          "type": "object",
+          "required": [
+            "tmin",
+            "tavg",
+            "tmax",
+            "prec",
+            "rad",
+            "et0",
+            "vpd",
+            "cwb"
+          ],
+          "properties": {
+            "tmin": {
+              "enum": [
+                "C",
+                "K"
+              ]
+            },
+            "tavg": {
+              "enum": [
+                "C",
+                "K"
+              ]
+            },
+            "tmax": {
+              "enum": [
+                "C",
+                "K"
+              ]
+            },
+            "prec": {
+              "enum": [
+                "mm/day"
+              ]
+            },
+            "rad": {
+              "enum": [
+                "J/m2/day",
+                "MJ/m2/day"
+              ]
+            },
+            "et0": {
+              "enum": [
+                "mm/day"
+              ]
+            },
+            "vpd": {
+              "enum": [
+                "hPa",
+                "kPa"
+              ]
+            },
+            "cwb": {
+              "enum": [
+                "mm/day"
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "observations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "date",
+              "available_on",
+              "tmin",
+              "tavg",
+              "tmax",
+              "prec",
+              "rad",
+              "et0",
+              "vpd",
+              "cwb"
+            ],
+            "properties": {
+              "date": {
+                "type": "string",
+                "format": "date"
+              },
+              "available_on": {
+                "type": "string",
+                "format": "date"
+              },
+              "tmin": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "tavg": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "tmax": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "prec": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "rad": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "et0": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "vpd": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "cwb": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              }
+            },
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "source_reference": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifact_sha256": {
+          "type": "string",
+          "pattern": "^[a-fA-F0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "soil": {
+      "type": "object",
+      "required": [
+        "product",
+        "version",
+        "available_on"
+      ],
+      "properties": {
+        "product": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "available_on": {
+          "type": "string",
+          "format": "date"
+        },
+        "awc": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 100
+        },
+        "awc_unit": {
+          "const": "CY-Bench WISE"
+        },
+        "bulk_density": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0.1,
+          "maximum": 3.5
+        },
+        "bulk_density_unit": {
+          "const": "kg/dm3"
+        },
+        "source_reference": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifact_sha256": {
+          "type": "string",
+          "pattern": "^[a-fA-F0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

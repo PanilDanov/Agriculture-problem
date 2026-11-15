@@ -1,0 +1,132 @@
+{
+  "inputs": {
+    "transfer_labels.zip": "a1a80277e36671559909882d6a12a661a0505b710ba429b15d275fa0ae163849",
+    "reference_corrected.csv": "ca8da91570a8d42593720cd08ffb40aa5f9e45e0e0d5fd8384f781afcfc06251",
+    "sidra1612.json": "0918421b9d0428b9b6493240857898008605850311e9af9c380e8331a586fc82"
+  },
+  "distributions": [
+    {
+      "crop": "maize",
+      "country": "US",
+      "valid_unique_label_rows": 4506,
+      "ambiguous_rows": 0,
+      "labels": {
+        "n": 4506,
+        "p01_t_ha": 3.25995,
+        "median_t_ha": 10.444,
+        "p99_t_ha": 14.309799999999992,
+        "max_t_ha": 17.402
+      },
+      "train_2003_2019": {
+        "n": 11810,
+        "p01_t_ha": 0.4,
+        "median_t_ha": 7.461,
+        "p99_t_ha": 13.03,
+        "max_t_ha": 23.333
+      }
+    },
+    {
+      "crop": "maize",
+      "country": "BR",
+      "valid_unique_label_rows": 15337,
+      "ambiguous_rows": 0,
+      "labels": {
+        "n": 15337,
+        "p01_t_ha": 0.09,
+        "median_t_ha": 3.494,
+        "p99_t_ha": 9.640079999999987,
+        "max_t_ha": 14.4
+      },
+      "train_2003_2019": {
+        "n": 11810,
+        "p01_t_ha": 0.4,
+        "median_t_ha": 7.461,
+        "p99_t_ha": 13.03,
+        "max_t_ha": 23.333
+      },
+      "sidra_year_shift_0": {
+        "matched": 10152,
+        "within_0_001_t_ha": 1175,
+        "by_harvest_year": [
+          {
+            "harvest_year": 2022,
+            "matched": 5079,
+            "within_0_001_t_ha": 573
+          },
+          {
+            "harvest_year": 2023,
+            "matched": 5073,
+            "within_0_001_t_ha": 602
+          }
+        ]
+      },
+      "sidra_year_shift_-1": {
+        "matched": 5110,
+        "within_0_001_t_ha": 4965,
+        "by_harvest_year": [
+          {
+            "harvest_year": 2023,
+            "matched": 5110,
+            "within_0_001_t_ha": 4965
+          }
+        ]
+      }
+    },
+    {
+      "crop": "wheat",
+      "country": "US",
+      "valid_unique_label_rows": 2614,
+      "ambiguous_rows": 0,
+      "labels": {
+        "n": 2614,
+        "p01_t_ha": 1.12491,
+        "median_t_ha": 4.327,
+        "p99_t_ha": 8.061179999999988,
+        "max_t_ha": 10.398
+      },
+      "train_2003_2019": {
+        "n": 12012,
+        "p01_t_ha": 1.0366499999999998,
+        "median_t_ha": 6.35,
+        "p99_t_ha": 9.62,
+        "max_t_ha": 33.696
+      }
+    },
+    {
+      "crop": "wheat",
+      "country": "BR",
+      "valid_unique_label_rows": 1974,
+      "ambiguous_rows": 0,
+      "labels": {
+        "n": 1974,
+        "p01_t_ha": 1.0584,
+        "median_t_ha": 3.0,
+        "p99_t_ha": 4.8,
+        "max_t_ha": 14.0
+      },
+      "train_2003_2019": {
+        "n": 12012,
+        "p01_t_ha": 1.0366499999999998,
+        "median_t_ha": 6.35,
+        "p99_t_ha": 9.62,
+        "max_t_ha": 33.696
+      },
+      "sidra_year_shift_0": {
+        "matched": 1016,
+        "within_0_001_t_ha": 1016,
+        "by_harvest_year": [
+          {
+            "harvest_year": 2022,
+            "matched": 1016,
+            "within_0_001_t_ha": 1016
+          }
+        ]
+      },
+      "sidra_year_shift_-1": {
+        "matched": 0,
+        "within_0_001_t_ha": 0,
+        "by_harvest_year": []
+      }
+    }
+  ]
+}

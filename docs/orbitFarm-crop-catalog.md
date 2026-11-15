@@ -1,6 +1,6 @@
 # orbitFarm plantable crop catalog
 
-All ten crops are available in the **Crop** planting selector and **Previous crop** field. Each crop has artwork for three growth stages. Plantings support editing, care reminders, and browser-local save/reload.
+All ten crops are available in the **Crop** planting selector and **Previous crop** field. Each crop has artwork for three growth stages. Plantings support editing, care reminders, recording harvests, replanting, and browser-local save/reload. New farms start with one whole-field bed. A selected rotation highlights its next crop and advances one season after the matching crop is harvested.
 
 | API and saved-state ID | English display name |
 | --- | --- |
@@ -27,7 +27,7 @@ Care reminders use the demonstration schedule and ask the farmer to check local 
 
 The farm scene and bed card show **Seedling** from the recorded planting date, **Growing** from the end of the reference initial stage, and **Ready to harvest** from the reference harvest threshold. The demo season slider spans at least a year from the current demo date and includes any later estimated harvest. The landscape blends through the four illustrated seasons as the displayed date changes. For open-field tomato, the recorded date is when the seedlings are transplanted into the field, and the harvest threshold estimates the first ripe fruit.
 
-The thresholds count elapsed calendar days. They use published examples or reference range midpoints for the demo. Field timing varies with cultivar, climate, and management. The analysis contract supplies a recommended planting date when available. The estimates below are derived from the planting record and this catalog.
+The thresholds count elapsed calendar days. They use published examples or reference range midpoints for the demo. Field timing varies with cultivar, climate, and management. The analysis contract supplies a recommended planting date when available. A matching recommended plan planting date can use the supplied calendar harvest date. Otherwise the estimates below are derived from the planting record and this catalog. `Harvest crop` is available when the crop is ready on the selected season date. Its `Harvest date` field defaults to that date. The explicit action records the date and unlocks the following planting; moving the season slider alone does not record a harvest. Future records appear as `Planned harvest` in the journal. Earlier dates continue to show the archived planting without permitting a second harvest.
 
 | Crop | Growing from day | Ready to harvest from day | Reference |
 | --- | ---: | ---: | --- |

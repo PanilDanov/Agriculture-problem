@@ -6,6 +6,7 @@ import './orbitFarm-select.css';
 export interface SelectOption {
   value: string;
   label: string;
+  badge?: string;
 }
 
 interface SelectProps {
@@ -186,14 +187,19 @@ export function Select({ label, value, options, onChange, disabled = false }: Se
               key={option.value}
               id={`${id}-option-${index}`}
               role="option"
+              aria-label={option.label}
+              aria-describedby={option.badge ? `${id}-option-${index}-badge` : undefined}
               aria-selected={option.value === value}
               className={`of-select-option${activeIndex === index ? ' is-active' : ''}`}
               data-index={index}
               onPointerMove={() => setActiveIndex(index)}
               onClick={() => choose(index)}
             >
-              <span>{option.label}</span>
-              {option.value === value && <Check size={16} strokeWidth={2} aria-hidden="true" />}
+              <span className="of-select-option-label">{option.label}</span>
+              {(option.badge || option.value === value) && <span className="of-select-option-meta">
+                {option.badge && <span className="of-select-option-badge" id={`${id}-option-${index}-badge`}>{option.badge}</span>}
+                {option.value === value && <Check size={16} strokeWidth={2} aria-hidden="true" />}
+              </span>}
             </div>
           ))}
         </div>, document.body,

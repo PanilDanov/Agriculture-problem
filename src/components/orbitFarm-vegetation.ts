@@ -17,7 +17,8 @@ const SHRUBS = [
 
 export function getOrchardMask(source: ImageData) {
   const mask = new Uint8Array(ORCHARD.width * ORCHARD.height);
-  const treeBounds = [[0, TREE_SPLIT], [TREE_SPLIT, ORCHARD.width]];
+  // Keep the original left fruit tree; only replace the right tree with the olive.
+  const treeBounds = [[TREE_SPLIT, ORCHARD.width]];
   for (let row = 0; row < ORCHARD.height; row++) {
     const y = ORCHARD.y + row;
     const rowOffset = row * ORCHARD.width;

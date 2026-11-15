@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  STORAGE_KEY, createDefaultLayout, createScenarioState, farmReducer, getBedName, getDueTasks,
+  STORAGE_KEY, createDefaultLayout, createDemoLayout, createScenarioState, farmReducer, getBedName, getDueTasks,
   getPlotLabel, loadFarm, polygonsOverlap, saveFarm, validateBedPolygon, validateFarmLayout,
 } from './orbitFarm-domain';
 import type { FarmLayout, FarmState, LayoutPoint, StorageLike } from './orbitFarm-types';
@@ -14,7 +14,7 @@ const memoryStorage = (): StorageLike => {
 };
 
 function legacyFarm(state: FarmState, version: 1 | 2) {
-  const { layout, demoToday, tasks, journal, ...fields } = state;
+  const { layout, demoToday, tasks, journal, harvests: _harvests, ...fields } = state;
   return {
     ...fields, version,
     ...(version === 2 ? { layout } : {}),
@@ -32,8 +32,15 @@ function legacyFarm(state: FarmState, version: 1 | 2) {
 }
 
 describe('custom bed geometry', () => {
-  it('keeps the default six-bed layout valid while allowing triangles and concave beds', () => {
-    expect(validateFarmLayout(createDefaultLayout())).toEqual({ valid: true, errors: [] });
+  it('starts new farms with one bed covering the full planning area', () => {
+    const layout = createDefaultLayout();
+    expect(validateFarmLayout(layout)).toEqual({ valid: true, errors: [] });
+    expect(layout.beds).toEqual([{ slotId: 0, name: 'Whole field', points: rectangle(0, 0, 24, 12) }]);
+    expect(createScenarioState('empty-farm').layout).toEqual(layout);
+    expect(createScenarioState('normal').layout.beds).toHaveLength(6);
+  });
+  it('keeps demonstration beds valid while allowing triangles and concave beds', () => {
+    expect(validateFarmLayout(createDemoLayout())).toEqual({ valid: true, errors: [] });
     expect(validateBedPolygon(points([[0, 0], [4, 0], [0, 4]]))).toMatchObject({ valid: true, area: 8 });
     const concave = points([[0, 0], [6, 0], [6, 2], [2, 2], [2, 6], [0, 6]]);
     expect(validateBedPolygon(concave)).toMatchObject({ valid: true, area: 20 });
@@ -84,11 +91,11 @@ describe('custom bed geometry', () => {
     expect(polygonsOverlap(polygon, rectangle(4, 1, 2, 2))).toBe(false);
   });
   it('rejects duplicate identifiers, missing names, invalid dimensions, and excessive beds', () => {
-    const layout = createDefaultLayout();
+    const layout = createDemoLayout();
     layout.beds[1].slotId = layout.beds[0].slotId;
     expect(validateFarmLayout(layout).errors.join()).toMatch(/identifiers/);
-    expect(validateFarmLayout({ ...createDefaultLayout(), width: 25 }).valid).toBe(false);
-    const unnamed = createDefaultLayout(); unnamed.beds[0].name = '   ';
+    expect(validateFarmLayout({ ...createDemoLayout(), width: 25 }).valid).toBe(false);
+    const unnamed = createDemoLayout(); unnamed.beds[0].name = '   ';
     expect(validateFarmLayout(unnamed).valid).toBe(false);
     const excessive = layoutWith(...Array.from({ length: 25 }, (_, index) => rectangle(index % 12 * 2, Math.floor(index / 12) * 2, 1, 1)));
     expect(validateFarmLayout(excessive).errors.join()).toMatch(/at most 24/);
@@ -105,7 +112,7 @@ describe('custom bed geometry', () => {
 describe('custom layouts preserve farm activity', () => {
   it('can plant an added bed whose stable identifier is outside the legacy six slots', () => {
     const original = createScenarioState();
-    const layout = createDefaultLayout();
+    const layout = createDemoLayout();
     layout.beds.push({ slotId: 40, name: 'Corner bed', points: rectangle(0, 0, 1, 1) });
     const edited = farmReducer(original, { type: 'set_layout', layout });
     const planted = farmReducer(edited, { type: 'plant', slotId: 40, cropId: 'chickpea', plantedOn: '2026-11-14' });
@@ -117,7 +124,7 @@ describe('custom layouts preserve farm activity', () => {
   it('keeps planting, tasks, history, and field analysis when a planted bed changes shape or name', () => {
     const original = createScenarioState();
     const completed = farmReducer(original, { type: 'complete_task', taskId: getDueTasks(original)[0].id });
-    const layout = createDefaultLayout();
+    const layout = createDemoLayout();
     layout.beds[0] = { slotId: 0, name: 'North bed', points: points([[1, 1], [7, 1], [7, 3], [4, 3], [4, 5], [1, 5]]) };
     const edited = farmReducer(completed, { type: 'set_layout', layout });
     expect(edited.layout.beds[0].points).toHaveLength(6);
@@ -133,7 +140,7 @@ describe('custom layouts preserve farm activity', () => {
     const original = createScenarioState();
     const task = getDueTasks(original)[0];
     const completed = farmReducer(original, { type: 'complete_task', taskId: task.id });
-    const layout = createDefaultLayout(); layout.beds = layout.beds.filter(bed => bed.slotId !== 0);
+    const layout = createDemoLayout(); layout.beds = layout.beds.filter(bed => bed.slotId !== 0);
     const edited = farmReducer(completed, { type: 'set_layout', layout });
     expect(edited.plots).toEqual(completed.plots.filter(plot => plot.id !== task.plotId));
     expect(edited.tasks).toEqual(completed.tasks.filter(item => item.plotId !== task.plotId));
@@ -143,7 +150,7 @@ describe('custom layouts preserve farm activity', () => {
   });
   it('rejects an invalid edit atomically and supports an intentionally empty layout', () => {
     const original = createScenarioState();
-    const layout = createDefaultLayout(); layout.beds[1].points = structuredClone(layout.beds[0].points);
+    const layout = createDemoLayout(); layout.beds[1].points = structuredClone(layout.beds[0].points);
     expect(farmReducer(original, { type: 'set_layout', layout })).toBe(original);
     const cleared = farmReducer(original, { type: 'set_layout', layout: { width: 24, height: 12, beds: [] } });
     expect(cleared.layout.beds).toHaveLength(0);
@@ -163,10 +170,10 @@ describe('layout persistence and legacy farm migration', () => {
     storage.setItem(STORAGE_KEY, saved);
     const result = loadFarm(storage);
     expect(result.error).toBeNull();
-    expect(result.state).toEqual({ ...completed, version: 3, layout: createDefaultLayout() });
+    expect(result.state).toEqual({ ...completed, version: 3, layout: createDemoLayout() });
     expect(storage.getItem(STORAGE_KEY)).toBe(saved);
     expect(saveFarm(result.state, storage)).toBeNull();
-    expect(JSON.parse(storage.getItem(STORAGE_KEY)!)).toMatchObject({ version: 3, layout: createDefaultLayout() });
+    expect(JSON.parse(storage.getItem(STORAGE_KEY)!)).toMatchObject({ version: 3, layout: createDemoLayout() });
     expect(loadFarm(storage).state.journal).toEqual(completed.journal);
   });
   it('migrates version-two dates without timezone shifts and preserves custom layout and Undo history', () => {
@@ -199,7 +206,7 @@ describe('layout persistence and legacy farm migration', () => {
   it('round-trips a custom polygon, name, and nonlegacy bed identifier', () => {
     const storage = memoryStorage();
     const original = createScenarioState();
-    const layout = createDefaultLayout();
+    const layout = createDemoLayout();
     layout.beds[0] = { slotId: 51, name: 'Triangle bed', points: points([[1, 1], [7, 1], [1, 5]]) };
     let edited = farmReducer(original, { type: 'set_layout', layout });
     edited = farmReducer(edited, { type: 'plant', slotId: 51, cropId: 'sorghum', plantedOn: '2026-11-14' });

@@ -79,7 +79,7 @@ test('the season slider previews every growth stage on the same planting', async
   await expect(card.getByRole('button', { name: 'Watered', exact: true })).toBeVisible();
 });
 
-test('the landscape blends across all four seasons in the demo year', async ({ page }) => {
+test('the landscape blends across all four seasons in the demo year', async ({ page }, testInfo) => {
   await page.clock.setFixedTime(new Date('2026-11-14T12:00:00Z'));
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await visit(page, 'farm');
@@ -102,41 +102,56 @@ test('the landscape blends across all four seasons in the demo year', async ({ p
   }
 
   async function sampleOrchard() {
-    return plants.evaluate(element => {
-      const area = (element as HTMLCanvasElement).getContext('2d')!.getImageData(169, 15, 100, 47);
+    return landscape.evaluate(root => {
+      const plants = root.querySelector<HTMLCanvasElement>('canvas[data-seasonal-plants]')!;
+      const area = plants.getContext('2d')!.getImageData(169, 15, 100, 47);
       const pixels = area.data;
-      let apple = 0, olive = 0, translucent = 0, gap = 0, exposedTwigs = 0;
+      let olive = 0, duplicateTreePixels = 0, translucent = 0;
+      const occupied = new Set<number>();
       for (let i = 3; i < pixels.length; i += 4) {
         if (!pixels[i]) continue;
         const pixel = (i - 3) / 4;
         const x = 169 + pixel % area.width;
-        const y = 15 + Math.floor(pixel / area.width);
-        if (x < 214) apple++;
-        else if (x >= 221) olive++;
-        else gap++;
-        const isTwig = (pixels[i - 3] === 89 && pixels[i - 2] === 67 && pixels[i - 1] === 42)
-          || (pixels[i - 3] === 120 && pixels[i - 2] === 86 && pixels[i - 1] === 51);
-        if (x < 214 && y < 48 && isTwig) exposedTwigs++;
-        if (pixels[i] > 0 && pixels[i] < 255) translucent++;
+        if (x < 221) duplicateTreePixels++;
+        else olive++;
+        occupied.add(pixel);
+        if (pixels[i] < 255) translucent++;
       }
-
-      // Trace the visible apple tree from its trunk through the branch and leaf pixels.
-      const trunk = (area.height - 1) * area.width + 25;
-      const connected = new Set([trunk]);
-      const pending = [trunk];
-      for (let index = 0; index < pending.length; index++) {
-        const x = pending[index] % area.width;
-        const y = Math.floor(pending[index] / area.width);
-        for (let row = Math.max(0, y - 1); row <= Math.min(area.height - 1, y + 1); row++) {
-          for (let col = Math.max(0, x - 1); col <= Math.min(44, x + 1); col++) {
-            const pixel = row * area.width + col;
-            if (!pixels[pixel * 4 + 3] || connected.has(pixel)) continue;
-            connected.add(pixel);
-            pending.push(pixel);
+      // The only tree drawn over the original landscape is the existing olive.
+      let oliveComponents = 0;
+      while (occupied.size) {
+        oliveComponents++;
+        const pending = [occupied.values().next().value!];
+        occupied.delete(pending[0]);
+        for (let head = 0; head < pending.length; head++) {
+          const x = pending[head] % area.width;
+          const y = Math.floor(pending[head] / area.width);
+          for (let row = Math.max(0, y - 1); row <= Math.min(area.height - 1, y + 1); row++) {
+            for (let col = Math.max(0, x - 1); col <= Math.min(area.width - 1, x + 1); col++) {
+              const neighbor = row * area.width + col;
+              if (!occupied.delete(neighbor)) continue;
+              pending.push(neighbor);
+            }
           }
         }
       }
-      return { apple, olive, gap, translucent, exposedTwigs, attached: connected.size === apple };
+
+      const image = root.querySelector('img')!;
+      const original = document.createElement('canvas');
+      original.width = image.naturalWidth;
+      original.height = image.naturalHeight;
+      const originalContext = original.getContext('2d')!;
+      originalContext.drawImage(image, 0, 0);
+      const leftTree = originalContext.getImageData(178, 17, 42, 49).data;
+      const frames = [...root.querySelectorAll<HTMLCanvasElement>('canvas[data-season]')];
+      let originalTreeShapeMismatches = 0;
+      for (const frame of frames) {
+        const rendered = frame.getContext('2d')!.getImageData(178, 17, 42, 49).data;
+        for (let i = 3; i < leftTree.length; i += 4) {
+          if (rendered[i] !== leftTree[i]) originalTreeShapeMismatches++;
+        }
+      }
+      return { olive, oliveComponents, duplicateTreePixels, translucent, originalTreeShapeMismatches };
     });
   }
 
@@ -165,47 +180,15 @@ test('the landscape blends across all four seasons in the demo year', async ({ p
 
   const winter = landscape.locator('canvas[data-season="winter"]');
   const matureOrchard = await sampleOrchard();
-  await seek('2026-11-30');
-  const lateAutumnOrchard = await sampleOrchard();
-  await seek('2026-12-09');
-  const earlyWinterOrchard = await sampleOrchard();
-  await seek('2026-12-18');
-  const lastLeaves = await sampleOrchard();
-  await seek('2026-12-31');
-  await expect(winter).toHaveCSS('opacity', '1');
-  const bareOrchard = await sampleOrchard();
-  expect(lateAutumnOrchard.apple).toBeLessThan(matureOrchard.apple);
-  expect(earlyWinterOrchard.apple).toBeLessThan(lateAutumnOrchard.apple);
-  expect(earlyWinterOrchard.apple).toBeGreaterThan(bareOrchard.apple);
-  expect(matureOrchard.exposedTwigs).toBe(0);
-  expect(bareOrchard.exposedTwigs).toBeGreaterThan(0);
-  expect(bareOrchard.olive).toBeGreaterThan(500);
-  for (const orchard of [matureOrchard, lateAutumnOrchard, earlyWinterOrchard, lastLeaves, bareOrchard]) {
-    expect(orchard.olive).toBe(bareOrchard.olive);
-    expect(orchard.gap).toBe(0);
-    expect(orchard.translucent).toBe(0);
-    expect(orchard.attached).toBe(true);
+  expect(matureOrchard.olive).toBeGreaterThan(500);
+  for (const date of ['2026-11-30', '2026-12-09', '2026-12-18', '2026-12-31', '2027-01-01', '2027-02-09', '2027-03-20']) {
+    await seek(date);
+    const orchard = await sampleOrchard();
+    expect(orchard).toMatchObject({
+      olive: matureOrchard.olive, oliveComponents: 1, duplicateTreePixels: 0,
+      translucent: 0, originalTreeShapeMismatches: 0,
+    });
   }
-  await seek('2027-01-01');
-  await expect(winter).toHaveCSS('opacity', '1');
-  await seek('2027-02-09');
-  expect(await sampleOrchard()).toMatchObject({ attached: true, gap: 0, translucent: 0 });
-  await seek('2027-03-20');
-  expect(await sampleOrchard()).toMatchObject({ gap: 0, exposedTwigs: 0, translucent: 0 });
-  const gapsInCrown = await plants.evaluate(element => {
-    const width = 45;
-    const height = 28;
-    const pixels = (element as HTMLCanvasElement).getContext('2d')!.getImageData(169, 21, width, height).data;
-    let gaps = 0;
-    for (let row = 0; row < height; row++) {
-      const alpha = [];
-      for (let x = 0; x < width; x++) alpha.push(pixels[(row * width + x) * 4 + 3]);
-      const first = alpha.indexOf(255);
-      if (first >= 0) gaps += alpha.slice(first, alpha.lastIndexOf(255)).filter(value => value === 0).length;
-    }
-    return gaps;
-  });
-  expect(gapsInCrown).toBeLessThanOrEqual(2);
   await seek('2027-05-30');
   const midpoint = await landscape.locator('canvas[data-season]').evaluateAll(frames => Object.fromEntries(
     frames.map(frame => [frame.getAttribute('data-season')!, Number(getComputedStyle(frame).opacity)])));
@@ -217,8 +200,11 @@ test('the landscape blends across all four seasons in the demo year', async ({ p
   await shortcuts.getByRole('button', { name: 'Winter, Jan 15, 2027' }).click();
   await expect(dateLabel).toHaveAttribute('datetime', '2027-01-15');
   await expect(plants).toHaveCSS('opacity', '1');
-  expect(await sampleOrchard()).toMatchObject({ gap: 0, translucent: 0 });
+  expect(await sampleOrchard()).toMatchObject({ oliveComponents: 1, duplicateTreePixels: 0, translucent: 0, originalTreeShapeMismatches: 0 });
   await expect(winter).toHaveCSS('opacity', '1');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.getByRole('button', { name: 'Current day', exact: true }).click();
+  await page.getByTestId('farm-scene').screenshot({ path: testInfo.outputPath('tree-fix-proof.png') });
 });
 
 test('the bed card records watering with or without a reminder', async ({ page }) => {
@@ -315,17 +301,20 @@ test('create a farm, analyze, plant, log care, and preserve it after reload', as
   await expect(page.getByRole('heading', { name: 'Rotation plans', exact: true })).toBeVisible();
   await expect(page.getByRole('article').filter({ has: page.getByRole('heading', { name: 'Example current plan', exact: true }) })).toBeVisible();
   await expect(page.getByRole('article', { name: 'Improve soil plan' })).toBeVisible();
-  await page.getByRole('article', { name: 'Save water plan' })
+  await page.getByRole('article', { name: 'Improve soil plan' })
     .getByRole('button', { name: 'Use this plan', exact: true }).click();
 
   await expect(page).toHaveURL(/#\/farm$/);
   await expect(page.getByTestId('farm-name')).toContainText('Sunrise Test Farm');
-  await page.getByTestId('plot-slot-3').click();
+  await expect(page.getByTestId('farm-scene').locator('[data-testid^="plot-slot-"]')).toHaveCount(1);
+  const initialLayout = await page.evaluate(() => JSON.parse(localStorage.getItem('orbitFarm.farm.v1')!).layout);
+  expect(initialLayout.beds).toEqual([{ slotId: 0, name: 'Whole field', points: [{ x: 0, y: 0 }, { x: 24, y: 0 }, { x: 24, y: 12 }, { x: 0, y: 12 }] }]);
+  await page.getByTestId('plot-slot-0').click();
   await page.getByRole('combobox', { name: 'Crop', exact: true }).click();
   await page.getByRole('option', { name: 'Chickpea', exact: true }).click();
   await page.getByLabel('Planting date', { exact: true }).fill('2026-11-01');
   await page.getByRole('button', { name: 'Plant crop', exact: true }).click();
-  await expect(page.getByTestId('plot-slot-3')).toHaveAccessibleName(/Chickpea/);
+  await expect(page.getByTestId('plot-slot-0')).toHaveAccessibleName(/Chickpea/);
 
   await page.getByTestId('selected-task').getByRole('button', { name: 'Watered', exact: true }).click();
   await expect(page.getByRole('status').filter({ hasText: 'Irrigation logged' })
@@ -338,16 +327,16 @@ test('create a farm, analyze, plant, log care, and preserve it after reload', as
   await expect(page.getByTestId('journal-entry').filter({ hasText: 'Irrigation logged' })).toHaveCount(1);
   await navigate(page, 'Your farm');
   await expect(page.getByTestId('farm-name')).toContainText('Sunrise Test Farm');
-  await expect(page.getByTestId('plot-slot-3')).toHaveAccessibleName(/Chickpea/);
+  await expect(page.getByTestId('plot-slot-0')).toHaveAccessibleName(/Chickpea/);
 
   await page.getByRole('button', { name: 'Edit field information', exact: true }).click();
   await expect(page.getByLabel('Farm name', { exact: true })).toHaveValue('Sunrise Test Farm');
   await page.getByLabel('Farm name', { exact: true }).fill('Sunrise Updated Farm');
   await page.getByRole('button', { name: 'Analyze my farm', exact: true }).click();
-  await page.getByRole('article', { name: 'Save water plan' })
+  await page.getByRole('article', { name: 'Improve soil plan' })
     .getByRole('button', { name: 'Use this plan', exact: true }).click();
   await expect(page.getByTestId('farm-name')).toContainText('Sunrise Updated Farm');
-  await expect(page.getByTestId('plot-slot-3')).toHaveAccessibleName(/Chickpea/);
+  await expect(page.getByTestId('plot-slot-0')).toHaveAccessibleName(/Chickpea/);
   await navigate(page, 'Journal');
   await expect(page.getByTestId('journal-entry').filter({ hasText: 'Irrigation logged' })).toHaveCount(1);
 });
@@ -441,6 +430,8 @@ for (const timezoneId of ['Pacific/Honolulu', 'Pacific/Kiritimati']) {
       await page.getByRole('combobox', { name: 'Crop', exact: true }).click();
       await page.getByRole('option', { name: 'Chickpea', exact: true }).click();
       await expect(page.getByLabel('Planting date', { exact: true })).toHaveValue('2028-03-01');
+      const acknowledgement = page.getByRole('checkbox', { name: 'Plant outside the selected plan', exact: true });
+      if (await acknowledgement.isVisible()) await acknowledgement.check();
       await page.getByRole('button', { name: 'Plant crop', exact: true }).click();
       await expect(page.locator('.plot-summary')).toContainText('Mar 1, 2028');
       await page.reload();

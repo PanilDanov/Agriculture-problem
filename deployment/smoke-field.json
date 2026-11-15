@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "1.0",
+  "requestId": "2bd65a7a-54af-41f1-955d-619eac56dac2",
+  "farmId": "release-smoke-egypt",
+  "boundaryVersion": 1,
+  "boundary": {
+    "type": "Polygon",
+    "coordinates": [[[31.049, 30.399], [31.051, 30.399], [31.051, 30.401], [31.049, 30.401], [31.049, 30.399]]]
+  },
+  "regionLabel": "Illustrative Nile Delta field",
+  "localInputs": {
+    "soil": {"ph": null, "texture": null, "source": "unknown", "sampledOn": null},
+    "irrigation": {"availability": "unknown", "method": null, "waterBudget": null, "applicationEfficiency": null},
+    "previousCropId": null,
+    "currentPlan": null
+  },
+  "priorities": ["balanced"],
+  "yieldForecast": {"mode": "annual_history"}
+}

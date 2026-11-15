@@ -16,14 +16,35 @@ export interface Crop {
 }
 
 export interface FarmInputs {
-  soil: { ph: number | null; texture: string | null; source?: 'farmer_reported' | 'soil_test' | 'synthetic' | 'unknown' };
+  soil: { ph: number | null; texture: string | null; source?: 'farmer_reported' | 'soil_test' | 'synthetic' | 'unknown'; sampledOn?: string | null };
   irrigation: {
     availability: 'available' | 'none' | 'unknown';
     method: 'drip' | 'sprinkler' | 'surface' | null;
     volumeM3: number | null;
+    applicationEfficiency?: number | null;
+    periodStart?: string | null;
+    periodEnd?: string | null;
   };
   previousCropId: CropId | null;
   priority: Priority;
+  currentPlan?: Array<{ seasonIndex: number; cropId: CropId }> | null;
+  fieldObservations?: FieldObservations | null;
+  seasonalWaterBalance?: FieldObservations['seasonalWaterBalance'];
+  yieldForecast?: { mode: 'auto' | 'annual_history' | 'pre_season' | 'mid_season'; harvestYear?: number | null };
+  agroEcologicalZone?: string | null;
+}
+
+export interface FieldObservations {
+  observedOn: string;
+  cropId: CropId;
+  variant?: string | null;
+  stage: 'initial' | 'development' | 'mid_season' | 'late';
+  stageProgress?: number | null;
+  et0MmDay?: number | null;
+  applicationEfficiency?: number | null;
+  source: string;
+  rootZoneLayers?: Array<{ thicknessM: number; thetaFc: number; thetaWp: number; thetaNow: number | null }>;
+  seasonalWaterBalance?: Array<{ cropId: CropId; periodStart: string; periodEnd: string; netIrrigationRequirementMm: number; source: string; method: string }>;
 }
 
 export interface AnalysisRequest {
@@ -38,13 +59,17 @@ export interface AnalysisRequest {
     irrigation: {
       availability: FarmInputs['irrigation']['availability'];
       method: FarmInputs['irrigation']['method'];
-      waterBudget: { volumeM3: number; basis: 'field_inlet' } | null;
+      waterBudget: { volumeM3: number; basis: 'field_inlet'; periodStart?: string | null; periodEnd?: string | null } | null;
       applicationEfficiency: number | null;
     };
     previousCropId: CropId | null;
     currentPlan: null | Array<{ seasonIndex: number; cropId: CropId }>;
+    fieldObservations?: FieldObservations | null;
+    seasonalWaterBalance?: FieldObservations['seasonalWaterBalance'];
+    agroEcologicalZone?: string | null;
   };
   priorities: [Priority];
+  yieldForecast?: FarmInputs['yieldForecast'];
 }
 
 export interface EnvironmentalSignal {
@@ -67,6 +92,12 @@ export interface CropOption {
   scoreStatus: 'complete' | 'insufficient_data';
   reasons: string[];
   recommendedPlantingDate?: string | null;
+  evaluationStatus?: 'evaluated' | 'insufficient_data' | 'excluded';
+  componentScores?: Record<string, number | null>;
+  knownWeight?: number;
+  missingFields?: string[];
+  exclusionReasons?: string[];
+  scoringModelVersion?: string;
 }
 
 export interface RotationPlan {
@@ -103,6 +134,34 @@ export interface AnalysisResult {
   rotationPlans: RotationPlan[];
   assumptions: string[];
   limitations: string[];
+  yieldForecasts?: YieldForecast[];
+  irrigationAssessment?: IrrigationAssessment;
+  modelVersion?: string;
+  recentWeather?: { status: string; periodStart?: string; periodEnd?: string; meanTemperatureC?: number | null; precipitationMm?: number | null; latestEt0MmDay?: number | null; observedOn?: string | null; source?: string };
+}
+
+export interface YieldForecast {
+  cropId: CropId;
+  status: 'available' | 'unavailable';
+  harvestYear?: number;
+  mode?: string;
+  reason?: string;
+  code?: string;
+  forecast?: {
+    crop: string; mode: string; predicted_yield_t_ha: number; spatial_level: 'country' | 'administrative_region';
+    model_version: string; warnings: string[]; prediction_interval_t_ha?: [number, number] | null;
+    country_code?: string; harvest_year?: number; data_through?: string | number; last_observed_year?: number;
+    source?: string | Record<string, unknown>; experimental?: boolean;
+    [key: string]: unknown;
+  };
+  diagnostics?: Record<string, unknown> | null;
+}
+
+export interface IrrigationAssessment {
+  status: string;
+  missingFields?: string[];
+  limitations?: string[];
+  [key: string]: unknown;
 }
 
 export interface Plot {

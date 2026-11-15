@@ -1,0 +1,30 @@
+name: orbitfarm
+services:
+  ml:
+    build:
+      context: .
+      dockerfile: deployment/ml.Dockerfile
+    environment:
+      ORBITFARM_ML_TOKEN: ${ORBITFARM_ML_TOKEN:-}
+    expose:
+      - "8001"
+    restart: unless-stopped
+  api:
+    build:
+      context: .
+      dockerfile: deployment/api.Dockerfile
+    depends_on:
+      ml:
+        condition: service_healthy
+    environment:
+      ORBITFARM_ML_URL: http://ml:8001
+      ORBITFARM_ML_TOKEN: ${ORBITFARM_ML_TOKEN:-}
+      ORBITFARM_SOURCE_TIMEOUT: ${ORBITFARM_SOURCE_TIMEOUT:-32}
+      ORBITFARM_REGIONAL_INPUT_DIR: /app/agronomy/regional_inputs
+    ports:
+      - "127.0.0.1:${ORBITFARM_API_PORT:-8000}:8000"
+    volumes:
+      - field-cache:/var/cache/orbitfarm
+    restart: unless-stopped
+volumes:
+  field-cache:

@@ -1,0 +1,440 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Model features 1.0",
+  "oneOf": [
+    {
+      "type": "object",
+      "required": [
+        "country_code",
+        "harvest_year",
+        "season_start",
+        "season_end",
+        "season_days",
+        "climate_through",
+        "climate_seasons",
+        "climate_temperature_c",
+        "climate_min_temperature_c",
+        "climate_max_temperature_c",
+        "climate_temperature_sd_c",
+        "climate_precipitation_mm",
+        "climate_precipitation_mm_day",
+        "climate_radiation_mj_m2_day",
+        "climate_et0_mm",
+        "climate_vpd_kpa",
+        "climate_water_balance_mm",
+        "climate_hot_days",
+        "climate_frost_days",
+        "climate_dry_days",
+        "climate_precipitation_sd_mm",
+        "climate_temperature_interannual_sd_c"
+      ],
+      "properties": {
+        "country_code": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$"
+        },
+        "adm_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "harvest_year": {
+          "type": "integer",
+          "minimum": 1900,
+          "maximum": 2100
+        },
+        "season_start": {
+          "type": "string",
+          "format": "date"
+        },
+        "season_end": {
+          "type": "string",
+          "format": "date"
+        },
+        "season_days": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 366
+        },
+        "climate_through": {
+          "type": "string",
+          "format": "date"
+        },
+        "climate_seasons": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 5
+        },
+        "climate_temperature_c": {
+          "type": "number",
+          "minimum": -65,
+          "maximum": 65
+        },
+        "climate_min_temperature_c": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 65
+        },
+        "climate_max_temperature_c": {
+          "type": "number",
+          "minimum": -65,
+          "maximum": 70
+        },
+        "climate_temperature_sd_c": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 65
+        },
+        "climate_precipitation_mm": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 12000
+        },
+        "climate_precipitation_mm_day": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 150
+        },
+        "climate_radiation_mj_m2_day": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 45
+        },
+        "climate_et0_mm": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5000
+        },
+        "climate_vpd_kpa": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 15
+        },
+        "climate_water_balance_mm": {
+          "type": "number",
+          "minimum": -5000,
+          "maximum": 12000
+        },
+        "climate_hot_days": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 366
+        },
+        "climate_frost_days": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 366
+        },
+        "climate_dry_days": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 366
+        },
+        "climate_precipitation_sd_mm": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 12000
+        },
+        "climate_temperature_interannual_sd_c": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 65
+        },
+        "awc": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 100
+        },
+        "bulk_density": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0.1,
+          "maximum": 3.5
+        },
+        "latitude": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": -90,
+          "maximum": 90
+        },
+        "longitude": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": -180,
+          "maximum": 180
+        }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": [
+        "country_code",
+        "adm_id",
+        "harvest_year",
+        "season_start",
+        "season_end",
+        "season_days",
+        "climate_through",
+        "climate_seasons",
+        "climate_temperature_c",
+        "climate_min_temperature_c",
+        "climate_max_temperature_c",
+        "climate_temperature_sd_c",
+        "climate_precipitation_mm",
+        "climate_precipitation_mm_day",
+        "climate_radiation_mj_m2_day",
+        "climate_et0_mm",
+        "climate_vpd_kpa",
+        "climate_water_balance_mm",
+        "climate_hot_days",
+        "climate_frost_days",
+        "climate_dry_days",
+        "climate_precipitation_sd_mm",
+        "climate_temperature_interannual_sd_c",
+        "mid_temperature_c",
+        "mid_min_temperature_c",
+        "mid_max_temperature_c",
+        "mid_temperature_sd_c",
+        "mid_precipitation_mm",
+        "mid_precipitation_mm_day",
+        "mid_radiation_mj_m2_day",
+        "mid_et0_mm",
+        "mid_vpd_kpa",
+        "mid_water_balance_mm",
+        "mid_hot_days",
+        "mid_frost_days",
+        "mid_dry_days",
+        "mid_weather_through",
+        "mid_weather_coverage"
+      ],
+      "properties": {
+        "country_code": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$"
+        },
+        "adm_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "harvest_year": {
+          "type": "integer",
+          "minimum": 1900,
+          "maximum": 2100
+        },
+        "season_start": {
+          "type": "string",
+          "format": "date"
+        },
+        "season_end": {
+          "type": "string",
+          "format": "date"
+        },
+        "season_days": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 366
+        },
+        "climate_through": {
+          "type": "string",
+          "format": "date"
+        },
+        "climate_seasons": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 5
+        },
+        "climate_temperature_c": {
+          "type": "number",
+          "minimum": -65,
+          "maximum": 65
+        },
+        "climate_min_temperature_c": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 65
+        },
+        "climate_max_temperature_c": {
+          "type": "number",
+          "minimum": -65,
+          "maximum": 70
+        },
+        "climate_temperature_sd_c": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 65
+        },
+        "climate_precipitation_mm": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 12000
+        },
+        "climate_precipitation_mm_day": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 150
+        },
+        "climate_radiation_mj_m2_day": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 45
+        },
+        "climate_et0_mm": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5000
+        },
+        "climate_vpd_kpa": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 15
+        },
+        "climate_water_balance_mm": {
+          "type": "number",
+          "minimum": -5000,
+          "maximum": 12000
+        },
+        "climate_hot_days": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 366
+        },
+        "climate_frost_days": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 366
+        },
+        "climate_dry_days": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 366
+        },
+        "climate_precipitation_sd_mm": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 12000
+        },
+        "climate_temperature_interannual_sd_c": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 65
+        },
+        "awc": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 100
+        },
+        "bulk_density": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0.1,
+          "maximum": 3.5
+        },
+        "latitude": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": -90,
+          "maximum": 90
+        },
+        "longitude": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": -180,
+          "maximum": 180
+        },
+        "mid_temperature_c": {
+          "type": "number",
+          "minimum": -65,
+          "maximum": 65
+        },
+        "mid_min_temperature_c": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 65
+        },
+        "mid_max_temperature_c": {
+          "type": "number",
+          "minimum": -65,
+          "maximum": 70
+        },
+        "mid_temperature_sd_c": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 65
+        },
+        "mid_precipitation_mm": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 12000
+        },
+        "mid_precipitation_mm_day": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 150
+        },
+        "mid_radiation_mj_m2_day": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 45
+        },
+        "mid_et0_mm": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5000
+        },
+        "mid_vpd_kpa": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 15
+        },
+        "mid_water_balance_mm": {
+          "type": "number",
+          "minimum": -5000,
+          "maximum": 12000
+        },
+        "mid_hot_days": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 366
+        },
+        "mid_frost_days": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 366
+        },
+        "mid_dry_days": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 366
+        },
+        "mid_weather_through": {
+          "type": "string",
+          "format": "date"
+        },
+        "mid_weather_coverage": {
+          "type": "number",
+          "minimum": 0.95,
+          "maximum": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  ]
+}

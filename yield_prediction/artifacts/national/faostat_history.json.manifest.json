@@ -1,0 +1,20 @@
+{
+  "sha256": "9466548959ffb3887f1234eba2502626822fde0611d59779e243dde76eaa3a3d",
+  "source": {
+    "dataset": "FAOSTAT Crops and livestock products (QCL)",
+    "url": "https://bulks-faostat.fao.org/production/Production_Crops_Livestock_E_All_Data_(Normalized).zip",
+    "documentation": "https://www.fao.org/faostat/en/#data/QCL",
+    "published_on": "2025-12-31",
+    "archive_sha256": "c5835418c18f9322e7decbd6800f93a216eaae3cdfa31acb08f0518c0c6d6853",
+    "country_mapping_url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_110m_admin_0_countries.geojson",
+    "country_mapping_sha256": "6866c877d39cba9c357620878839b336d569f8c662d3cfab4cb1dbe2d39c977f",
+    "snapshot_max_harvest_year": 2024,
+    "retrieved_on": "2026-11-15",
+    "flags": {
+      "A": "Official figure",
+      "E": "Estimated value",
+      "I": "Imputed by receiving agency",
+      "X": "External organization"
+    }
+  }
+}

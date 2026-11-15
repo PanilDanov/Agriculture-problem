@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "1.0",
+  "requestId": "93cbd94b-a7ef-4d6d-a91b-a8b07be6fd4c",
+  "farmId": "example-field",
+  "boundaryVersion": 1,
+  "boundary": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          -93.5008,
+          41.9994
+        ],
+        [
+          -93.4992,
+          41.9994
+        ],
+        [
+          -93.4992,
+          42.0006
+        ],
+        [
+          -93.5008,
+          42.0006
+        ],
+        [
+          -93.5008,
+          41.9994
+        ]
+      ]
+    ]
+  },
+  "regionLabel": "Example field in Iowa",
+  "localInputs": {
+    "soil": {
+      "ph": null,
+      "texture": null,
+      "source": "unknown",
+      "sampledOn": null
+    },
+    "irrigation": {
+      "availability": "unknown",
+      "method": null,
+      "waterBudget": null,
+      "applicationEfficiency": null
+    },
+    "previousCropId": "wheat",
+    "currentPlan": null
+  },
+  "priorities": [
+    "save_water"
+  ]
+}

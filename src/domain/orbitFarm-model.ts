@@ -52,10 +52,16 @@ export function buildAnalysisRequest(state: FarmState, requestId: string): Analy
     schemaVersion: '1.0', requestId, farmId: state.farmId, boundaryVersion: state.boundaryVersion, boundary: state.boundary,
     regionLabel: 'Selected field',
     localInputs: {
-      soil: { ...inputs.soil, source: inputs.soil.source ?? (state.scenarioId === 'empty-farm' ? 'farmer_reported' : 'synthetic'), sampledOn: null },
-      irrigation: { availability: irrigation.availability, method: irrigation.method, waterBudget: irrigation.volumeM3 === null ? null : { volumeM3: irrigation.volumeM3, basis: 'field_inlet' }, applicationEfficiency: null },
-      previousCropId: inputs.previousCropId, currentPlan: null,
-    }, priorities: [inputs.priority],
+      soil: { ...inputs.soil, source: inputs.soil.source ?? (state.scenarioId === 'empty-farm' ? 'farmer_reported' : 'synthetic'), sampledOn: inputs.soil.sampledOn ?? null },
+      irrigation: { availability: irrigation.availability, method: irrigation.method,
+        waterBudget: irrigation.volumeM3 === null ? null : { volumeM3: irrigation.volumeM3, basis: 'field_inlet',
+          ...(irrigation.periodStart ? { periodStart: irrigation.periodStart, periodEnd: irrigation.periodEnd } : {}) },
+        applicationEfficiency: irrigation.applicationEfficiency ?? null },
+      previousCropId: inputs.previousCropId, currentPlan: inputs.currentPlan ?? null,
+      ...(inputs.fieldObservations ? { fieldObservations: inputs.fieldObservations } : {}),
+      ...(inputs.seasonalWaterBalance ? { seasonalWaterBalance: inputs.seasonalWaterBalance } : {}),
+      ...(inputs.agroEcologicalZone ? { agroEcologicalZone: inputs.agroEcologicalZone } : {}),
+    }, priorities: [inputs.priority], ...(inputs.yieldForecast ? { yieldForecast: inputs.yieldForecast } : {}),
   });
 }
 
@@ -111,7 +117,7 @@ export function farmReducer(state: FarmState, action: FarmAction): FarmState {
       return { ...state, boundary: structuredClone(action.boundary), boundaryVersion: state.boundaryVersion + 1, analysis: null, pendingRequestId: null, analysisError: null, selectedPlanId: null };
     }
     case 'set_inputs': {
-      try { const inputs = validateFarmInputs(action.inputs); inputs.soil.source = inputs.soil.ph === null && inputs.soil.texture === null ? 'unknown' : 'farmer_reported'; return { ...state, inputs, analysis: null, pendingRequestId: null, analysisError: null, selectedPlanId: null }; }
+      try { const inputs = validateFarmInputs(action.inputs); inputs.soil.source = inputs.soil.ph === null && inputs.soil.texture === null ? 'unknown' : inputs.soil.source === 'soil_test' ? 'soil_test' : 'farmer_reported'; return { ...state, inputs, analysis: null, pendingRequestId: null, analysisError: null, selectedPlanId: null }; }
       catch (error) { return { ...state, analysisError: error instanceof Error ? error.message : 'Check your farm information.' }; }
     }
     case 'analysis_started': return { ...state, pendingRequestId: action.requestId, analysisError: null };

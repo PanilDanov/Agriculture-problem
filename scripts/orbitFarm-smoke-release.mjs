@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 
 const staleEtag = '"c6e39d374b170c1e45c5bd4ec8616573"';
@@ -38,6 +39,9 @@ async function verifyRelease(baseUrl) {
   assert.equal(contentType(healthResponse), 'application/json', `${healthUrl} must return JSON.`);
   assert.equal((await healthResponse.json()).status, 'ok', `${healthUrl} did not report status "ok".`);
   process.stdout.write('PASS /health: HTTP 200 and status ok.\n');
+  const readyResponse = await request(new URL('/ready', baseUrl));
+  assert.equal((await readyResponse.json()).status, 'ready', 'The field API must report actual ML readiness.');
+  process.stdout.write('PASS /ready: field API and all packaged ML models are ready.\n');
 
   const assets = new Map();
   for (const path of ['/', '/index.html']) {
@@ -65,6 +69,29 @@ async function verifyRelease(baseUrl) {
     process.stdout.write(`PASS ${type}: ${new URL(url).pathname}\n`);
   }));
   for (const result of results) if (result.status === 'rejected') throw result.reason;
+
+  const payload = JSON.parse(await readFile(new URL('../deployment/smoke-field.json', import.meta.url), 'utf8'));
+  const analysisResponse = await fetch(new URL('/v1/analysis', baseUrl), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(55_000),
+  });
+  assert.equal(analysisResponse.status, 200, `Real field analysis returned HTTP ${analysisResponse.status}.`);
+  const analysis = await analysisResponse.json();
+  assert(['nasa-api', 'nasa-cache'].includes(analysis.dataMode), 'Release analysis must use actual NASA observations.');
+  assert.equal(analysis.cropOptions?.length, 10, 'All ten crop options must be present.');
+  assert.equal(analysis.rotationPlans?.length, 3, 'All three rotation plans must be present.');
+  assert.equal(analysis.yieldForecasts?.length, 10, 'All ten yield model results must be present.');
+  for (const row of analysis.yieldForecasts) {
+    assert.equal(row.status, 'available', `${row.cropId} forecast is unavailable: ${row.reason ?? row.code ?? 'unknown reason'}`);
+    assert.equal(row.forecast?.spatial_level, 'country', 'National forecasts must preserve their actual spatial scope.');
+    assert(Number.isFinite(row.forecast.predicted_yield_t_ha) && row.forecast.predicted_yield_t_ha > 0,
+      `${row.cropId} must return a finite, positive actual model forecast.`);
+    assert(row.forecast.model_version, `${row.cropId} must identify its model version.`);
+    assert.equal(row.usesNasaWeather, false, 'Annual yield-history models must not claim NASA weather as a predictor.');
+  }
+  process.stdout.write('PASS /v1/analysis: real NASA field context and ten actual country ML forecasts.\n');
   process.stdout.write(`Release smoke check passed for ${baseUrl.origin} (${assets.size} assets).\n`);
 }
 

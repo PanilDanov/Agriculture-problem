@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "1.0",
+  "requestId": "2bd65a7a-54af-41f1-955d-619eac56dac2",
+  "farmId": "release-smoke-lugo",
+  "boundaryVersion": 1,
+  "boundary": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          -7.573,
+          43.11223
+        ],
+        [
+          -7.571,
+          43.11223
+        ],
+        [
+          -7.571,
+          43.11423
+        ],
+        [
+          -7.573,
+          43.11423
+        ],
+        [
+          -7.573,
+          43.11223
+        ]
+      ]
+    ]
+  },
+  "regionLabel": "Lugo, Spain; published regional forecast",
+  "localInputs": {
+    "soil": {
+      "ph": null,
+      "texture": null,
+      "source": "unknown",
+      "sampledOn": null
+    },
+    "irrigation": {
+      "availability": "unknown",
+      "method": null,
+      "waterBudget": null,
+      "applicationEfficiency": null
+    },
+    "previousCropId": null,
+    "currentPlan": null
+  },
+  "priorities": [
+    "balanced"
+  ],
+  "yieldForecast": {
+    "mode": "pre_season",
+    "harvestYear": 2026
+  }
+}

@@ -1,62 +1,96 @@
-# orbitFarm deployment on Vercel
+# Run and deploy the complete orbitFarm application
 
-The `lu1dgys-projects/orbitfarm` project serves the Vite frontend and FastAPI on [orbitfarm.vercel.app](https://orbitfarm.vercel.app/). New sessions start in live API mode and submit the field contour to `POST /v1/analysis` at the site's origin. Saved farms use browser local storage. The backend fetches source data on demand and caches responses in the function's temporary filesystem. [Vercel FastAPI hosting](https://vercel.com/docs/frameworks/backend/fastapi) · [Vercel function filesystem](https://vercel.com/docs/functions/runtimes#file-system-support)
+The integrated checkout contains the website, NASA field API, crop assessments and all yield-model artifacts. The field API and ML process use **separate Python environments**: the field service supports Python 3.11/3.12, while the released ML package requires Python 3.11 and exact model-library versions. National annual-history forecasts cover all ten product crops; regional environmental models cover wheat and maize where verified crop-mask regional inputs are installed.
 
-## Deploy from GitHub
+## Local setup and run
 
-Each push to `frontend` runs `orbitFarm checks`. After the tests pass, the workflow packages the frontend and FastAPI, publishes the release to the public site, and checks `/health`.
+Install Python 3.11 and Node.js 22.12 or newer; Node 24 LTS is recommended. An optional Python 3.12 can run the field API. No global Python package installation is needed.
 
-Set `VERCEL_TOKEN` as a repository Actions secret with deploy access to `lu1dgys-projects/orbitfarm`. The workflow builds the release while publishing awaits this secret. To upgrade FastAPI, update `BACKEND_REVISION` in `.github/workflows/orbitFarm-checks.yml` to the tested backend commit.
+```bash
+python3 scripts/orbitFarm-local.py setup
+python3 scripts/orbitFarm-local.py check
+python3 scripts/orbitFarm-local.py run
+```
 
-## Build a release
+The setup command creates `.venv-api` and `.venv-ml`, installs the frontend lockfile and exact model dependencies, and verifies all 18 model artifacts. On Apple Silicon it installs a checksum-verified OpenMP library only under `.runtime/native`, retaining its license. Linux hosts need their native OpenMP runtime; the containers below install it explicitly. The launcher can use an official Node distribution already extracted under `.runtime/node-v*/` when the global Node is too old.
 
-Use Node.js 22.12 or newer and an authenticated Vercel CLI. The release script uses the Windows system `tar.exe` or `bsdtar` on macOS and Linux.
+`run` builds the website with same-origin real API enabled, starts inference on port 8001 and serves the API plus built website at **http://127.0.0.1:8000**. It waits for actual model readiness and stops its own child processes on Ctrl+C. Use `--no-build` for an existing verified build, or `--reuse-ml` to connect to an already running inference service. Ports and optional service token are configurable through `.env`; copy `.env.example` to see supported settings. Shell environment values take precedence. Tokens are not printed.
 
-From the frontend checkout, install the frontend dependencies and build the release using the backend checkout as input.
+Explicit interpreter and environment paths are supported:
+
+```bash
+python3 scripts/orbitFarm-local.py setup --ml-python /path/to/python3.11 --api-python /path/to/python3.12
+python3 scripts/orbitFarm-local.py check --api-env /path/to/api-venv --ml-env /path/to/ml-venv
+```
+
+Windows can invoke the script with its installed Python interpreter and supply full interpreter paths when `python3.11` is not a command. The corresponding environment executables are under `Scripts/`. Native model dependencies must be available for that platform.
+
+## Complete container deployment
+
+Docker Compose builds the website and two independent services. The API image uses Python 3.12 plus Expat; the ML image uses Python 3.11, OpenMP and pinned regional/candidate/national model dependencies.
+
+```bash
+mkdir -p .runtime/regional-inputs
+docker compose up --build --detach --wait --wait-timeout 120
+curl --fail http://127.0.0.1:8000/ready
+```
+
+The website is available at **http://127.0.0.1:8000**. Only the API port is published to loopback; ML stays on the internal service network at `http://ml:8001`. A host reverse proxy can expose the website over HTTPS. Source responses persist in the named `field-cache` volume. The API image includes the audited ES112 regional registry; requests beyond its crop/year/geographic coverage remain explicit coverage gaps. National forecasts still operate where FAOSTAT country histories are available. Additional audited registries can be installed in a custom image or mounted with a Compose override and `ORBITFARM_REGIONAL_INPUT_DIR`.
+
+Use `docker compose logs --follow` for diagnostics and `docker compose down` to stop the stack. Avoid deleting the cache volume when a source replay is needed. Source caches and regional datasets have separate provenance and data dates.
+
+## Data and model readiness
+
+`GET /health` checks process availability. **`GET /ready` checks the connected inference service and its actual model artifacts.** A successful health response alone does not establish model readiness.
+
+The national models and filtered reproducible FAOSTAT source snapshot are included in Git. Country coverage differs by crop; absent production histories remain unavailable rather than borrowing another country's estimate. Source dates, versions, forecast horizon and experimental quality status are returned. See [national data and models](../yield_prediction/docs/national_models.md) for retraining and label units.
+
+Regional models require daily AgERA5 aggregated over the correct administrative crop mask, a verified boundary/ID crosswalk, publication dates and eligible calendars. A real [ES112/Lugo 2026 pre-season release](../yield_prediction/docs/published_regional_inputs.md) for wheat and maize is included by default, using five published 2019-2023 seasons and original verified 2025 source availability. These estimates are explicitly historical replays: their January/April nominal forecast dates remain distinct from the actual calculation timestamp and 2023 climate cutoff. NASA POWER remains the real source for field weather, water and suitability assessments; a NASA point is never relabelled a regional AgERA5 aggregate. See [regional data contract](../yield_prediction/docs/data_engineer_contract.md) and [ML service contract](../yield_prediction/docs/inference_service.md).
+
+## Verification before publishing
+
+```bash
+python -m unittest discover -s agronomy/tests -v
+# In the separate ML environment, from yield_prediction:
+python -m pytest -q
+# From the repository root with Node 24:
+npm run verify
+```
+
+The full ML tests use the real pinned CY-Bench sample; fetch it with `python yield_prediction/download_data.py sample`. The checked source ZIP SHA-256 is `0c84fd65f06acb3c7224f3fc512de83019dd97734506a5018b253ccbdba0d4ed`. This exercises the actual data preparation/training route rather than skipping it.
+
+The deterministic cross-process check uses an explicitly identified weather test fixture and real ML inference:
+
+```bash
+# Start the ML service, then use the field API environment:
+python scripts/orbitFarm-smoke-ml-stack.py --ml-url http://127.0.0.1:8001
+```
+
+The release smoke check additionally uses real external NASA/source retrieval for the illustrative Nile Delta polygon in `deployment/smoke-field.json`. It checks readiness, uncached HTML behavior, referenced assets, all ten crops, three plans and ten real country-model forecasts:
+
+```bash
+node scripts/orbitFarm-smoke-release.mjs https://your-deployment.example
+```
+
+## GitHub checks
+
+The workflow tests the frontend, Python field API and all real ML artifacts/data independently. It then exercises HTTP inference through an isolated field API environment, builds both containers and checks their readiness and served website. The Vercel publishing job waits for these checks.
+
+The integrated release uses the **current tested checkout** for both frontend and backend. It no longer packages the old pinned `7d36975` backend. Future release metadata records the current commit for both halves.
+
+## Vercel website and field API
+
+Vercel remains an alternative host for the frontend and field API. The ML service runs separately in its Python 3.11 environment; set **`ORBITFARM_ML_URL` to its reachable HTTPS URL**. A localhost address cannot connect separate cloud deployments. An optional shared `ORBITFARM_ML_TOKEN` is passed by the field API. Regional input files must also be available to the field API when regional forecasting is enabled.
+
+Build a combined release from the integrated checkout:
 
 ```bash
 npm ci
-npm run deploy:stage -- ../Agriculture-problem
+npm run deploy:stage
 ```
 
-The script prints a new release directory under `.vercel/`. It builds Vite with same-origin analysis enabled and stages the FastAPI entry point, the analysis modules, the crop catalog and the provider configuration. Set provider endpoints and calendar files in the backend's `agronomy/field_sources.json`. The methodology, references and source gaps are documented in that checkout's `agronomy/field-data.md` and `agronomy/analysis-api.md`.
+Release staging uses Node 24. The script builds Vite with the real same-origin API, includes all current agronomy modules and source/catalog JSON files, and prints a release path under `.vercel/`. An optional positional backend checkout remains supported for legacy split repositories. The staged field package uses Python 3.12. The script verifies the pinned Expat RPM SHA-256 and retains the library license required by Rasterio on Vercel Linux. Node's built-in Zstandard decoder extracts only the named files; no separate tar/zstd installation is required.
 
-The package uses Python 3.12. The release script verifies the SHA-256 checksum of a pinned Amazon Linux 2023 Expat RPM and includes the shared library and license required by Rasterio's Linux wheel. Update `deployment/vercel/expat.json` with the package URL, checksum and archive paths when updating Expat. [Amazon Linux 2023 package sources](https://docs.aws.amazon.com/linux/al2023/ug/managing-repos-os-updates.html)
+To use the existing GitHub publishing workflow, configure `VERCEL_TOKEN` and `ORBITFARM_ML_URL` as Actions secrets, plus `ORBITFARM_ML_TOKEN` when the inference service uses a token. The workflow builds and tests the release but does not publish a partially configured application when the token or ML URL is absent. It supplies the service settings at runtime, checks `/ready`, and performs the complete public release smoke check after publication.
 
-## Verify and publish
-
-Run the following from the printed release directory.
-
-```bash
-vercel link --yes --scope lu1dgys-projects --project orbitfarm
-vercel deploy --prod --skip-domain --yes --scope lu1dgys-projects
-```
-
-Open the staged deployment using Vercel project access. Create a farm and draw or enter a field boundary, then select **Analyze my farm**. Check that the browser sends `POST /v1/analysis` to the staged hostname, the response uses `nasa-api` or `nasa-cache`, and **Save water** and **Improve soil** each display two crops. Use [Vercel CLI curl](https://vercel.com/docs/cli/curl) for an authenticated HTTP check when needed. Revoke a temporary automation credential after the check if the CLI creates one.
-
-Promote the verified deployment and repeat the browser check at the public domain.
-
-```bash
-vercel promote <staged-deployment-url> --yes --scope lu1dgys-projects
-```
-
-A direct public API smoke test can use the illustrative Iowa payload from the backend checkout.
-
-```bash
-curl https://orbitfarm.vercel.app/v1/analysis \
-  -H "Content-Type: application/json" \
-  --data-binary "@agronomy/example_analysis_request.json"
-```
-
-The browser shows **Planting date unavailable** when the published sources cannot support a field-level date. [Staged production deployments](https://vercel.com/docs/cli/deploy#skip-domain) · [Vercel promotion](https://vercel.com/docs/cli/promote)
-
-## Public release verification
-
-On November 15, 2026, a fresh browser session entered each contour through **Create farm** and submitted it to the public deployment. Both requests returned HTTP 200 with `nasa-api` and all ten crop options. The browser displayed both two-season plans.
-
-| Field | Save water | Improve soil | Dates shown |
-| --- | --- | --- | --- |
-| France, CropHarvest row 3104 | Sunflower → barley | Sunflower → wheat | Unavailable for both provisional plans |
-| Iowa, API example contour | Maize → wheat | Maize → wheat, provisional | May 13, 2027 and October 18, 2027 |
-
-The France and Iowa requests took 3.9 and 4.4 seconds respectively in the browser smoke test. The run used production deployment `dpl_5vdYhgAa6xkf5QgNXukFy4HmXcfP`.
+The previously hosted orbitfarm.vercel.app deployment predates this integration until a new verified release is published. Local tests or a successful build do not claim that the public deployment has been updated.

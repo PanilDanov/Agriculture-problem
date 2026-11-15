@@ -4,6 +4,7 @@ import path from 'node:path';
 const ignoredDirectories = new Set([
   '.git', 'node_modules', 'dist', 'build', 'coverage', 'playwright-report',
   'test-results', '.vite', '.vercel', '.sites-runtime',
+  '.runtime', '.cache', '__pycache__', 'data',
 ]);
 const textExtensions = new Set([
   '.md', '.json', '.ts', '.tsx', '.js', '.mjs', '.cjs', '.css', '.html',
@@ -29,7 +30,7 @@ async function visit(directory) {
   for (const entry of await readdir(directory, { withFileTypes: true })) {
     const filename = path.join(directory, entry.name);
     if (entry.isDirectory()) {
-      if (!ignoredDirectories.has(entry.name)) await visit(filename);
+      if (!ignoredDirectories.has(entry.name) && !entry.name.startsWith('.venv')) await visit(filename);
       continue;
     }
     if (!entry.isFile()) continue;

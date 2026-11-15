@@ -1,0 +1,128 @@
+{
+  "source": {
+    "archive_sha256": "c5835418c18f9322e7decbd6800f93a216eaae3cdfa31acb08f0518c0c6d6853",
+    "country_mapping_sha256": "6866c877d39cba9c357620878839b336d569f8c662d3cfab4cb1dbe2d39c977f",
+    "country_mapping_url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_110m_admin_0_countries.geojson",
+    "dataset": "FAOSTAT Crops and livestock products (QCL)",
+    "documentation": "https://www.fao.org/faostat/en/#data/QCL",
+    "flags": {
+      "A": "Official figure",
+      "E": "Estimated value",
+      "I": "Imputed by receiving agency",
+      "X": "External organization"
+    },
+    "published_on": "2025-12-31",
+    "retrieved_on": "2026-11-15",
+    "snapshot_max_harvest_year": 2024,
+    "url": "https://bulks-faostat.fao.org/production/Production_Crops_Livestock_E_All_Data_(Normalized).zip",
+    "filtered_snapshot_sha256": "9466548959ffb3887f1234eba2502626822fde0611d59779e243dde76eaa3a3d"
+  },
+  "audit": {
+    "accepted_rows": {
+      "barley": 5415,
+      "chickpea": 2694,
+      "faba-bean": 3096,
+      "lentil": 2683,
+      "maize": 8632,
+      "potato": 8120,
+      "sorghum": 6014,
+      "sunflower": 3647,
+      "tomato": 8070,
+      "wheat": 6786
+    },
+    "country_mapping": "Natural Earth 5.1.2 ISO_N3_EH to ISO_A2_EH; regional aggregates excluded",
+    "flags": {
+      "A": 41181,
+      "E": 12460,
+      "X": 1516
+    },
+    "rejected_rows": {
+      "nonpositive_or_nonfinite": 18,
+      "unmapped_area_or_regional_aggregate": 23490
+    },
+    "source_csv": "Production_Crops_Livestock_E_All_Data_(Normalized).csv",
+    "units": "source kg/ha / 1000 = target t/ha"
+  },
+  "models": {
+    "barley": {
+      "model": "ridge_1",
+      "quality": "beats_last_yield_on_holdout",
+      "countries": 103,
+      "rows": 3920,
+      "mae_t_ha": 0.4014837644794293,
+      "baseline_mae_t_ha": 0.4630624584717608
+    },
+    "chickpea": {
+      "model": "ridge_10",
+      "quality": "experimental",
+      "countries": 56,
+      "rows": 1924,
+      "mae_t_ha": 0.2280478954722894,
+      "baseline_mae_t_ha": 0.18435703703703704
+    },
+    "faba-bean": {
+      "model": "ridge_10",
+      "quality": "beats_last_yield_on_holdout",
+      "countries": 68,
+      "rows": 2197,
+      "mae_t_ha": 0.272082771407954,
+      "baseline_mae_t_ha": 0.2915690607734806
+    },
+    "lentil": {
+      "model": "ridge_1",
+      "quality": "beats_last_yield_on_holdout",
+      "countries": 56,
+      "rows": 1947,
+      "mae_t_ha": 0.16332882791871922,
+      "baseline_mae_t_ha": 0.1689748031496063
+    },
+    "maize": {
+      "model": "hist_absolute",
+      "quality": "beats_last_yield_on_holdout",
+      "countries": 154,
+      "rows": 6165,
+      "mae_t_ha": 0.6230934805412042,
+      "baseline_mae_t_ha": 0.6672279379157429
+    },
+    "potato": {
+      "model": "ridge_1",
+      "quality": "beats_last_yield_on_holdout",
+      "countries": 147,
+      "rows": 5876,
+      "mae_t_ha": 1.1593728079985026,
+      "baseline_mae_t_ha": 1.2367551724137928
+    },
+    "sorghum": {
+      "model": "ridge_1",
+      "quality": "experimental",
+      "countries": 111,
+      "rows": 4263,
+      "mae_t_ha": 0.5085162603464589,
+      "baseline_mae_t_ha": 0.4372165079365079
+    },
+    "sunflower": {
+      "model": "hist_absolute",
+      "quality": "beats_last_yield_on_holdout",
+      "countries": 77,
+      "rows": 2715,
+      "mae_t_ha": 0.1885853081335609,
+      "baseline_mae_t_ha": 0.21134372093023254
+    },
+    "tomato": {
+      "model": "hist_absolute",
+      "quality": "experimental",
+      "countries": 149,
+      "rows": 5858,
+      "mae_t_ha": 4.77232084507794,
+      "baseline_mae_t_ha": 4.463402293577981
+    },
+    "wheat": {
+      "model": "ridge_1",
+      "quality": "beats_last_yield_on_holdout",
+      "countries": 124,
+      "rows": 4918,
+      "mae_t_ha": 0.31838061793687433,
+      "baseline_mae_t_ha": 0.3899467213114753
+    }
+  }
+}

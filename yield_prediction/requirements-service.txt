@@ -1,0 +1,6 @@
+# The inference process is deliberately independent of agronomy's NumPy/Pandas.
+# Install the package separately with `pip install ./yield_prediction`.
+# These native estimator dependencies make all candidate artifacts available.
+-r requirements.txt
+catboost==1.2.8
+xgboost==3.0.2

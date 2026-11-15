@@ -1,0 +1,11 @@
+﻿crop,air_humidity_min_pct,air_humidity_max_pct,mean_temp_min_c,mean_temp_max_c,min_temp_c,max_temp_c,precip_min_mm,precip_max_mm,soil_ph_min,soil_ph_max,soil_moisture,soil_type,root_depth_min_m,root_depth_max_m,depletion_fraction,solar_radiation_min_mj_m2_day,solar_radiation_max_mj_m2_day,soil_organic_carbon_min_pct,irrigation,previous_crop
+wheat,40,70,15,22,-5,30,450,650,6.0,7.5,moderate; irrigate at ~55% TAW depletion,"[""loam"",""sandy loam"",""clay loam""]",1.0,1.8,0.55,15,25,1.0,no,"[""chickpea"",""lentil"",""faba_bean"",""sunflower""]"
+barley,35,70,12,20,-8,30,450,650,6.0,8.0,moderate; relatively drought tolerant,"[""loam"",""sandy loam"",""clay loam""]",1.0,1.5,0.55,15,25,1.0,no,"[""chickpea"",""lentil"",""faba_bean"",""sunflower""]"
+maize,50,80,20,30,10,35,500,800,5.8,7.5,high; avoid stress during flowering,"[""loam"",""clay loam"",""silty clay loam""]",1.0,1.7,0.55,18,28,1.0,yes,"[""chickpea"",""lentil"",""faba_bean""]"
+sorghum,30,70,25,32,15,40,450,650,5.5,8.5,low_to_moderate; avoid stress at emergence and flowering,"[""loam"",""clay loam"",""silty clay loam"",""clay""]",1.0,2.0,0.55,18,28,1.0,no,"[""chickpea"",""lentil"",""sunflower""]"
+chickpea,30,60,18,25,5,32,300,500,6.0,8.0,moderate; avoid waterlogging,"[""loam"",""clay loam"",""sandy loam""]",0.6,1.0,0.5,15,25,1.0,no,"[""wheat"",""barley"",""sunflower""]"
+lentil,30,60,15,24,5,30,300,450,6.0,8.0,moderate; avoid waterlogging,"[""loam"",""sandy loam"",""silt loam""]",0.6,0.8,0.5,15,25,1.0,no,"[""wheat"",""barley"",""sunflower""]"
+faba_bean,40,70,15,22,0,30,400,700,6.0,7.5,high; avoid drought during flowering and pod filling,"[""loam"",""clay loam"",""silty clay loam""]",0.5,0.7,0.45,15,25,1.0,no,"[""wheat"",""barley"",""sunflower""]"
+potato,60,80,15,20,5,30,500,700,5.0,6.5,high_and_stable; avoid waterlogging,"[""sandy loam"",""loam""]",0.4,0.6,0.35,15,25,1.5,yes,"[""wheat"",""barley"",""chickpea""]"
+sunflower,35,65,20,27,5,35,600,1000,6.0,7.5,moderate; avoid stress at budding and flowering,"[""loam"",""sandy loam"",""clay loam""]",0.8,1.5,0.45,18,28,1.0,no,"[""wheat"",""barley"",""chickpea"",""lentil""]"
+tomato,50,70,18,27,10,32,400,800,5.5,7.0,high_and_stable; avoid large fluctuations,"[""sandy loam"",""loam"",""clay loam""]",0.7,1.5,0.4,18,28,1.5,yes,"[""wheat"",""barley"",""chickpea""]"

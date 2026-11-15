@@ -1,0 +1,76 @@
+{
+  "source": "https://zenodo.org/records/17279151",
+  "datasetVersion": "1.10",
+  "publishedOn": "2025-10-06",
+  "recordLastUpdated": "2025-12-19T07:37:29.996537+00:00",
+  "conservativeAvailableOn": "2025-12-19",
+  "availabilityBasis": "Latest recorded revision of the original published Zenodo 1.10 archive; not observation date or sample GitHub commit.",
+  "samplePublicationNotUsed": "GitHub sample commit b55e691 is 2026-04-16, after these pre-season issue dates.",
+  "sourceArchiveExpectedMd5": "8ec510982f396469eca25a4f0fa8632e",
+  "sourceArchiveBytes": 6228749411,
+  "downloadMethod": "Only original ES table byte ranges; each member CRC verified. Full 6.2GB archive not downloaded.",
+  "originalCsvSha256": {
+    "maize": {
+      "meteo": "3c28b6b2e33c79c813cbe73023f50cb250b5f0be55c25c4c682e1e0bf417662a",
+      "crop_calendar": "670c7f0ca01cd30a2ae93d6e352d11c81b6fbaa367498873e8e86400906623f5",
+      "soil": "76d9fc2b30944ccdd4406be8de112c4029fe761fb7efa1dd5b8c2503536c6c3c",
+      "location": "846443830cfa3bd856fd6355be8bd1a05513011dfc16411de2eb0dabc0d51f0c"
+    },
+    "wheat": {
+      "meteo": "a365b1f9ce9d1281f42b37c7bc7847347add31178d7735a88645424cfbf4ac55",
+      "crop_calendar": "e4b4b9932dc315923b7c670baaad0f8e21ad374a06ccfb848c7497cdfedb2d6b",
+      "soil": "c3771b7a134d67a063e292a713f70ddc28cec712c75eba70509fe0e308055cf0",
+      "location": "bf4c80bcd534cd403dec904c00cd091fbc0f0ef65246d3dbc9b3d739622c8326"
+    }
+  },
+  "geometryAudit": {
+    "polygonArchiveSha256": "e295229b85fdcfe31e63afbaa0ec38e26b494c274da414926658ea68d2951df4",
+    "polygonArchiveMd5": "815d0e94f6746f15febb99b627142a04",
+    "giscoSha256": "06d15d7f1e933029d5e87f4a83b5d2d1eec4f9497bb50484ca1e8b54bb304f8a",
+    "geometryToleranceDegrees": 1e-06,
+    "measuredHausdorffDegrees": 6.471135888909176e-07,
+    "regionId": "ES112",
+    "countryCode": "ES",
+    "nutsLevel": 3,
+    "nutsVersion": "2016",
+    "resolution": "03M",
+    "crs": "EPSG:4326"
+  },
+  "boundarySource": "https://zenodo.org/records/17279151/files/polygons.zip?download=1",
+  "boundaryReference": "https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_03M_2016_4326.geojson",
+  "boundaryAttribution": "\u00a9 EuroGeographics for the administrative boundaries",
+  "calendarAssumption": "Published static crop-area-weighted day-of-year calendar recurs in target year; not a measured planting date.",
+  "weatherLimit": "Observed daily data through 2023. Pre-season climatology uses five eligible 2019-2023 seasons; there is no 2026 mid-season weather.",
+  "temporalInterpretation": "Retrospective estimates computed during release preparation, not evidence of forecasts actually issued on the nominal January/April dates.",
+  "preparedAsOf": "2026-11-15",
+  "verification": [
+    {
+      "cropId": "maize",
+      "forecastDate": "2026-04-14",
+      "climateThrough": "2023-10-28",
+      "coverage": {
+        "historical_seasons": 5,
+        "mid_weather_fraction": 0.0
+      },
+      "isReplay": true,
+      "calculatedAt": "2026-11-15T14:30:44Z",
+      "temporalStatus": "retrospective_estimate",
+      "modelVersion": "1.0.0+b09d15d5ef",
+      "referencePredictionTHa": 7.142389983443048
+    },
+    {
+      "cropId": "wheat",
+      "forecastDate": "2026-01-22",
+      "climateThrough": "2023-07-08",
+      "coverage": {
+        "historical_seasons": 5,
+        "mid_weather_fraction": 0.0
+      },
+      "isReplay": true,
+      "calculatedAt": "2026-11-15T14:30:45Z",
+      "temporalStatus": "retrospective_estimate",
+      "modelVersion": "1.0.0+b09d15d5ef",
+      "referencePredictionTHa": 2.3605019775066585
+    }
+  ]
+}

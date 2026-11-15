@@ -1,0 +1,3 @@
+-r requirements-field-data.txt
+cdsapi>=0.7.7,<1
+jsonschema==4.23.0

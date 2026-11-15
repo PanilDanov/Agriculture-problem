@@ -1,29 +1,20 @@
-import { execFile } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { copyFile, lstat, mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { copyFile, cp, lstat, mkdir, mkdtemp, readFile, readdir, writeFile } from 'node:fs/promises';
 import { basename, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { promisify } from 'node:util';
 import { build } from 'vite';
+import { extractRpmFiles } from './orbitFarm-rpm.mjs';
 
 const frontend = fileURLToPath(new URL('../', import.meta.url));
-const backend = resolve(process.argv[2] ?? join(frontend, '../Agriculture-problem'));
+const backend = resolve(process.argv[2] ?? frontend);
 const stagingParent = join(frontend, '.vercel');
 const template = join(frontend, 'deployment/vercel');
-const run = promisify(execFile);
 const backendFiles = [
   'AgroWise_crop_requirements_clean.csv',
   'data_pipeline.py',
-  'agronomy/api.py',
-  'agronomy/assessment.py',
-  'agronomy/crop_profiles.json',
-  'agronomy/field_calendars.py',
-  'agronomy/field_context.py',
-  'agronomy/field_geometry.py',
-  'agronomy/field_providers.py',
-  'agronomy/field_sources.json',
-  'agronomy/rotation_planner.py',
-  'agronomy/water_screen.py',
+  ...(await readdir(join(backend, 'agronomy'), { withFileTypes: true }))
+    .filter(file => file.isFile() && /\.(py|json)$/.test(file.name))
+    .map(file => join('agronomy', file.name)),
 ];
 
 async function stageExpat(staging) {
@@ -44,16 +35,15 @@ async function stageExpat(staging) {
   }
   if (!cached) await writeFile(rpmPath, rpm);
 
-  const tar = process.platform === 'win32' ? 'tar.exe' : 'bsdtar';
   const native = join(staging, 'native');
   await mkdir(native);
+  const contents = extractRpmFiles(rpm, [expat.library, expat.license]);
   await Promise.all([
     [expat.library, 'libexpat.so.1'],
     [expat.license, 'expat-COPYING'],
-  ].map(async ([member, file]) => {
-    const { stdout } = await run(tar, ['-xOf', rpmPath, member], { encoding: 'buffer' });
-    if (!stdout.length) throw new Error(`Empty Expat archive member: ${member}.`);
-    await writeFile(join(native, file), stdout);
+  ].map(async ([member, file], index) => {
+    if (!contents[index].length) throw new Error(`Empty Expat archive member: ${member}.`);
+    await writeFile(join(native, file), contents[index]);
   }));
 }
 
@@ -71,6 +61,7 @@ await Promise.all([
     .map(file => copyFile(join(template, file), join(staging, file))),
   writeFile(join(staging, 'requirements.txt'), `${requirements.trimEnd()}\n`),
   stageExpat(staging),
+  cp(join(backend, 'agronomy/regional_inputs'), join(staging, 'agronomy/regional_inputs'), { recursive: true }),
 ]);
 
 await build({

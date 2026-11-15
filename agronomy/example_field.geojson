@@ -1,0 +1,33 @@
+{
+  "type": "Feature",
+  "properties": {
+    "purpose": "Example boundary for the field collector"
+  },
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          -93.5008,
+          41.9994
+        ],
+        [
+          -93.4992,
+          41.9994
+        ],
+        [
+          -93.4992,
+          42.0006
+        ],
+        [
+          -93.5008,
+          42.0006
+        ],
+        [
+          -93.5008,
+          41.9994
+        ]
+      ]
+    ]
+  }
+}

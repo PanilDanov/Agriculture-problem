@@ -1,0 +1,12 @@
+.deps/
+.optdeps/
+.venv/
+__pycache__/
+.pytest_cache/
+*.egg-info/
+build/
+data/raw/
+data/processed/
+artifacts/legacy_reproduction/
+artifacts/logs/
+*.tmp

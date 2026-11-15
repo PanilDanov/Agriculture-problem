@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=65"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agrowise-yield-prediction"
+version = "1.1.0"
+requires-python = ">=3.11,<3.12"
+dynamic = ["dependencies"]
+
+[project.optional-dependencies]
+candidates = ["catboost==1.2.8", "xgboost==3.0.2"]
+regional-data = ["pyshp==2.3.1", "Shapely==2.0.7", "certifi>=2024"]
+
+[project.scripts]
+orbitfarm-yield-service = "yield_prediction.service:main"
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+yield_prediction = ["models/*.joblib", "models/*.json", "candidate_models/*.joblib", "candidate_models/*.json", "national_models/*.joblib", "national_models/*.json", "schemas/*.json"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

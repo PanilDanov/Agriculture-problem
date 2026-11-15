@@ -8,6 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 
 os.environ.setdefault("ORBITFARM_CACHE_DIR", str(Path(gettempdir()) / "orbitfarm-field-cache"))
+os.environ.setdefault("ORBITFARM_REGIONAL_INPUT_DIR", str(Path(__file__).with_name("agronomy") / "regional_inputs"))
 
 # Rasterio's Linux wheel links to Expat, which is absent from the Vercel runtime.
 if sys.platform == "linux":

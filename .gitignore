@@ -12,3 +12,11 @@ test-results/
 !.env.example
 *.local
 *.log
+.venv*/
+.runtime/
+.cache/
+__pycache__/
+*.py[cod]
+.data_pipeline_cache/
+data/
+.data/

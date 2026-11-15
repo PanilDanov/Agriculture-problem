@@ -1,0 +1,202 @@
+{
+  "weather": {
+    "source_id": "nasa-power",
+    "endpoint": "https://power.larc.nasa.gov/api/temporal/daily/point",
+    "documentation": "https://power.larc.nasa.gov/docs/services/api/temporal/daily/",
+    "ttl_days": 2,
+    "first_year": 1984,
+    "time_standard": "LST",
+    "optional_parameters": ["SFMC", "RZMC"],
+    "parameters": {
+      "T2M": ["temperature_mean_c", "degC"],
+      "T2M_MIN": ["temperature_min_c", "degC"],
+      "T2M_MAX": ["temperature_max_c", "degC"],
+      "PRECTOTCORR": ["precipitation_mm", "mm/day"],
+      "RH2M": ["relative_humidity_pct", "%"],
+      "ALLSKY_SFC_SW_DWN": ["solar_radiation_mj_m2_day", "MJ/m2/day"],
+      "WS2M": ["wind_speed_2m_m_s", "m/s"],
+      "PS": ["surface_pressure_kpa", "kPa"],
+      "T2MDEW": ["dew_point_c", "degC"],
+      "SFMC": ["modeled_surface_moisture", "m3/m3"],
+      "RZMC": ["modeled_root_zone_moisture", "m3/m3"]
+    }
+  },
+  "soil": {
+    "source_id": "isric-soilgrids",
+    "endpoint": "https://maps.isric.org/mapserv",
+    "documentation": "https://docs.isric.org/globaldata/soilgrids/SoilGrids_faqs_01.html",
+    "version": "SoilGrids 2.0, mean prediction",
+    "ttl_days": 90,
+    "resolution_m": 250,
+    "depths": [
+      "0-5cm",
+      "5-15cm",
+      "15-30cm",
+      "30-60cm",
+      "60-100cm",
+      "100-200cm"
+    ],
+    "properties": {
+      "wv0010": {
+        "field": "water_content_10kpa",
+        "unit": "m3/m3",
+        "divisor": 1000,
+        "max": 1
+      },
+      "wv0033": {
+        "field": "water_content_33kpa",
+        "unit": "m3/m3",
+        "divisor": 1000,
+        "max": 1
+      },
+      "wv1500": {
+        "field": "water_content_1500kpa",
+        "unit": "m3/m3",
+        "divisor": 1000,
+        "max": 1
+      },
+      "phh2o": {
+        "field": "ph_water",
+        "unit": "pH",
+        "divisor": 10,
+        "max": 14,
+        "depths": [
+          "0-5cm"
+        ]
+      },
+      "soc": {
+        "field": "organic_carbon_g_kg",
+        "unit": "g/kg",
+        "divisor": 10,
+        "max": 1000,
+        "depths": [
+          "0-5cm"
+        ]
+      },
+      "sand": {
+        "field": "sand_pct",
+        "unit": "%",
+        "divisor": 10,
+        "max": 100,
+        "depths": [
+          "0-5cm"
+        ]
+      },
+      "silt": {
+        "field": "silt_pct",
+        "unit": "%",
+        "divisor": 10,
+        "max": 100,
+        "depths": [
+          "0-5cm"
+        ]
+      },
+      "clay": {
+        "field": "clay_pct",
+        "unit": "%",
+        "divisor": 10,
+        "max": 100,
+        "depths": [
+          "0-5cm"
+        ]
+      }
+    }
+  },
+  "country": {
+    "source_id": "natural-earth",
+    "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_10m_admin_0_map_units.geojson",
+    "documentation": "https://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-admin-0-details/",
+    "version": "5.1.2, 1:10m map units",
+    "ttl_days": 3650
+  },
+  "fao_calendar": {
+    "source_id": "fao-crop-calendar",
+    "endpoint": "https://api-cropcalendar.apps.fao.org/api/v1",
+    "documentation": "https://api-cropcalendar.apps.fao.org/",
+    "ttl_days": 14,
+    "crop_ids": {
+      "wheat": {
+        "0372": "Wheat",
+        "0373": "Bread wheat",
+        "0374": "Durum wheat"
+      },
+      "barley": {
+        "0024": "Barley",
+        "0025": "Two-row barley"
+      },
+      "maize": {
+        "0338": "Maize",
+        "0113": "Sweet maize"
+      },
+      "sorghum": {
+        "0325": "Sorghum"
+      },
+      "chickpea": {
+        "0087": "Chickpea"
+      },
+      "lentil": {
+        "0200": "Lentil"
+      },
+      "faba-bean": {
+        "0028": "Faba bean",
+        "0054": "Dry faba bean"
+      },
+      "sunflower": {
+        "0335": "Sunflower"
+      },
+      "potato": {
+        "0283": "Potato"
+      },
+      "tomato": {
+        "0356": "Tomato, production system needs confirmation"
+      }
+    }
+  },
+  "gridded_calendar": {
+    "source_id": "sacks-crop-calendar",
+    "endpoint": "https://sage-public-files.s3.amazonaws.com/crop-calendar-dataset/netcdf0.5deg",
+    "documentation": "https://sage.nelson.wisc.edu/data-and-models/datasets/crop-calendar-dataset/netcdf-0-5-degree/",
+    "version": "Sacks et al. 2010, unfilled 0.5-degree grid",
+    "ttl_days": 3650,
+    "crops": {
+      "wheat": {
+        "winter": "Wheat.Winter",
+        "spring": "Wheat"
+      },
+      "barley": {
+        "winter": "Barley.Winter",
+        "spring": "Barley"
+      },
+      "maize": {
+        "main": "Maize",
+        "second": "Maize.2"
+      },
+      "sorghum": {
+        "main": "Sorghum",
+        "second": "Sorghum.2"
+      },
+      "sunflower": {
+        "main": "Sunflower"
+      },
+      "potato": {
+        "main": "Potatoes"
+      }
+    }
+  },
+  "modeled_calendar": {
+    "source_id": "ggcmi-crop-calendar",
+    "endpoint": "https://zenodo.org/records/5062513/files",
+    "documentation": "https://zenodo.org/records/5062513",
+    "version": "GGCMI Phase 3 v1.01, static 0.5-degree grid",
+    "ttl_days": 3650,
+    "crops": {
+      "wheat": {"winter": "wwh", "spring": "swh"},
+      "barley": {"main": "bar"},
+      "maize": {"main": "mai"},
+      "sorghum": {"main": "sor"},
+      "sunflower": {"main": "sun"},
+      "potato": {"main": "pot"}
+    },
+    "water_regimes": {"rf": "rainfed", "ir": "irrigated"}
+  }
+}

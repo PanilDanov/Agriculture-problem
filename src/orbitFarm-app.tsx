@@ -23,6 +23,8 @@ const FarmLayoutEditor = lazy(() => import('./components/orbitFarm-layout-editor
 import { OrbitScanner } from './components/orbitFarm-scanner';
 import { getFarmSeasonStops } from './components/orbitFarm-seasons';
 import { Select } from './components/orbitFarm-select';
+import { AnalysisDetails } from './components/orbitFarm-analysis-details';
+import { FieldEvidenceFields } from './components/orbitFarm-evidence-fields';
 
 type Route = 'farm' | 'plans' | 'tasks' | 'journal' | 'lab' | 'setup' | 'layout';
 type TaskAction = 'complete_task' | 'skip_task' | 'snooze_task';
@@ -260,7 +262,8 @@ export function OrbitFarmApp() {
     const boundary = validateBoundary(draft.boundary);
     if (!boundary.valid || !draft.boundary) { setFormError(boundary.errors[0] ?? 'Draw a closed field boundary before continuing.'); return; }
     const inputs = structuredClone(draft.inputs);
-    inputs.soil.source = inputs.soil.ph === null && inputs.soil.texture === null ? 'unknown' : 'farmer_reported';
+    inputs.soil.source = inputs.soil.ph === null && inputs.soil.texture === null ? 'unknown'
+      : inputs.soil.source === 'soil_test' ? 'soil_test' : 'farmer_reported';
     const freshFarm = createScenarioState('empty-farm');
     if (!editingFarm && state.boundary === null) freshFarm.layout = structuredClone(state.layout);
     const next: FarmState = {
@@ -399,6 +402,7 @@ export function OrbitFarmApp() {
               {draft.inputs.irrigation.availability === 'available' && <div className="form-row"><label>Water budget (m³)<input type="number" min="0" placeholder="Unknown" value={draft.inputs.irrigation.volumeM3 ?? ''} onChange={(e) => setDraft({ ...draft, inputs: { ...draft.inputs, irrigation: { ...draft.inputs.irrigation, volumeM3: e.target.value === '' ? null : Number(e.target.value) } } })} /></label><Select label="Irrigation method" value={draft.inputs.irrigation.method ?? ''} onChange={(value) => setDraft({ ...draft, inputs: { ...draft.inputs, irrigation: { ...draft.inputs.irrigation, method: value as FarmInputs['irrigation']['method'] || null } } })} options={[{ value: '', label: 'Unknown' }, { value: 'drip', label: 'Drip' }, { value: 'sprinkler', label: 'Sprinkler' }, { value: 'surface', label: 'Surface' }]} /></div>}
               <p className="field-hint">Total water available for the whole field.</p>
               <div className="form-row"><Select label="Main priority" value={draft.inputs.priority} onChange={(value) => setDraft({ ...draft, inputs: { ...draft.inputs, priority: value as FarmInputs['priority'] } })} options={[{ value: 'balanced', label: 'Balanced' }, { value: 'save_water', label: 'Save water' }, { value: 'improve_soil', label: 'Improve soil' }]} /><Select label="Previous crop" value={draft.inputs.previousCropId ?? ''} onChange={(value) => setDraft({ ...draft, inputs: { ...draft.inputs, previousCropId: value as CropId || null } })} options={[{ value: '', label: 'Unknown' }, ...CROP_CATALOG.map((crop) => ({ value: crop.id, label: crop.name }))]} /></div>
+              <FieldEvidenceFields inputs={draft.inputs} onChange={(inputs) => setDraft(current => ({ ...current, inputs }))} />
               {formError && <div className="form-error" role="alert">{formError}</div>}
               <button className="button primary full-width" type="submit"><ScanLine size={18} />Analyze my farm <ArrowRight size={16} /></button><p className="field-hint centered">{providerMode === 'mock' ? 'Demo analysis' : 'Sends field data to your analysis service.'}</p>
             </section>
@@ -441,7 +445,8 @@ export function OrbitFarmApp() {
                 }}>Use this plan <ArrowRight size={16} /></button>
               </article>
             ))}</div>
-            <div className="conditions-heading"><div><h2>Crop suitability</h2></div></div><div className="crop-options">{state.analysis.cropOptions.map((option) => <article key={option.cropId} className="crop-option"><CropSprite cropId={option.cropId} size={48} /><div><h3>{option.name}</h3><p>{option.recommendedPlantingDate ? `Recommended planting: ${displayDate(option.recommendedPlantingDate)}` : 'Planting date unavailable'}</p><details className="crop-details"><summary>Details</summary>{option.reasons.map(reason => <p key={reason}>{reason}</p>)}</details></div><span className="score">{option.score === null ? <span className="small">Needs more data</span> : <><strong>{Math.round(option.score)}</strong><span>/100</span></>}</span></article>)}</div>
+            <AnalysisDetails analysis={state.analysis} />
+            <div className="conditions-heading"><div><h2>Crop suitability</h2></div></div><div className="crop-options">{state.analysis.cropOptions.map((option) => <article key={option.cropId} className="crop-option"><CropSprite cropId={option.cropId} size={48} /><div><h3>{option.name}</h3><p>{option.recommendedPlantingDate ? `Recommended planting: ${displayDate(option.recommendedPlantingDate)}` : 'Planting date unavailable'}</p><details className="crop-details"><summary>Details</summary>{option.reasons.map(reason => <p key={reason}>{reason}</p>)}</details></div><span className="score">{option.evaluationStatus === 'excluded' ? <span className="small">Outside crop requirements</span> : option.score === null ? <span className="small">Needs more data</span> : <><strong>{Math.round(option.score)}</strong><span>/100</span></>}</span></article>)}</div>
             <details className="evidence-details"><summary><Database size={17} />Sources & details<ChevronRight size={16} /></summary><ConditionCards analysis={state.analysis} /><SourceEvidence analysis={state.analysis} /><div className="evidence-notes"><h3>Assumptions & limitations</h3><p>Suitability scores compare crops; they do not predict harvests.</p>{[...state.analysis.assumptions, ...state.analysis.limitations].map((note) => <p key={note}>• {note}</p>)}</div></details>
           </> : <div className="empty-state"><SatelliteIcon /><h2>No analysis yet</h2><button className="button primary" onClick={() => state.boundary ? void analyze() : createFarm()}><ScanLine size={17} />{state.boundary ? 'Analyze field' : 'Draw my farm'}</button></div>}
         </>}

@@ -1,0 +1,13 @@
+{
+  "seed": 42,
+  "validation_years": [2012, 2014, 2016],
+  "last_training_year": 2017,
+  "first_test_year": 2018,
+  "last_test_year": 2020,
+  "legacy_training_end": 2017,
+  "legacy_test_end": 2017,
+  "tuning_trials_per_family": 0,
+  "tuned_families": 2,
+  "learning_sizes": [500, 1000, 2000, 5000, 10000],
+  "minimum_LOCO_test_rows": 10
+}

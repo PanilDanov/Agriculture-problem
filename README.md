@@ -6,7 +6,24 @@
 
 A cozy 16-bit farm companion that turns Earth observations and local knowledge into explainable crop rotations and everyday care reminders.
 
-Frontend work continues on the `frontend` branch. All project content, code, comments, and interface copy must be in English.
+This integrated checkout contains the website, the NASA field-analysis API and the independently pinned yield-model runtime. Product content, code, comments, and interface copy are in English.
+
+## Run the complete application
+
+Use Python 3.11 and Node.js 22.12 or newer. The launcher also detects an official Node distribution under `.runtime/`.
+
+```bash
+python3 scripts/orbitFarm-local.py setup
+python3 scripts/orbitFarm-local.py run
+```
+
+Open `http://127.0.0.1:8000/`. The launcher builds the live website, starts the ML runtime separately, checks model readiness, and starts FastAPI on the same origin. It creates separate `.venv-api` and `.venv-ml` environments; it does not replace system Python or Node.
+
+The complete flow uses NASA POWER historical and recent weather, SoilGrids estimates, published calendars, ten-crop suitability and measured irrigation calculations, and ten actual FAOSTAT national annual-history yield models. Compatible registered regional data enable the separate wheat/maize models. National yield, regional yield, historical water screens and suitability scores retain their distinct units and spatial support. An absent input is reported rather than filled with an example.
+
+Source and model coverage vary by crop and country. Sorghum, chickpea and tomato national models did not improve on their last-yield holdout baselines and are explicitly experimental. No model claims verified accuracy for an individual field.
+
+Copernicus CDS is optional for national forecasts and required for new compatible AgERA5 regional weather ingestion. After manually creating a CDS account and accepting the dataset licence, use `python3 scripts/orbitFarm-copernicus.py configure` to save a token outside Git. [Copernicus data pipeline](agronomy/copernicus-data.md) · [National models, real data and validation](yield_prediction/docs/national_models.md) · [Scoring and water evidence](agronomy/scoring-and-water.md) · [ML service](yield_prediction/docs/inference_service.md)
 
 - [Project overview](orbitFarm.md)
 - [Product specification](docs/orbitFarm-product.md)

@@ -1,0 +1,145 @@
+{
+  "status": "downloaded_and_unit_verified",
+  "provider": "Copernicus CDS",
+  "product": "AgERA5",
+  "version": "2.0",
+  "source": "https://cds.climate.copernicus.eu/datasets/sis-agrometeorological-indicators",
+  "retrievedOn": "2026-11-15",
+  "observedDate": "2025-01-01",
+  "areaNorthWestSouthEast": [
+    31.1,
+    30.9,
+    30.9,
+    31.1
+  ],
+  "purpose": "Live source connectivity and unit check; not a registered regional model dataset",
+  "archives": [
+    {
+      "group": "et0",
+      "sha256": "629857e132b99d3c9fa8e9482376d8368b41213d0dbd763a180f4ff2c05546df",
+      "bytes": 25892,
+      "fields": [
+        {
+          "key": "et0",
+          "variable": "ReferenceET_PenmanMonteith_FAO56",
+          "sourceUnit": "mm d-1",
+          "shape": [
+            1,
+            2,
+            2
+          ],
+          "min": 1.7956923246383667,
+          "max": 1.863991379737854,
+          "day": "2025-01-01"
+        }
+      ]
+    },
+    {
+      "group": "prec",
+      "sha256": "48eabd1400dc885f22123af1c01fa995d8e62a2a84eabd0db2e7cedc15828c98",
+      "bytes": 25566,
+      "fields": [
+        {
+          "key": "prec",
+          "variable": "Precipitation_Flux",
+          "sourceUnit": "mm d-1",
+          "shape": [
+            1,
+            2,
+            2
+          ],
+          "min": 0.019999999552965164,
+          "max": 0.07999999821186066,
+          "day": "2025-01-01"
+        }
+      ]
+    },
+    {
+      "group": "rad",
+      "sha256": "201b5f6e5ce793d6b5da7d0eb5612a957fe73e01f946a30a45112a597dcf4bf2",
+      "bytes": 25853,
+      "fields": [
+        {
+          "key": "rad",
+          "variable": "Solar_Radiation_Flux",
+          "sourceUnit": "J m-2 d-1",
+          "shape": [
+            1,
+            2,
+            2
+          ],
+          "min": 8764367.0,
+          "max": 8995732.0,
+          "day": "2025-01-01"
+        }
+      ]
+    },
+    {
+      "group": "temperature",
+      "sha256": "678151351b6d1498ea4929e26641fd15d7b7078a7afecd7c816ae90fab2feade",
+      "bytes": 77504,
+      "fields": [
+        {
+          "key": "tmax",
+          "variable": "Temperature_Air_2m_Max_24h",
+          "sourceUnit": "K",
+          "shape": [
+            1,
+            2,
+            2
+          ],
+          "min": 292.7831115722656,
+          "max": 293.0018310546875,
+          "day": "2025-01-01"
+        },
+        {
+          "key": "tavg",
+          "variable": "Temperature_Air_2m_Mean_24h",
+          "sourceUnit": "K",
+          "shape": [
+            1,
+            2,
+            2
+          ],
+          "min": 286.78253173828125,
+          "max": 286.8692932128906,
+          "day": "2025-01-01"
+        },
+        {
+          "key": "tmin",
+          "variable": "Temperature_Air_2m_Min_24h",
+          "sourceUnit": "K",
+          "shape": [
+            1,
+            2,
+            2
+          ],
+          "min": 281.701171875,
+          "max": 282.2077941894531,
+          "day": "2025-01-01"
+        }
+      ]
+    },
+    {
+      "group": "vpd",
+      "sha256": "06f68273da6e3ee1b46efbdeff66588a6837e644da746a94039c16375a751f07",
+      "bytes": 25938,
+      "fields": [
+        {
+          "key": "vpd",
+          "variable": "Vapour_Pressure_Deficit_at_Maximum_Temperature",
+          "sourceUnit": "hPa",
+          "shape": [
+            1,
+            2,
+            2
+          ],
+          "min": 11.958364486694336,
+          "max": 12.473388671875,
+          "day": "2025-01-01"
+        }
+      ]
+    }
+  ],
+  "credentialsIncluded": false
+}

@@ -45,7 +45,7 @@ export function createApiProvider(baseUrl: string, options: { timeoutMs?: number
       let timedOut = false;
       const onAbort = () => controller.abort();
       signal?.addEventListener('abort', onAbort, { once: true });
-      const timer = setTimeout(() => { timedOut = true; controller.abort(); }, options.timeoutMs ?? 12000);
+      const timer = setTimeout(() => { timedOut = true; controller.abort(); }, options.timeoutMs ?? 45000);
       try {
         const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(request), signal: controller.signal });
         if (response.status === 404 || response.status === 422) {

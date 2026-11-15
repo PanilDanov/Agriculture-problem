@@ -1,6 +1,6 @@
 # orbitFarm: Frontend-to-Backend Inputs
 
-This is the proposed input agreement for `POST /v1/analysis`.
+This is the core farmer-input agreement for `POST /v1/analysis`.
 
 The frontend sends the field boundary and information supplied by the farmer. The backend selects the planning horizon and recommended planting dates, retrieves environmental data, and calculates recommendations. The form does not ask for planting date or season end.
 
@@ -35,7 +35,7 @@ These values do not require farmer input.
 
 | Field | Purpose |
 | --- | --- |
-| `schemaVersion` | Identify the payload format; proposed value: `1.0`. |
+| `schemaVersion` | Identify the payload format; current value: `1.0`. |
 | `requestId` | Match each result to its analysis request. |
 | `farmId` | Identify the saved farm. |
 | `boundaryVersion` | Prevent a result for an older boundary from replacing the latest analysis. |
@@ -65,4 +65,4 @@ These values do not require farmer input.
 - Temperature, rainfall, satellite measurements, and scoring weights are not authoritative frontend inputs.
 - The planting schematic is separate from the geographic field boundary.
 
-For the complete payload, see the [JSON request example](../contracts/orbitFarm-analysis-request.example.json). Detailed validation and scoring decisions are in the [analysis contract proposal](orbitFarm-analysis-contract.md).
+For the complete payload, see the [JSON request example](../contracts/orbitFarm-analysis-request.example.json). Detailed validation and scoring decisions are in the [current analysis contract](orbitFarm-analysis-contract.md).

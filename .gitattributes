@@ -1,0 +1,15 @@
+# Keep source and frozen JSON hashes stable across fresh Windows/macOS/Linux clones.
+* text=auto eol=lf
+*.csv -text
+*.tsv -text
+*.gz binary
+*.joblib binary
+*.zip binary
+*.xlsx binary
+*.xls binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.woff binary
+*.woff2 binary

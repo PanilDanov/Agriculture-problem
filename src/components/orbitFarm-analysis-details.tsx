@@ -2,6 +2,7 @@ import { useId } from 'react';
 import { CROP_CATALOG } from '../domain/orbitFarm-crop-catalog';
 import type { AnalysisResult, CropOption, IrrigationAssessment, YieldForecast } from '../domain/orbitFarm-types';
 import { CropSprite } from './orbitFarm-crop-sprite';
+import { ArtworkMark } from './orbitFarm-artwork-mark';
 import './orbitFarm-analysis-details.css';
 
 const FACTORS: Record<string, string> = { temperature: 'Temperature', soilPh: 'Soil pH', water: 'Water adequacy', soilTexture: 'Soil texture' };
@@ -128,6 +129,7 @@ function ForecastCard({ cropId, name, entry }: { cropId: YieldForecast['cropId']
   return <article className={`of-yield-card ${ready ? 'of-yield-card--ready' : 'of-yield-card--missing'}`} aria-label={`${name} yield forecast`}>
     <header><CropSprite cropId={cropId} size={36} /><div><h3>{name}</h3><span className="of-analysis-caption">{ready ? spatialLabel : 'Forecast unavailable'}</span></div>
       {experimental && <span className="of-analysis-tag of-analysis-tag--review">Experimental</span>}</header>
+    <ArtworkMark />
     {ready && forecast ? <>
       <p className="of-yield-value"><strong>{analysisNumber(forecast.predicted_yield_t_ha, 2)}</strong><span>t/ha</span></p>
       <p className="of-analysis-caption">{modeLabel}{forecast.harvest_year ?? entry?.harvestYear ? ` · harvest ${forecast.harvest_year ?? entry?.harvestYear}` : ''}
@@ -162,7 +164,8 @@ function ForecastCard({ cropId, name, entry }: { cropId: YieldForecast['cropId']
               : 'Held-out error did not improve on the last-reported-yield baseline.' : `Reported model quality: ${words(quality)}.`}</p>}
         {pointWeather ? <><Source value={sourceRecord.labels} label="Yield labels" />
           {Array.isArray(object(sourceRecord.calendar).source_files) && (object(sourceRecord.calendar).source_files as unknown[]).map((file, index) => <Source key={index} value={file} label="Crop calendar" />)}
-          <Source value={sourceRecord.weather} label="NASA weather" /><Source value={sourceRecord.geometry} label="Province boundaries" /></> : <Source value={source} />}
+          <Source value={sourceRecord.weather} label="NASA weather" /><Source value={sourceRecord.geometry} label="Province boundaries" />
+          {text(object(sourceRecord.geometry).attribution) && <p className="of-analysis-source">{text(object(sourceRecord.geometry).attribution)}</p>}</> : <Source value={source} />}
         {warnings.length > 0 && <ul className="of-analysis-notes">{warnings.map((warning, index) => <li key={`${index}-${warning}`}>{warning}</li>)}</ul>}
       </div></details>
     </> : <p className="of-analysis-unavailable">{entry?.reason ?? 'This analysis does not include a trained-model forecast for this crop.'}</p>}

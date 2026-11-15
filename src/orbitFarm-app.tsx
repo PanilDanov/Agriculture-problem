@@ -18,6 +18,7 @@ import type {
   JournalEntry, ProviderSettings, ScenarioId,
 } from './domain/orbitFarm-types';
 import { CropSprite, FarmScene, SatelliteIcon } from './components/orbitFarm-farm-scene';
+import { ArtworkMark } from './components/orbitFarm-artwork-mark';
 const BoundaryMap = lazy(() => import('./components/orbitFarm-boundary-map').then((module) => ({ default: module.BoundaryMap })));
 const FarmLayoutEditor = lazy(() => import('./components/orbitFarm-layout-editor').then((module) => ({ default: module.FarmLayoutEditor })));
 import { OrbitScanner } from './components/orbitFarm-scanner';
@@ -446,6 +447,7 @@ export function OrbitFarmApp() {
                       </span>}
                     </div>;
                   })}<ArrowRight size={20} /></div>
+                  <ArtworkMark className="of-artwork-mark--sequence" />
                   {plan.waterScreenMm !== undefined && <p className="small muted">
                     {plan.waterScreenMm === null ? 'Historical water comparison unavailable' : `Historical water screen · ${Math.round(plan.waterScreenMm)} mm`}
                   </p>}
@@ -464,7 +466,7 @@ export function OrbitFarmApp() {
             <AnalysisDetails analysis={state.analysis} />
             <div className="conditions-heading"><div><h2>Crop suitability</h2><p>Scores compare crop suitability for your field.</p></div></div><div className="crop-options">{state.analysis.cropOptions.map((option) => {
               const planSeason = selectedPlan?.sequence.indexOf(option.cropId) ?? -1;
-              return <article key={option.cropId} className={`crop-option${planSeason >= 0 ? ' in-active-plan' : ''}`}><CropSprite cropId={option.cropId} size={48} /><div><h3>{option.name}</h3><p>{option.recommendedPlantingDate ? `Recommended planting: ${displayDate(option.recommendedPlantingDate)}` : 'Planting date unavailable'}</p>{planSeason >= 0 && <span className="crop-plan-badge"><Leaf size={11} />In your active plan</span>}<details className="crop-details"><summary>Details</summary>{option.reasons.map(reason => <p key={reason}>{reason}</p>)}</details></div><span className="score">{option.evaluationStatus === 'excluded' ? <span className="small">Outside crop requirements</span> : option.score === null ? <span className="small">Needs more data</span> : <><strong>{Math.round(option.score)}</strong><span>/100</span></>}</span></article>;
+              return <article key={option.cropId} className={`crop-option${planSeason >= 0 ? ' in-active-plan' : ''}`}><CropSprite cropId={option.cropId} size={48} /><div><h3>{option.name}</h3><p>{option.recommendedPlantingDate ? `Recommended planting: ${displayDate(option.recommendedPlantingDate)}` : 'Planting date unavailable'}</p>{planSeason >= 0 && <span className="crop-plan-badge"><Leaf size={11} />In your active plan</span>}<details className="crop-details"><summary>Details</summary>{option.reasons.map(reason => <p key={reason}>{reason}</p>)}</details></div><span className="score">{option.evaluationStatus === 'excluded' ? <span className="small">Outside crop requirements</span> : option.score === null ? <span className="small">Needs more data</span> : <><strong>{Math.round(option.score)}</strong><span>/100</span></>}</span><ArtworkMark /></article>;
             })}</div>
             <details className="evidence-details"><summary><Database size={17} />Sources & details<ChevronRight size={16} /></summary><ConditionCards analysis={state.analysis} /><SourceEvidence analysis={state.analysis} /><div className="evidence-notes"><h3>Assumptions & limitations</h3><p>Suitability scores compare crops; they do not predict harvests.</p>{[...state.analysis.assumptions, ...state.analysis.limitations].map((note) => <p key={note}>• {note}</p>)}</div></details>
           </> : <div className="empty-state"><SatelliteIcon /><h2>No analysis yet</h2><button className="button primary" onClick={() => state.boundary ? void analyze() : createFarm()}><ScanLine size={17} />{state.boundary ? 'Analyze field' : 'Draw my farm'}</button></div>}
@@ -703,6 +705,7 @@ function PlotEditor({ state, slotId, viewDate, dueWatering, onAction, onTaskActi
           <div><span className="eyebrow">{bedName}</span><h3>{cropName(plot.cropId)}</h3></div>
           <span className="growth-dot" />
         </div>
+        <ArtworkMark className="of-artwork-mark--inline" />
         <RotationGuide state={state} slotId={slotId} viewDate={viewDate} onCompare={previewing ? undefined : onComparePlans} />
         <div className="plot-detail"><span>Estimated stage</span><strong>{stage}</strong></div>
         <div className="plot-detail"><span>{plot.cropId === 'tomato' ? 'Transplant date' : stage === 'Planned' ? 'Planting date' : 'Planted'}</span><strong>{displayDate(plot.plantedOn)}</strong></div>
@@ -735,6 +738,7 @@ function PlotEditor({ state, slotId, viewDate, dueWatering, onAction, onTaskActi
   }}>
     <div className="plot-editor-heading"><span className="eyebrow">{bedName}</span><h3>{plot ? 'Edit planting' : lastHarvest ? 'Plant next crop' : 'Plant crop'}</h3></div>
     <RotationGuide state={state} slotId={slotId} viewDate={viewDate} onCompare={onComparePlans} />
+    <ArtworkMark className="of-artwork-mark--inline" />
     {previewing && <p className="plot-preview-label">Planning for {displayDate(viewDate)}</p>}
     {!progress && suggestedOptions.length > 0 && <>
       <span className="eyebrow">Recommended for your field</span>

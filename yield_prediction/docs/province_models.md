@@ -109,7 +109,10 @@ retraining needs no private `.data` directory or network download. For a newly
 collected snapshot, pass `--weather /path/to/monthly-directory --as-of YYYY-MM-DD`.
 Canonical normalized weather JSON and trainer/feature-code hashes enter the
 model version. A test retrains actual barley models from the portable snapshot
-in a temporary directory and compares their complete artifact hashes.
+in a temporary directory, checks source/version identity and each artifact's
+checksum, and compares real predictions and holdout metrics within tight numeric
+tolerances. Serialized bytes can differ across operating systems and BLAS
+implementations; binary equality is not a cross-platform training guarantee.
 
 `POST /v1/yield` accepts exactly one input kind. For this family:
 

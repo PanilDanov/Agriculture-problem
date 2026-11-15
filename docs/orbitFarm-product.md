@@ -1,8 +1,8 @@
-# orbitFarm · Product specification v0.1
+# orbitFarm · Product behaviour
 
-This document guides the team's first 24 hours. All code, comments, file contents, user interface text, errors, help text, and demo content must be in English. The product name is **orbitFarm**; trademark availability has not been checked.
+This document describes the integrated application and its product boundaries, reviewed 15 November 2026. All code, comments, file contents, user interface text, errors, help text, and demo content must be in English. The product name is **orbitFarm**; trademark availability has not been checked.
 
-Status: the specification, delivery plan, and starter Figma design are prepared. Figma includes five screen drafts. The active delivery is a working browser application with reproducible mock-data test benches. PWA installation and home-screen behavior are deferred. Requirements below describe the product; successful checks must be established by actual test runs, and an authentic backend integration is separate work.
+The browser application includes live field analysis, explicitly labelled demo test benches, two-season rotation comparisons, planting/harvest progression and a local journal. The backend uses actual NASA POWER observations and versioned crop/ML sources. PWA installation, accounts and cloud synchronization remain outside this release. See the [current implementation](../README.md), [data-source scope](data-sources.md) and [analysis contract](orbitFarm-analysis-contract.md) for verified behaviour and limits.
 
 ## Product in one sentence
 
@@ -12,9 +12,7 @@ Farmers see their land as a cozy 16-bit pixel-art farm from above, with a fence,
 
 ## Connection to the NASA challenge
 
-The accessible search representation of the official **Field Shift** page describes crop-rotation decision support using NASA Earth observations, local soil information, crop characteristics, and farmer priorities. Comparing crop sequences therefore belongs in the main user journey. The three options below are our MVP decision, not a NASA requirement. Direct access to the page failed while this document was prepared; the team must check the full statement and its Resources tab before submission. [Official 2026 challenge](https://www.spaceappschallenge.org/2026/challenges/field-shift-adapting-farms-with-nasa-data/).
-
-Early test benches use mocks. The final demonstration must show at least one genuine NASA source from the challenge's Resources, with its date and provenance visible in the UI. The GO Team clarified this condition for Global Awards eligibility on November 5, 2026. A saved genuine response makes the pitch more reliable than a live request. [GO Team clarification](https://github.com/nasa/spaceapps/discussions/1827).
+The project uses NASA Earth observations as evidence for crop and rotation decisions. Its implemented NASA source is POWER, with observation dates, units and provenance retained. A scan is an interface transition while available data is processed, not a new satellite overpass. [Official NASA POWER data service](https://power.larc.nasa.gov/docs/services/) · [Project data-source inventory](data-sources.md).
 
 ## Main user journey
 
@@ -71,24 +69,20 @@ The website MVP must include on-device persistence, farm renaming, planting-area
 | Nutrient information missing | `Check soil nutrients` — no fertilizer dosage |
 | Action recorded | `Irrigation logged` / `Undo` |
 
-`Wait for rain` is allowed only with a separate forecast that has an identified source and validity period. Historical NASA POWER or GPM rainfall is not a forecast. During the first 24 hours, forecasts exist only in the synthetic `rain-coming` test bench, labeled `Demo forecast`; connecting a genuine forecast service is outside the MVP. Recording a completed action is a user report, not evidence that field conditions changed.
+`Wait for rain` is allowed only with a separate forecast that has an identified source and validity period. Historical NASA POWER or GPM rainfall is not a forecast. Any synthetic forecast in a test bench must be labelled `Demo forecast`. A genuine future-weather forecast service is outside this release. Recording a completed action is a user report, not evidence that field conditions changed.
 
-## Data agreement with the analytics team
+## Environmental data and model scope
 
-The first genuine end-to-end integration uses NASA POWER for regional temperature and rainfall, plus one preprocessed SMAP or HLS snapshot if feasible. Do not integrate five systems at once. The data team prepares agronomic rules and an approved crop list for one region; the frontend must not invent them from the color of the soil.
+The live collector uses NASA POWER daily weather, SoilGrids static soil predictions and sourced calendar candidates. A POWER point represents its provider grid, not a measurement of each planting bed. Source availability and missing data remain visible. SMAP satellite retrievals and HLS imagery are not implemented product inputs; optional POWER moisture fields are modelled grid outputs and must not be labelled SMAP observations.
 
-| Source | Available information | Responsible UI use |
-| --- | --- | --- |
-| **NASA POWER** | Regional weather and climate parameters; meteorological grid of 0.5° × 0.625°. | Regional context, not a measurement of an individual planting area. [POWER API docs](https://power.larc.nasa.gov/docs/tutorials/service-data-request/api/). |
-| **SMAP Enhanced L3** | Surface soil moisture on a 9 km grid. SMAP observes approximately the upper 5 cm of soil. | A single regional signal may apply to the entire small farm. A daily product does not guarantee a new observation of every field each day. [Dataset](https://data.nasa.gov/dataset/smap-enhanced-l3-radiometer-global-and-polar-grid-daily-9-km-ease-grid-soil-moisture-v006-3df00), [NASA on SMAP](https://www.nasa.gov/image-article/smap-data-aids-agriculture/). |
-| **HLS** | Land-surface observations at 30 m resolution. | An optional spatial layer and vegetation indices. Account for clouds and observation time; this is not live video. [HLS products](https://hls.gsfc.nasa.gov/data-products/). |
+The project also has ten national annual-history models and twenty experimental Spanish provincial pre-season/mid-season models using MAPA labels and NASA POWER monthly point proxies. Eight original/candidate wheat/maize regional estimators retain a separate crop-mask input contract. Model coverage and temporal cutoffs differ; field accuracy is unverified. [Model/source inventory and limitations](data-sources.md).
 
-The scan visualizes requesting or processing available data; it does not command a new satellite overpass. Require the source URL, dataset/product version, `observedAt`, `fetchedAt`, units, spatial resolution/footprint, quality, and a clear distinction between synthetic data, NASA cache, and NASA API delivery. Every recommendation references its supporting signals and local inputs. Do not display decorative confidence claims such as `98% confidence`.
+The response keeps source URLs, versions, observation/retrieval dates, units, spatial scope and quality. Synthetic demo data, real saved observations and live provider responses remain distinct. No decorative confidence percentage is a substitute for validation.
 
 ## First-release boundaries
 
-**Included:** one region and one farm, 10 plantable crops with three synthetic recommendation profiles, the current rotation plus two alternatives covering two seasons, a game-style planting schematic, care tasks, a journal, a mock/API adapter, and error test benches. This stage prioritizes the website; PWA support is deferred. At least one genuine NASA observation remains a requirement for the final competition demonstration. The first working test benches may remain fully synthetic with visible labels.
+**Included:** a geographic field boundary, ten crop profiles, a supplied or clearly labelled example current plan plus two alternative two-season sequences, custom schematic beds, planting/harvest progression, care tasks, local journal/persistence, live API analysis and repeatable demo/error benches. The plans preserve reasons and unavailable dates rather than claiming every crop is locally scheduled. The available ML modes retain their documented geographic scope and warnings.
 
-**Later work:** PWA installation and offline-shell behavior after the website is stable; then multi-user accounts, multiple farms, cloud synchronization, push and background tasks, market prices, dosage calculations, yield prediction, IoT, a marketplace, 3D, and a game economy. During the first 24 hours, there are no coins, penalties for missed tasks, or artificial plant deaths driven by timers.
+**Later work:** PWA installation and offline shell, multiple user accounts, cloud synchronization, push/background tasks, field-calibrated yield uncertainty, a validated whole-field water balance where local inputs are missing, market prices, IoT and a game economy. No coins, penalties or artificial plant deaths are driven by timers.
 
-Choose the demo region with the analytics team during the first hour, based on available data and suitable crops. Fixtures may remain synthetic until then; this does not justify claiming support for every climate zone. Sprint outcomes, the data contract, and tests are described in the [orbitFarm delivery plan](orbitFarm-delivery-plan.md).
+The [original short delivery plan](archive/2026-11-14-delivery-plan.md) is retained as project history. Current setup and checks are in the [development guide](orbitFarm-development.md) and [integrated recovery guide](../DATA_RECOVERY.md).

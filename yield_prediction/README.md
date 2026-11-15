@@ -1,4 +1,4 @@
-# AgroWise yield prediction
+# orbitFarm yield prediction
 
 The complete inference process is documented in [Yield inference service](docs/inference_service.md).
 It exposes health/readiness and actual single/batch model forecasts in a separate pinned Python 3.11 environment.

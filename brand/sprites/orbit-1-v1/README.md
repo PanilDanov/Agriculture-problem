@@ -2,6 +2,12 @@
 
 Original orbitFarm pixel satellite, generated with the built-in `image_gen` tool on 2026-11-14. The ivory body carries a green sprout-in-orbit emblem; blue solar panels and a downward-facing cyan sensor keep it readable at small sizes.
 
+The scanner scene and standalone satellite display **AI-generated artwork**.
+The original source PNG and generation prompt are unchanged. Retain a visible
+generation mark when presenting the image separately or exporting a screenshot.
+Orbit-1 is a fictional project character, not a NASA mission or an observation
+source. See [artwork provenance](../../../docs/asset-provenance.md).
+
 - Runtime sprite: [`public/assets/orbit-1/orbit-1-scanner-v1.png`](../../../public/assets/orbit-1/orbit-1-scanner-v1.png), 1536 × 1024 RGBA with transparent background. Keep the alpha channel intact.
 - Generation prompt and provenance: [`source.json`](source.json).
 - Component: [`OrbitScanner`](../../../src/components/orbitFarm-scanner.tsx).

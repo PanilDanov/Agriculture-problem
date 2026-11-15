@@ -5,6 +5,7 @@ import { getGrowthStage } from '../domain/orbitFarm-model';
 import { FarmBedLayer, type FarmBedVisual } from './orbitFarm-bed-layer';
 import { ORBIT_SCANNER_SPRITE } from './orbitFarm-scanner';
 import { FarmWorld, FARM_WORLD_WIDTH } from './orbitFarm-world';
+import { ArtworkMark } from './orbitFarm-artwork-mark';
 import './orbitFarm-scenes.css';
 
 const FIELD_AREA = { x: 160, y: 204, width: 534, height: 234 };
@@ -27,7 +28,7 @@ function SatelliteDrawing() {
 }
 
 export function SatelliteIcon({ size = 80, className = '' }: { size?: number; className?: string }) {
-  return <svg width={size} height={size / 2} viewBox="0 0 160 80" aria-hidden="true" shapeRendering="crispEdges" className={`of-satellite-icon ${className}`}><SatelliteDrawing /></svg>;
+  return <span className="of-satellite-figure"><svg width={size} height={size / 2} viewBox="0 0 160 80" aria-hidden="true" shapeRendering="crispEdges" className={`of-satellite-icon ${className}`}><SatelliteDrawing /></svg><ArtworkMark /></span>;
 }
 
 function insideBed(point: LayoutPoint, points: LayoutPoint[]) {

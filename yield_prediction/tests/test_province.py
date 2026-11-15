@@ -9,6 +9,7 @@ from pathlib import Path
 import subprocess
 import sys
 
+import joblib
 import numpy as np
 import pytest
 
@@ -172,7 +173,34 @@ def test_real_barley_retraining_is_reproducible_from_tracked_portable_weather(tm
     assert report["weather_source"]["kind"] == "hash_verified_portable_release"
     assert report["weather_source"]["sha256"] == REGISTRY["weatherSha256"]
     for mode in MODES:
-        actual = json.loads((tmp_path / "models" / f"barley_{mode}.json").read_text())
-        _, released = load_province("barley", mode)
+        model_path = tmp_path / "models" / f"barley_{mode}.joblib"
+        actual = json.loads(model_path.with_suffix(".json").read_text())
+        original, released = load_province("barley", mode)
         assert actual["model_version"] == released["model_version"]
-        assert actual["artifact_sha256"] == released["artifact_sha256"]
+        for key in ("features", "provinces", "runtime", "source", "training_code_sha256", "feature_code_sha256"):
+            assert actual[key] == released[key]
+        # Each artifact retains strict checksum integrity. Serialized bytes and
+        # BLAS rounding need not be identical across macOS ARM and Linux x86.
+        assert hashlib.sha256(model_path.read_bytes()).hexdigest() == actual["artifact_sha256"]
+        retrained = joblib.load(model_path)
+        assert retrained["regions"] == original["regions"]
+        features = []
+        for code in released["current_coverage_regions"]:
+            region = original["regions"][code]
+            history = {int(year): float(value) for year, value in region["history"]}
+            row, _ = make_features(history, monthly_weather(WEATHER[code], as_of=AS_OF), region["calendar"],
+                                   2026, mode, as_of=AS_OF, provinces=released["provinces"], province_id=code)
+            features.append(row)
+        assert features
+        matrix = np.stack(features)
+        np.testing.assert_allclose(np.exp(retrained["model"].predict(matrix)),
+                                   np.exp(original["model"].predict(matrix)), rtol=1e-8, atol=1e-10)
+        assert actual["validation"]["selected_estimator"] == released["validation"]["selected_estimator"]
+        checks = [(actual["validation"][name], released["validation"][name])
+                  for name in ("metrics", "conservative_policy_metrics")]
+        checks.extend((actual["validation"]["metrics_by_label_age"][age], stats)
+                      for age, stats in released["validation"]["metrics_by_label_age"].items())
+        for measured, expected in checks:
+            assert measured["count"] == expected["count"]
+            for key in expected:
+                np.testing.assert_allclose(measured[key], expected[key], rtol=1e-8, atol=1e-10)

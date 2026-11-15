@@ -1,4 +1,4 @@
-"""Regional AgroWise yield forecasting."""
+"""Regional orbitFarm yield forecasting."""
 
 from .inference import predict_yield
 from .input_adapter import build_model_features

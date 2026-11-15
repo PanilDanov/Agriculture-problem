@@ -9,10 +9,10 @@ orbitFarm turns farm conditions into a clear plan for planting, crop rotation, a
 ## Personality and artwork
 
 - Friendly, calm, and curious. Guidance supports the farmer's decisions without promising a guaranteed harvest.
-- Cozy 16-bit pixel art: a slightly angled top-down view, tiled plots, wooden fences, small expressive plants, and dark green outlines. Use one perspective and consistent pixel density for every object. Stardew Valley is a mood reference; orbitFarm characters, interface, and artwork are original and use no copied game assets.
-- Base sprites use a 16×16 or 32×32 px grid. Scale by whole numbers with nearest-neighbor resampling; object edges align with the pixel grid. Apply `image-rendering: pixelated` to game artwork, with no smoothing, gradients, or blur.
+- Cozy pixel-art direction: a slightly angled top-down view, tiled plots, wooden fences, small expressive plants, and dark green outlines. The crop, scenery, dog and satellite illustrations were generated with `image_gen`; see [artwork provenance](../docs/asset-provenance.md) and [AI usage](../AI_USAGE.md). Stardew Valley is a historical mood reference, rather than an asset supplier for these generated files.
+- Runtime crop frames can be 32×32 px, but generated source artwork is not guaranteed to follow a native 16×16 or 32×32 grid. Preserve hard edges with nearest-neighbor resampling and `image-rendering: pixelated`. Do not describe generated artwork as manually drawn. Keep the visible **AI-generated artwork** mark on rendered illustration groups and on their submitted screenshots or recordings.
 - Land and plants dominate the scene. Panels and labels remain flat and readable. Do not represent scientific measurements as decorative game meters without units.
-- **Orbit-1** is the proposed satellite companion, with solar panels and a sprout on its body. It accompanies analysis and explains the result. Its status copy is `Analyzing latest available observations`.
+- **Orbit-1** is the implemented fictional satellite companion, with solar panels and a sprout on its body. It accompanies the analysis request; the request lifecycle controls its status. It is not a NASA spacecraft or a source of observations.
 - The wordmark is `orbitFarm`. A separate logo mark is **Planned**: an original pixel sprout inside an open orbit. At small sizes, use the mark alone. Minimum clear space is half the mark's height.
 - Credit NASA in data sources. The product identity and satellite belong to orbitFarm; do not use the official NASA logo as the app mark or imply NASA endorsement.
 
@@ -100,7 +100,7 @@ The file includes editable pixel farm artwork and a wordmark. A separate logo ma
 
 The [crop sprite pack](sprites/crops-v1/README.md) contains artwork for wheat, barley, maize, sorghum, chickpea, lentil, faba bean, sunflower, potato, and open-field tomato. Each crop has four images: `Seedling`, `Growing`, `Ready`, and `Harvest item`.
 
-The pack includes transparent PNG assets, the ten original 2×2 sheets, a self-contained [Figma import board](sprites/crops-v1/orbitFarm-crops-figma.svg), naming metadata, and the exact generation prompts. The import board keeps each sprite as a separate raster image layer with vector labels. These assets are prepared locally; they have not been placed into the shared Figma file.
+The pack includes transparent PNG assets, the ten original 2×2 sheets, a [generator for a self-contained Figma import board](sprites/crops-v1/build-figma-board.py), naming metadata, and the exact generation prompts. The import board keeps each sprite as a separate raster image layer with vector labels. These assets are prepared locally; they have not been placed into the shared Figma file.
 
 The generated masters are 1254×1254 px, and the losslessly extracted cells are 627×627 px. They follow the cozy pixel-art visual direction but are not guaranteed to align to an exact native 32×32 pixel grid. Growth artwork is illustrative and does not define scientific growth-stage timing.
 

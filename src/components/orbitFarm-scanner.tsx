@@ -1,4 +1,5 @@
 import { useId } from 'react';
+import { ArtworkMark } from './orbitFarm-artwork-mark';
 import './orbitFarm-scanner.css';
 
 export const ORBIT_SCANNER_SPRITE = `${import.meta.env.BASE_URL}assets/orbit-1/orbit-1-scanner-v1.png`;
@@ -65,6 +66,7 @@ export function OrbitScanner({ state = 'scanning', mode = 'demo', compact = fals
         </div>
         <div className="of-scanner-footprint"><span /><span /></div>
         <span className="of-scanner-lock">{complete ? '✓' : '+'}</span>
+        <ArtworkMark className="of-artwork-mark--overlay of-artwork-mark--scanner" />
       </div>
 
       <div className="of-scanner-copy" role="status" aria-live="polite" aria-atomic="true">

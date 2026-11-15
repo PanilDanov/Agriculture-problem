@@ -2,28 +2,14 @@
 
 **From orbit to your next season.**
 
-A web app and installable PWA that turns a farmer's boundary, Earth observations, and local knowledge into explainable crop rotations and everyday care reminders. The exact product name is **orbitFarm**.
+orbitFarm is Team HaHaton's project for [Field Shift: Adapting Farms with NASA Data](https://www.spaceappschallenge.org/2026/challenges/adapting-farms-with-nasa-data/), NASA Space Apps Challenge 2026.
 
-## Start here
+The implemented journey is **draw a field → analyze source evidence → compare rotations → record planting → care → harvest → plant the next crop**. All ten product crops are supported in the planting lifecycle. Farm records persist in the browser.
 
-- [Product specification](docs/orbitFarm-product.md): the user journey, MVP scope, screens, data boundaries, and English interface copy.
-- [Four delivery sprints](docs/orbitFarm-delivery-plan.md): a 24-hour plan with visible results, reproducible test benches, the analytics contract, and release checks.
-- [Proposed analysis contract](docs/orbitFarm-analysis-contract.md) and [request example](contracts/orbitFarm-analysis-request.example.json): frontend inputs, server-selected planting dates and planning horizon, units, and the initial scoring policy.
-- [Brandbook](brand/orbitFarm-brandbook.md) and [design tokens](brand/orbitFarm-tokens.json): the original cozy 16-bit pixel-art direction and implementation foundations.
-- [Figma brand and product design](https://www.figma.com/design/ZD6mSeYogRklG9vO6eMUCJ): editable brand foundations, components, and five product screens.
+The public application runs the React/TypeScript website, Python analysis API and separate pinned ML runtime together at [orbitfarm.vercel.app](https://orbitfarm.vercel.app/#/farm). NASA POWER weather, ISRIC soil estimates, published crop calendars and explicitly sourced farmer inputs remain distinguishable. Live analysis does not use synthetic test-bench responses.
 
-## Agreed scope
+The model bundle contains 20 experimental NASA/MAPA provincial crop/mode models, ten FAOSTAT national models and eight original wheat/maize regional artifacts. These families have distinct input requirements and coverage; they do not establish field-level accuracy. Missing inputs, historical replays and baseline failures are disclosed.
 
-**Journey:** Draw farm → Analyze → Compare rotations → Plant → Care → Log action.
+See the [README](README.md) for capabilities, limitations and quick start; [submission material](docs/submission/project.md) for the project description; [development](docs/orbitFarm-development.md) for verification; and [deployment](docs/orbitFarm-deployment.md) for hosting.
 
-**24-hour release:** one farm, one demo region, 10 plantable crops with three synthetic recommendation profiles, a current two-season plan and two rotation alternatives, a schematic planting layout, and a care journal. All application copy, code, comments, and project files use English. React + TypeScript + Vite, Vercel, and interchangeable mock/API providers.
-
-**Visual direction:** original cozy 16-bit farm graphics, pixel headings, crisp game windows, and readable body text. Stardew Valley is a mood reference; its assets are not part of this project.
-
-**Dates:** planting date and season end are absent from field setup and the analysis request. The backend chooses recommended planting dates and the planning horizon. Business dates use `YYYY-MM-DD` without time or timezone conversion; recorded actual planting dates remain separate from recommendations.
-
-**Data:** start with explicitly labeled fixtures. By the final demonstration, at least one authentic NASA source from the challenge Resources must pass through the same contract into the interface. A cached authentic snapshot supports a reliable presentation. Every synthetic and real signal remains individually identifiable.
-
-**Current status:** product specification, delivery plan, brandbook, and editable Figma screen designs are prepared. Application implementation, the server, CI, and automated tests have not been created; nothing has been deployed. Planned verification commands describe acceptance requirements, not completed checks.
-
-Challenge: [Field Shift: Adapting Farms with NASA Data](https://www.spaceappschallenge.org/2026/challenges/field-shift-adapting-farms-with-nasa-data/).
+Original code, source data and generated artwork have separate attribution and reuse information in [third-party notices](THIRD_PARTY_NOTICES.md) and [AI usage](AI_USAGE.md). Earlier AgriWise naming survives only in compatibility filenames and historical material.

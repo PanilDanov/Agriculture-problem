@@ -15,7 +15,7 @@ The development site uses `http://127.0.0.1:5173`. The application uses hash rou
 
 | Address | Purpose |
 | --- | --- |
-| `/#/farm` | Farm, custom planting beds, care actions, and the selected bed. |
+| `/#/farm` | Farm, custom planting beds, care actions, harvest progression, and the selected bed. |
 | `/#/layout` | Polygon-bed layout editor with draft Undo, Redo, and Cancel. |
 | `/#/setup` | Field boundary and farmer inputs. |
 | `/#/plans` | Crop options and three rotation plans. |
@@ -42,7 +42,7 @@ Field setup sends no planting date, season end, or timezone. The backend chooses
 
 ## Custom bed layouts
 
-`Edit layout` opens a separate draft editor. The classic 3 × 2 arrangement is only the initial preset. Draw simple polygons on a 24 × 12 schematic grid, move entire beds, change individual corners, name beds, or use the row and patchwork presets. The editor allows up to 24 beds with up to 32 corners each. A 0.5-cell snap keeps placement predictable; numeric point and corner controls support keyboard use and touch screens.
+`Edit layout` opens a separate draft editor. The classic 3 × 2 arrangement remains an optional preset and demo layout. New farms begin with one Whole field bed; existing custom layouts are preserved. Draw simple polygons on a 24 × 12 schematic grid, move entire beds, change individual corners, name beds, or use the row and patchwork presets. The editor allows up to 24 beds with up to 32 corners each. A 0.5-cell snap keeps placement predictable; numeric point and corner controls support keyboard use and touch screens.
 
 Shared edges are allowed. Self-crossing, overlapping, zero-area, and out-of-bounds beds are rejected without replacing the last valid shape. The layout is separate from the geographic field boundary and does not change hectares, satellite sampling, or existing analysis.
 
@@ -79,7 +79,7 @@ The GitHub Actions workflow runs locked dependency installation, the English-con
 
 ## Data and deployment limits
 
-Local development uses labeled demo fixtures by default. To use live field data, start the FastAPI service and select **Use API** in Test benches. The hosted site uses its own origin for live field analysis. API mode reports service failures in the interface. [Analysis contract](orbitFarm-analysis-contract.md) · [Local setup and data recovery](https://github.com/PanilDanov/Agriculture-problem/blob/feature/yield-prediction/DATA_RECOVERY.md)
+Local development uses labeled demo fixtures by default. To use live field data, start the FastAPI service and select **Use API** in Test benches. The hosted site uses its own origin for live field analysis. API mode reports service failures in the interface. [Analysis contract](orbitFarm-analysis-contract.md) · [Integrated local setup and data recovery](../DATA_RECOVERY.md) · [Source licences and reproducibility](data-sources.md)
 
 Farm state is stored in browser local storage for each origin and profile.
 

@@ -4,6 +4,7 @@ import { CROP_CATALOG } from '../domain/orbitFarm-crop-catalog';
 import type { GrowthStage } from '../domain/orbitFarm-model';
 import { planBedAnnotations } from './orbitFarm-bed-annotations';
 import { CropSprite } from './orbitFarm-crop-sprite';
+import { ArtworkMark } from './orbitFarm-artwork-mark';
 import { FARM_WORLD_VIEW_BOX } from './orbitFarm-world';
 import './orbitFarm-bed-layer.css';
 
@@ -146,6 +147,7 @@ export function FarmBedLayer({ beds, pixelsPerUnit, selectedSlotId, onSelectSlot
           </g>;
         })}
       </svg>
+      <ArtworkMark className="of-artwork-mark--overlay" />
     </div>
     {legend.length > 0 && <div className="of-bed-legend" aria-label="Small bed identifiers">
       <div className="of-bed-legend-heading"><strong>Beds</strong></div>

@@ -2,7 +2,7 @@
 
 This is the developer reference for the JSON currently sent by the orbitFarm frontend to the analysis backend. It lists every request field, accepted value, and validation rule, and distinguishes values supported by the validator from values the current interface actually sends.
 
-Implementation snapshot: November 14, 2026. The broader [analysis proposal](orbitFarm-analysis-contract.md) includes planned backend behavior; this guide describes the current frontend implementation.
+Core request guide, reviewed November 15, 2026. The [current analysis contract](orbitFarm-analysis-contract.md) links the implemented schemas and optional ML/irrigation input contracts. This guide describes the core farmer payload; the Python and frontend schemas are authoritative for optional evidence fields.
 
 ## HTTP request
 
@@ -17,7 +17,7 @@ Accept: application/json
 - If the service URL ends in `/v1/analysis`, it is used directly. If it ends in `/v1`, the frontend appends `/analysis`. Otherwise, it appends `/v1/analysis`. A trailing slash is removed first.
 - The URL must use HTTP or HTTPS and have no embedded username/password, query string, or fragment.
 - The request body is JSON, with no file uploads. The frontend sets no `Authorization` header or custom `credentials` option.
-- The default request timeout is 12 seconds. Starting a new analysis cancels the previous in-flight request.
+- The default request timeout is 45 seconds. Starting a new analysis cancels the previous in-flight request.
 
 ## Reading the field tables
 
@@ -169,9 +169,9 @@ Accepted crop IDs are limited to the current frontend catalog:
 | `tomato` | Open-field tomato |
 
 - `localInputs.previousCropId`: one of those strings, or `null` when unknown. This is the previous crop, not a requested next crop.
-- `localInputs.currentPlan`: **always `null` in the current builder**. The validator also accepts exactly two objects, each with integer `seasonIndex` equal to `1` or `2` and a `cropId` from the table above. Both indices must occur once; their array order is not prescribed.
+- `localInputs.currentPlan`: two season entries when the farmer supplies a plan or an applicable selected plan is available; otherwise `null`. Each entry has integer `seasonIndex` equal to `1` or `2` and a `cropId` from the table above. Both indices must occur once; their array order is not prescribed.
 
-Schema-supported example of a future plan; the current UI does not send this value:
+Example of a supported current plan:
 
 ```json
 [

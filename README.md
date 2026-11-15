@@ -1,57 +1,70 @@
 # orbitFarm
 
-**From orbit to your next season.**
+**From orbit to your next season.** An interactive farm planner using NASA Earth observations to help farmers compare crops, explore rotations and record care and harvests.
 
-[Open orbitFarm](https://orbitfarm.vercel.app/) · [Test benches](https://orbitfarm.vercel.app/#/lab)
+[Open the application](https://orbitfarm.vercel.app/#/farm) · [Team HaHaton](https://www.spaceappschallenge.org/2026/find-a-team/team-robert/?tab=project) · [Submission material](docs/submission/project.md)
 
-A cozy 16-bit farm companion that turns Earth observations and local knowledge into explainable crop rotations and everyday care reminders.
+Built for NASA Space Apps Challenge 2026: [Field Shift: Adapting Farms with NASA Data](https://www.spaceappschallenge.org/2026/challenges/adapting-farms-with-nasa-data/). The live application includes the website, field-analysis API and 38 trained model artifacts, hosted together on Vercel Container Runtime.
 
-This integrated checkout contains the website, the NASA field-analysis API and the independently pinned yield-model runtime. Product content, code, comments, and interface copy are in English.
+## What you can do
 
-## Run the complete application
+- Draw a field, provide its crop history and management constraints, and request an analysis using real source data.
+- Compare two-season rotation scenarios with component evidence, water constraints and explicit missing-data statuses.
+- Plant any of ten crops, record care and harvests, and advance the selected rotation. Farm records are saved in the browser.
+- Inspect experimental yield estimates and their geography, source dates, model versions and validation against a last-observed-yield baseline.
 
-Use Python 3.11 and Node.js 22.12 or newer. The launcher also detects an official Node distribution under `.runtime/`.
+**Crops:** wheat, barley, maize, sorghum, chickpea, lentil, faba bean, sunflower, potato and open-field tomato. Coverage varies by crop and location; ten crops does not mean worldwide model coverage.
+
+## How NASA data is used
+
+| Source | Implemented use | Scope |
+| --- | --- | --- |
+| [NASA POWER Daily](https://power.larc.nasa.gov/docs/services/api/temporal/daily/) | Historical temperature screening and field weather evidence | Point data; historical climate scenarios are distinguished from forecasts |
+| [NASA POWER Monthly](https://power.larc.nasa.gov/docs/services/api/temporal/monthly/) | Weather features for 20 provincial models: ten crops × pre-season/mid-season | Actual monthly data at a fixed representative point in each supported Spanish province |
+| [ISRIC SoilGrids](https://www.isric.org/explore/soilgrids), MAPA and FAO references | Soil estimates, published crop calendars, crop statistics and reference water calculations | Separate sources with their own resolution, dates and limitations |
+| FAOSTAT / CY-Bench / Copernicus AgERA5 | Ten national annual-history models and eight original wheat/maize regional artifacts | National models use yield history; regional models require compatible crop-mask weather inputs |
+
+NASA POWER is listed in the challenge's [official resources](https://www.spaceappschallenge.org/2026/challenges/adapting-farms-with-nasa-data/?tab=resources). NASA data is used in analysis and provincial ML features; the project does not imply NASA endorsement.
+
+## Try the complete flow
+
+1. Open the [farm](https://orbitfarm.vercel.app/#/farm), draw a boundary and enter the known field information.
+2. For the fullest currently audited seasonal model coverage, choose a field in **Ciudad Real, Granada, Huesca, Lleida, Tarragona or Zaragoza, Spain**, with harvest year **2026**.
+3. Analyze the field and inspect source evidence and experimental model validation. Missing soil, calendar or water inputs remain visible and can prevent a complete recommendation.
+4. Compare a rotation, record a planting, then record its harvest to advance the plan. The [test benches](https://orbitfarm.vercel.app/#/lab) provide explicitly labelled synthetic demonstrations.
+
+All 20 provincial crop/mode combinations have frozen 2026 coverage in those six provinces. Coverage elsewhere is checked per crop and mode. A province-level estimate is not a prediction validated for an individual field. Thirteen of the 20 provincial models beat their baseline in both the overall holdout and conservative label-age check; all 20 remain experimental. National sorghum, chickpea and tomato models also remain experimental after failing their holdout baseline comparison.
+
+Irrigation calculations use FAO-56 reference formulas and require sourced local measurements for the current root-zone snapshot. The application does not substitute satellite soil moisture for a farmer's root-zone measurement. Missing inputs are never filled with demo values in live analysis.
+
+## Run locally
+
+Requirements: **Python 3.11** and **Node.js 22.12+**; CI uses Node.js 24.
 
 ```bash
 python3 scripts/orbitFarm-local.py setup
 python3 scripts/orbitFarm-local.py run
 ```
 
-Open `http://127.0.0.1:8000/`. The launcher builds the live website, starts the ML runtime separately, checks model readiness, and starts FastAPI on the same origin. It creates separate `.venv-api` and `.venv-ml` environments; it does not replace system Python or Node.
+Open `http://127.0.0.1:8000/`. The launcher creates separate pinned API and ML environments, builds the website and checks model readiness. No CDS account is needed for the bundled NASA/MAPA and national forecasts. Fetching new compatible AgERA5 data requires a free Copernicus CDS account and acceptance of the dataset licence; credentials stay outside Git.
 
-The complete flow uses NASA POWER historical and recent weather, SoilGrids estimates, published calendars, ten-crop suitability and measured irrigation calculations. Ten FAOSTAT national annual-history models provide country estimates. Twenty separate experimental models provide pre-season and mid-season estimates for all ten crops in verified Spanish provinces, using actual MAPA crop statistics and NASA monthly observations at a fixed representative point. Compatible registered AgERA5 crop-mask data enable the original wheat/maize models. An absent input is reported rather than filled with an example.
+For frontend development, run `npm ci` and `npm run dev`. See [development](docs/orbitFarm-development.md) and [deployment](docs/orbitFarm-deployment.md) for full commands and configuration.
 
-Source and model coverage vary by crop, province, country and season. Sorghum, chickpea and tomato national models did not improve on their last-yield holdout baselines and are explicitly experimental. All NASA/MAPA province models are experimental and expose their temporal validation against the last-observed-yield baseline. Provincial weather points, monthly calendar scenarios and aggregate crop statistics do not establish accuracy for an individual field. Past issue dates are labelled historical replays.
+## Code, formulas and verification
 
-The integrated version is served locally at port 8000 and publicly at [orbitfarm.vercel.app](https://orbitfarm.vercel.app). The public deployment runs the website, API and all 38 models together on Vercel Container Runtime; a separate server is not required. See the [deployment guide](docs/orbitFarm-deployment.md) for the tested container configuration and the alternative split-service deployment.
+| Area | Start here |
+| --- | --- |
+| NASA/soil acquisition and analysis API | [data_pipeline.py](data_pipeline.py), [agronomy](agronomy/README.md) |
+| Crop scores, rotations and water formulas | [scoring and water evidence](agronomy/scoring-and-water.md), [rotation_planner.py](agronomy/rotation_planner.py), [assessment.py](agronomy/assessment.py) |
+| NASA/MAPA provincial ML | [model methodology and validation](yield_prediction/docs/province_models.md) |
+| National ML and original regional models | [national models](yield_prediction/docs/national_models.md), [ML service](yield_prediction/docs/inference_service.md) |
+| UI, planting and harvest lifecycle | [src](src), [crop catalog](docs/orbitFarm-crop-catalog.md) |
+| API inputs and units | [request guide](docs/orbitFarm-backend-request-guide.md), [example request](contracts/orbitFarm-analysis-request.example.json) |
 
-Copernicus CDS is optional for national and NASA/MAPA forecasts and required for new compatible AgERA5 regional weather ingestion. After manually creating a CDS account and accepting the dataset licence, use `python3 scripts/orbitFarm-copernicus.py configure` to save a token outside Git. [Copernicus data pipeline](agronomy/copernicus-data.md) · [NASA/MAPA seasonal models](yield_prediction/docs/province_models.md) · [National models](yield_prediction/docs/national_models.md) · [Scoring and water evidence](agronomy/scoring-and-water.md) · [ML service](yield_prediction/docs/inference_service.md)
+Run `npm run verify` for frontend checks and browser tests; install Chromium first with `npx playwright install chromium`. API and ML checks run separately in their pinned environments and in [GitHub Actions](https://github.com/PanilDanov/Agriculture-problem/actions). See the development guide for exact commands. Source manifests, temporal evaluation reports and model checksums are committed with model artifacts.
 
-- [Project overview](orbitFarm.md)
-- [Product specification](docs/orbitFarm-product.md)
-- [24-hour delivery plan](docs/orbitFarm-delivery-plan.md)
-- [Local development and test benches](docs/orbitFarm-development.md)
-- [Restore both branches and their data on another computer](https://github.com/PanilDanov/Agriculture-problem/blob/feature/yield-prediction/DATA_RECOVERY.md)
-- [Vercel deployment and updates](docs/orbitFarm-deployment.md)
-- [Proposed analysis request contract](docs/orbitFarm-analysis-contract.md)
-- [Backend request guide: current fields, allowed values, and examples](docs/orbitFarm-backend-request-guide.md)
-- [Example analysis request](contracts/orbitFarm-analysis-request.example.json)
-- [Brandbook](brand/orbitFarm-brandbook.md)
-- [Crop sprite pack · 10 crops, 4 images each](brand/sprites/crops-v1/README.md)
-- [Plantable crop catalog · IDs and demo behavior](docs/orbitFarm-crop-catalog.md)
-- [Editable Figma design](https://www.figma.com/design/ZD6mSeYogRklG9vO6eMUCJ)
+## Credits and reuse
 
-The analysis request sends no planting date, season end, or timezone. The backend chooses recommended crop planting dates and the planning horizon. Planting, care, reminder, and journal dates use `YYYY-MM-DD` without timezone conversion.
+Original project code is licensed under [Apache 2.0](LICENSE). Third-party code, data, fonts and assets retain their own terms; see [third-party notices](THIRD_PARTY_NOTICES.md). Bundled GISCO-derived geometry has non-commercial reuse conditions and is excluded from the original-code licence.
 
-The public site calls the Vercel field API on the same origin. The API retrieves NASA POWER weather, soil data, and planting calendars for the selected field. Test benches provide labeled demo scenarios for local development.
-
-## Run the website
-
-Use Node.js 22.12 or newer; CI uses Node.js 24.
-
-```bash
-npm ci
-npm run dev
-```
-
-Open `http://127.0.0.1:5173/#/farm` for the application or `http://127.0.0.1:5173/#/lab` for test benches. Run `npm run verify` for type checks, domain tests, a production build, and browser tests. Before the first browser test run, install Chromium with `npx playwright install chromium`. Check actual command and GitHub Actions results before treating a revision as verified.
+[AI usage disclosure](AI_USAGE.md) documents Codex assistance and generated artwork. Source prompts and provenance are retained. The observed NASA, MAPA and FAOSTAT datasets are not AI-generated. `AgroWise_crop_requirements_clean.csv` retains its legacy filename for compatibility; **orbitFarm** is the current product name.

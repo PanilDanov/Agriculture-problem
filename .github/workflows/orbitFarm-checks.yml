@@ -28,8 +28,8 @@ jobs:
         run: npm ci
       - name: Verify English-only project content
         run: node scripts/orbitFarm-verify-content.mjs
-      - name: Verify portable native release packaging
-        run: node --test scripts/orbitFarm-rpm.test.mjs
+      - name: Verify Container deployment tooling
+        run: npm run test:deploy
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Run type, domain, build, and browser checks
@@ -79,7 +79,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install --yes --no-install-recommends libgomp1 libexpat1
-          python -m pip install './yield_prediction[candidates]' 'pytest>=7,<10'
+          python -m pip install ./yield_prediction 'pytest>=7,<10' 'six>=1.16,<2'
+          python -m pip install --no-deps catboost==1.2.8 xgboost==3.0.2
       - uses: actions/cache@v4
         with:
           path: yield_prediction/data/raw/sample
@@ -114,15 +115,22 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v5
-      - name: Build the separate API and inference images
-        run: |
-          mkdir -p .runtime/regional-inputs
-          docker compose build
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+      - name: Build the canonical Vercel container image
+        run: docker compose build
       - name: Start and verify model readiness and the served website
         run: |
           docker compose up --detach --wait --wait-timeout 120
-          curl --fail --silent --show-error --max-time 15 http://127.0.0.1:8000/ready | jq -e '.status == "ready"'
+          curl --fail --silent --show-error --max-time 15 http://127.0.0.1:8000/ready | jq -e '
+            .status == "ready" and
+            (.yieldService.details.regionalModels | length) == 8 and
+            .yieldService.details.nationalModels.readyModels == 10 and
+            .yieldService.details.provinceModels.readyModels == 20'
           curl --fail --silent --show-error --max-time 15 http://127.0.0.1:8000/ | grep -q 'id="root"'
+      - name: Verify actual NASA and all forecast families through the container
+        run: node scripts/orbitFarm-smoke-release.mjs http://127.0.0.1:8000
       - name: Save container diagnostics
         if: failure()
         run: docker compose logs --no-color
@@ -131,11 +139,16 @@ jobs:
         run: docker compose down --volumes
 
   deploy:
-    name: Build the Vercel release and publish
+    name: Publish the verified Container Runtime application
     needs: [verify, backend, ml, containers]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/frontend'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.VERCEL_PROJECT_ID != ''
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+      VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -143,53 +156,19 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: '24'
-          cache: npm
-          cache-dependency-path: package-lock.json
-      - name: Install release tools
+      - name: Validate linked project credentials
         run: |
-          npm install --global --no-audit --no-fund vercel@65.16.0
-      - name: Stage frontend and FastAPI
-        id: release
-        shell: bash
-        run: |
-          npm ci
-          npm run deploy:stage | tee "$RUNNER_TEMP/orbitfarm-release.log"
-          release_dir=$(sed -n 's/^Vercel release directory: //p' "$RUNNER_TEMP/orbitfarm-release.log")
-          test -f "$release_dir/dist/index.html"
-          printf 'path=%s\n' "$release_dir" >> "$GITHUB_OUTPUT"
-      - name: Publish verified release
+          test -n "$VERCEL_TOKEN" || { echo '::error::Configure the VERCEL_TOKEN secret.'; exit 1; }
+          test -n "$VERCEL_ORG_ID" || { echo '::error::Configure the VERCEL_ORG_ID repository variable.'; exit 1; }
+      - name: Deploy and verify the exact preview URL
+        id: preview
+        run: npm run deploy:preview
+      - name: Deploy and verify production
+        id: production
+        run: npm run deploy:production
+      - name: Record verified deployment
         env:
-          RELEASE_DIR: ${{ steps.release.outputs.path }}
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: team_zJUC8g6TYHP6x0MnkZkfG0Wt
-          VERCEL_PROJECT_ID: prj_ZutDvTPGMissMKemd3RXAErMjueA
-          ORBITFARM_ML_URL: ${{ secrets.ORBITFARM_ML_URL }}
-          ORBITFARM_ML_TOKEN: ${{ secrets.ORBITFARM_ML_TOKEN }}
-        shell: bash
+          PREVIEW_URL: ${{ steps.preview.outputs.url }}
+          PRODUCTION_URL: ${{ steps.production.outputs.url }}
         run: |
-          if [[ -z "$VERCEL_TOKEN" ]]; then
-            echo '::warning::Vercel publishing requires the VERCEL_TOKEN Actions secret.'
-            echo 'Release built. Publishing awaits the `VERCEL_TOKEN` repository secret.' >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
-          if [[ -z "$ORBITFARM_ML_URL" ]]; then
-            echo '::warning::Publishing the complete application requires ORBITFARM_ML_URL for the deployed inference service.'
-            echo 'Release built and tested. Publishing awaits the reachable ML service URL.' >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
-          cd "$RELEASE_DIR"
-          runtime_args=(--env "ORBITFARM_ML_URL=$ORBITFARM_ML_URL")
-          if [[ -n "$ORBITFARM_ML_TOKEN" ]]; then
-            runtime_args+=(--env "ORBITFARM_ML_TOKEN=$ORBITFARM_ML_TOKEN")
-          fi
-          vercel deploy --prod --yes --token "$VERCEL_TOKEN" \
-            "${runtime_args[@]}" \
-            --meta "orbitFarmFrontendSha=$GITHUB_SHA" --meta "orbitFarmBackendSha=$GITHUB_SHA" \
-            2>&1 | tee "$RUNNER_TEMP/orbitfarm-vercel.log"
-          deployment=$(grep -oE 'https://orbitfarm-[a-z0-9-]+-lu1dgys-projects\.vercel\.app' "$RUNNER_TEMP/orbitfarm-vercel.log" | tail -n 1)
-          curl --fail --silent --show-error --retry 3 --retry-all-errors --max-time 20 \
-            https://orbitfarm.vercel.app/health | jq -e '.status == "ok"'
-          curl --fail --silent --show-error --retry 3 --retry-all-errors --max-time 20 \
-            https://orbitfarm.vercel.app/ready | jq -e '.status == "ready"'
-          node "$GITHUB_WORKSPACE/scripts/orbitFarm-smoke-release.mjs" https://orbitfarm.vercel.app
-          printf 'Published %s to https://orbitfarm.vercel.app/\n' "$deployment" >> "$GITHUB_STEP_SUMMARY"
+          printf 'Verified commit: %s\nPreview: %s\nProduction: %s\n' "$GITHUB_SHA" "$PREVIEW_URL" "$PRODUCTION_URL" >> "$GITHUB_STEP_SUMMARY"

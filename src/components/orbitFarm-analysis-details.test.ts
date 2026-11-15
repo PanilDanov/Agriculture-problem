@@ -76,7 +76,8 @@ describe('analysis evidence display', () => {
       region_name: 'Albacete', region_id: '02', country_code: 'ES', data_through: '2026-05',
       source: { labels: { dataset: 'MAPA provincial statistics', url: 'https://www.mapa.gob.es/es/estadistica/temas/estadisticas-agrarias/' },
         calendar: { source_files: [{ id: 'leguminosasgrano.xlsx', url: 'https://www.mapa.gob.es/calendar.xlsx' }] },
-        weather: { product: 'NASA POWER Monthly', url: 'https://power.larc.nasa.gov/' } },
+        weather: { product: 'NASA POWER Monthly', url: 'https://power.larc.nasa.gov/' },
+        geometry: { source_url: 'https://example.org/boundaries', attribution: '© Registered boundary provider' } },
       validation: { holdout_years: [2022, 2023, 2024], metrics: { mae_t_ha: 4.56 },
         conservative_policy_metrics: { mae_t_ha: 2.45, last_yield_baseline_mae_t_ha: 2.7 },
         metrics_by_label_age: { '2': { mae_t_ha: 2.45, last_yield_baseline_mae_t_ha: 2.7 }, '3': { mae_t_ha: 2.6, last_yield_baseline_mae_t_ha: 2.9 } } } });
@@ -93,6 +94,7 @@ describe('analysis evidence display', () => {
     expect(html).not.toContain('4.56');
     expect(html).toContain('Yield labels:');
     expect(html).toContain('Crop calendar:');
+    expect(html).toContain('© Registered boundary provider');
   });
 
   it('does not describe a better provincial policy MAE as worse when the combined check failed', () => {

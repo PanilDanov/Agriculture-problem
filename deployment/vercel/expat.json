@@ -1,6 +1,0 @@
-{
-  "url": "https://cdn.amazonlinux.com/al2023/blobstore/16f4c8e1fe525d9d3e8c8ef5387448d2587d5a34ad062efb6513a6250eda3778/expat-2.8.3-1.amzn2023.0.1.x86_64.rpm",
-  "sha256": "16f4c8e1fe525d9d3e8c8ef5387448d2587d5a34ad062efb6513a6250eda3778",
-  "library": "./usr/lib64/libexpat.so.1.12.3",
-  "license": "./usr/share/licenses/expat/COPYING"
-}

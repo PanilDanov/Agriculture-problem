@@ -11,8 +11,13 @@ const htmlRequests = [
   { name: 'both cache validators', headers: { 'If-None-Match': staleEtag, 'If-Modified-Since': futureModifiedSince } },
 ];
 
-async function request(url, headers = {}) {
-  const response = await fetch(url, { headers, signal: AbortSignal.timeout(30_000) });
+export function verificationHeaders(url, baseUrl, headers = {}, bypass = process.env.VERCEL_AUTOMATION_BYPASS_SECRET) {
+  return { ...headers, ...(bypass && new URL(url).origin === new URL(baseUrl).origin
+    ? { 'x-vercel-protection-bypass': bypass } : {}) };
+}
+
+async function request(url, headers, baseUrl) {
+  const response = await fetch(url, { headers: verificationHeaders(url, baseUrl, headers), redirect: 'error', signal: AbortSignal.timeout(30_000) });
   assert.equal(response.status, 200, `${url} returned HTTP ${response.status}; expected 200.`);
   return response;
 }
@@ -35,19 +40,25 @@ function collectAssets(html, pageUrl, assets) {
 
 async function verifyRelease(baseUrl) {
   const healthUrl = new URL('/health', baseUrl);
-  const healthResponse = await request(healthUrl);
+  const healthResponse = await request(healthUrl, {}, baseUrl);
   assert.equal(contentType(healthResponse), 'application/json', `${healthUrl} must return JSON.`);
   assert.equal((await healthResponse.json()).status, 'ok', `${healthUrl} did not report status "ok".`);
   process.stdout.write('PASS /health: HTTP 200 and status ok.\n');
-  const readyResponse = await request(new URL('/ready', baseUrl));
-  assert.equal((await readyResponse.json()).status, 'ready', 'The field API must report actual ML readiness.');
+  const readyResponse = await request(new URL('/ready', baseUrl), {}, baseUrl);
+  const ready = await readyResponse.json();
+  assert.equal(ready.status, 'ready', 'The field API must report actual ML readiness.');
+  const models = ready.yieldService?.details;
+  assert.equal(models?.regionalModels?.length, 8);
+  assert(models.regionalModels.every(row => row.status === 'ready'));
+  assert.equal(models?.nationalModels?.readyModels, 10);
+  assert.equal(models?.provinceModels?.readyModels, 20);
   process.stdout.write('PASS /ready: field API and all packaged ML models are ready.\n');
 
   const assets = new Map();
   for (const path of ['/', '/index.html']) {
     const pageUrl = new URL(path, baseUrl);
     const results = await Promise.allSettled(htmlRequests.map(async ({ name, headers }) => {
-      const response = await request(pageUrl, headers);
+      const response = await request(pageUrl, headers, baseUrl);
       assert.equal(contentType(response), 'text/html', `${path} (${name}) must return HTML.`);
       assert(/(?:^|,)\s*no-store\s*(?:,|$)/i.test(response.headers.get('cache-control') ?? ''),
         `${path} (${name}) must send Cache-Control: no-store.`);
@@ -60,7 +71,7 @@ async function verifyRelease(baseUrl) {
   }
 
   const results = await Promise.allSettled([...assets].map(async ([url, type]) => {
-    const response = await request(url);
+    const response = await request(url, {}, baseUrl);
     const mime = contentType(response);
     const valid = type === 'stylesheet' ? mime === 'text/css'
       : ['text/javascript', 'application/javascript', 'text/ecmascript', 'application/ecmascript'].includes(mime);
@@ -71,9 +82,11 @@ async function verifyRelease(baseUrl) {
   for (const result of results) if (result.status === 'rejected') throw result.reason;
 
   const payload = JSON.parse(await readFile(new URL('../deployment/smoke-field.json', import.meta.url), 'utf8'));
-  const analysisResponse = await fetch(new URL('/v1/analysis', baseUrl), {
+  const analysisUrl = new URL('/v1/analysis', baseUrl);
+  const analysisResponse = await fetch(analysisUrl, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    redirect: 'error',
+    headers: verificationHeaders(analysisUrl, baseUrl, { 'Content-Type': 'application/json', Accept: 'application/json' }),
     body: JSON.stringify(payload),
     signal: AbortSignal.timeout(55_000),
   });
@@ -92,6 +105,36 @@ async function verifyRelease(baseUrl) {
     assert.equal(row.usesNasaWeather, false, 'Annual yield-history models must not claim NASA weather as a predictor.');
   }
   process.stdout.write('PASS /v1/analysis: real NASA field context and ten actual country ML forecasts.\n');
+
+  const provincePayload = JSON.parse(await readFile(new URL('../deployment/smoke-province-field.json', import.meta.url), 'utf8'));
+  for (const mode of ['pre_season', 'mid_season']) {
+    provincePayload.yieldForecast = { mode, harvestYear: 2026 };
+    const response = await fetch(analysisUrl, { method: 'POST', redirect: 'error',
+      headers: verificationHeaders(analysisUrl, baseUrl, { 'Content-Type': 'application/json', Accept: 'application/json' }),
+      body: JSON.stringify(provincePayload), signal: AbortSignal.timeout(55_000) });
+    assert.equal(response.status, 200, `Province ${mode} returned HTTP ${response.status}.`);
+    const result = await response.json();
+    assert(['nasa-api', 'nasa-cache'].includes(result.dataMode), 'Province analysis must use real NASA context.');
+    assert.equal(result.yieldForecasts?.length, 10);
+    for (const row of result.yieldForecasts) {
+      assert.equal(row.status, 'available', `${row.cropId}/${mode}: ${row.reason ?? row.code}`);
+      const forecast = row.forecast;
+      assert.equal(forecast?.crop, row.cropId);
+      assert.equal(forecast?.mode, mode);
+      assert.equal(forecast?.harvest_year, 2026);
+      assert.equal(forecast?.country_code, 'ES');
+      assert.equal(forecast?.region_id, '50');
+      assert.equal(forecast?.spatial_level, 'administrative_region');
+      assert.equal(forecast?.weather_support, 'representative_point');
+      assert.equal(forecast?.release_status, 'experimental');
+      assert.equal(forecast?.is_replay, true);
+      assert(forecast.model_version && forecast.forecast_date && forecast.calculated_at);
+      assert(forecast.forecast_date < forecast.calculated_at.slice(0, 10));
+      assert(Number.isFinite(forecast.predicted_yield_t_ha) && forecast.predicted_yield_t_ha >= 0);
+      assert.equal(row.usesNasaWeather, true);
+    }
+    process.stdout.write(`PASS /v1/analysis ${mode}: ten real NASA/MAPA forecasts with province/point/replay scope.\n`);
+  }
   process.stdout.write(`Release smoke check passed for ${baseUrl.origin} (${assets.size} assets).\n`);
 }
 

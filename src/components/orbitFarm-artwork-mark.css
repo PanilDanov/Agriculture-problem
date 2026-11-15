@@ -1,0 +1,38 @@
+.of-artwork-mark {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  padding: 3px 6px;
+  border: 1px solid #57665b;
+  border-radius: 3px;
+  background: #fff8e8;
+  color: #203d32;
+  font: 600 10px/1.4 Inter, system-ui, sans-serif;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+  pointer-events: none;
+}
+.of-artwork-mark--overlay {
+  position: absolute;
+  z-index: 8;
+  right: 8px;
+  bottom: 8px;
+  max-width: calc(100% - 16px);
+}
+.of-artwork-mark--scanner { bottom: 9%; right: 10%; }
+.of-artwork-mark--inline { margin-top: 9px; }
+.of-artwork-mark--sequence { margin: 10px auto 0; }
+.of-satellite-figure {
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+}
+.of-satellite-figure > .of-artwork-mark { text-align: center; }
+.rotation-card-seasons > .of-artwork-mark { margin-bottom: 12px; }
+.crop-option.crop-option { position: relative; padding-bottom: 36px; }
+.crop-option > .of-artwork-mark { position: absolute; left: 14px; bottom: 8px; max-width: calc(100% - 28px); }
+.of-yield-card > .of-artwork-mark { margin-top: 10px; }

@@ -4,9 +4,15 @@ Ten crops, each with four transparent PNG sprites: **Seedling**, **Growing**, **
 
 The crops are wheat, barley, maize, sorghum, chickpea, lentil, faba bean, sunflower, potato, and open-field tomato. All artwork was generated with the built-in `image_gen` tool. Exact prompts are saved in `generation-prompts.json`; original-output provenance is in `sources.json`.
 
+The website labels rendered crop-illustration groups **AI-generated artwork**.
+These source PNGs and original sheets are preserved unchanged and are not
+watermarked exports. Keep a visible generation mark when presenting them in a
+submission screenshot, recording or standalone illustration. See the full
+[asset provenance](../../../docs/asset-provenance.md) and [AI disclosure](../../../AI_USAGE.md).
+
 ## Use in Figma
 
-For the complete prepared board, drag `orbitFarm-crops-figma.svg` onto the Figma canvas. The board embeds the PNG sprites and uses editable vector labels. The plants remain raster artwork. Direct connector import was blocked by the Figma MCP Starter request limit, so this file provides an offline import path.
+Generate the board locally with `python3 build-figma-board.py`, then drag the resulting `orbitFarm-crops-figma.svg` onto the Figma canvas. It embeds PNG sprites with editable vector labels; the plants remain raster artwork. The generated SVG and local import-session JSON are ignored exports, not source files.
 
 To place individual sprites:
 
@@ -37,7 +43,7 @@ Requires Python 3 and Pillow. From this directory:
 python3 extract_sprites.py --archive
 ```
 
-This rebuilds `png/` and `manifest.json`, verifies source-pixel preservation and alpha bounds, then creates `../orbitFarm-crops-v1.zip`. To include newly added preview or Figma-import metadata without extracting again:
+This rebuilds `png/` and `manifest.json`, verifies source-pixel preservation and alpha bounds, then creates the ignored local export `../orbitFarm-crops-v1.zip`. The ZIP and embedded SVG are omitted from Git because their original sources and generators are retained. To package the existing extracted sources without extracting again:
 
 ```bash
 python3 extract_sprites.py --archive-only

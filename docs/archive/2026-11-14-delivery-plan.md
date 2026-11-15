@@ -1,3 +1,5 @@
+> Historical design/recovery record from 14–15 November 2026. It is not the current implementation or installation guide. See the [current project](../../README.md), [development guide](../orbitFarm-development.md) and [API contract](../orbitFarm-analysis-contract.md).
+
 # orbitFarm · 24-hour delivery plan: four sprints with visible results
 
 Status: website-first development plan. Implementation and reproducible test benches are the active work; PWA installation and home-screen behavior are deferred. Every sprint ends with a visible result and relevant checks. Test definitions and a workflow file are not evidence of a passing local or remote run; inspect their actual results.
@@ -41,7 +43,7 @@ If time runs short, cut extra crops and decorative animation. Preserve the farm 
 
 ## Analytics handoff contract
 
-This is a v1 proposal to agree on within the first four hours. A stable contract matters more than the backend language. The [detailed analysis request proposal](orbitFarm-analysis-contract.md) defines the farmer inputs, server-selected planning horizon, water-budget semantics, and experimental score discussed with the team. The current frontend implements the request shape; the broader agronomic policy remains a proposal for the backend.
+This is a v1 proposal to agree on within the first four hours. A stable contract matters more than the backend language. The [detailed analysis request proposal](../orbitFarm-analysis-contract.md) defines the farmer inputs, server-selected planning horizon, water-budget semantics, and experimental score discussed with the team. The current frontend implements the request shape; the broader agronomic policy remains a proposal for the backend.
 
 | Operation / object | Fields and meaning |
 | --- | --- |

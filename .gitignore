@@ -20,3 +20,7 @@ __pycache__/
 .data_pipeline_cache/
 data/
 .data/
+# Reproducible artwork exports and local Figma import-session state.
+/brand/sprites/orbitFarm-crops-v1.zip
+/brand/sprites/crops-v1/orbitFarm-crops-figma.svg
+/brand/sprites/crops-v1/figma-import.json

@@ -66,6 +66,7 @@ COPY agronomy/*.py agronomy/*.json ./agronomy/
 COPY agronomy/regional_inputs ./agronomy/regional_inputs
 COPY agronomy/province_inputs ./agronomy/province_inputs
 COPY data_pipeline.py AgroWise_crop_requirements_clean.csv ./
+COPY LICENSE THIRD_PARTY_NOTICES.md AI_USAGE.md ./
 COPY deployment/run-container.py ./deployment/run-container.py
 COPY --from=website /app/dist ./dist
 USER orbitfarm

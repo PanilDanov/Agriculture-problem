@@ -1,6 +1,6 @@
 # Irrigation and crop rotation data audit
 
-Reviewed November 15, 2026. The crop catalog covers ten open-field crops. It supplies public reference values for water demand and a documented set of rotation checks. Grain yield prediction remains limited to wheat and maize at the administrative-region level. [Crop profiles and source records](crop_profiles.json) · [Yield prediction methodology](../yield_prediction/README.md)
+Reviewed November 15, 2026. The crop catalog covers ten open-field crops. It supplies public reference values for water demand and a documented set of rotation checks. Yield inference includes ten country-level annual-history models, twenty experimental Spanish province models (ten crops × pre-season/mid-season with NASA point-proxy weather), and eight original/candidate crop-mask regional estimators for wheat and maize. Their spatial scopes and input availability differ; none establishes field-level accuracy. [Crop profiles and source records](crop_profiles.json) · [Yield prediction methodology](../yield_prediction/README.md) · [Source and licence index](../docs/data-sources.md)
 
 ## Review of the team data
 

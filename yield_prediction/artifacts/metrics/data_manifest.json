@@ -1,0 +1,619 @@
+{
+  "files": [
+    {
+      "file": "maize_AO.zip",
+      "sha256": "8e1917b2f34b2dc22a2e3ffe4159f2d5c651e756fce29cacdfc9d70beb00371a"
+    },
+    {
+      "file": "maize_BE.zip",
+      "sha256": "dbc2ff895acb06618d398fed315ce0f300bce7a8d059285e3b99a0b33e159edf"
+    },
+    {
+      "file": "maize_BG.zip",
+      "sha256": "6fc85ec98c1ccf6486a5b865f73d2fa9e39c1d1c64c17385746e2cdbcb10cd96"
+    },
+    {
+      "file": "maize_CN.zip",
+      "sha256": "11141bc8d93385322f750fc9f638a73e7090da53dc09b7fc00d7d965f4db7a4b"
+    },
+    {
+      "file": "maize_CZ.zip",
+      "sha256": "523514771b74a94dee7e3b0fb170520cd387d0c24a51ac1a9d3d9b9f4fc41712"
+    },
+    {
+      "file": "maize_DE.zip",
+      "sha256": "39d204206f020d3aee3b415dd10581d434d46da7cdc9ffb5ba47115733ec98bb"
+    },
+    {
+      "file": "maize_ES.zip",
+      "sha256": "b7a3f7736795e9becaa10205be01caf3f6a57172f3db31bd313bf531cfbe7375"
+    },
+    {
+      "file": "maize_ET.zip",
+      "sha256": "475c7dd02efe6010afa97a53e0b927a6752a826423dc21739475c788be35708d"
+    },
+    {
+      "file": "maize_FR.zip",
+      "sha256": "95e8809ac0acf52ba96322472892e9195b68d8dd3aa5c6957318656649ec395e"
+    },
+    {
+      "file": "maize_HU.zip",
+      "sha256": "41e2fe694d2c94d74e4b18e007cee4edfa6b19b0fe7fb732a6fa2675f2ca4cfa"
+    },
+    {
+      "file": "maize_IT.zip",
+      "sha256": "98e3e05408c79ab983a83b7280418ca2bdeb4d8188b6787a3890caa00ee5230c"
+    },
+    {
+      "file": "maize_MG.zip",
+      "sha256": "c293dc74d1f91ebdba8f1d772832c3add26ee99215286082c6bd6d9067c70077"
+    },
+    {
+      "file": "maize_MX.zip",
+      "sha256": "25fe63230ed07ddfe90bf68926d67c6a1f79d8a1b454e4399131309699ae59e7"
+    },
+    {
+      "file": "maize_NL.zip",
+      "sha256": "ae2cdf99a51270694c67fd15157aae12605df98cccee82ded4ad4978c6799c21"
+    },
+    {
+      "file": "maize_PL.zip",
+      "sha256": "850c3310fcb6260f3461299cac7569d3f166807c5984fd946427fd911a2e5104"
+    },
+    {
+      "file": "maize_PT.zip",
+      "sha256": "2d8f2e65fd6297dfe77ccd386461e0725a950620cf1eb18c55287a6058730a1d"
+    },
+    {
+      "file": "maize_RO.zip",
+      "sha256": "68c58743ce5c5032bac487ad1c3440ee05bd7d5dc8afdb541973a78ce673119f"
+    },
+    {
+      "file": "maize_ZA.zip",
+      "sha256": "d09cb20cbb658c1793e3dbf72fd241c242acf2703014665138d20b552b835de0"
+    },
+    {
+      "file": "maize_ZM.zip",
+      "sha256": "da2bf6c80ca1d849d3a7fc14c76e50de65f98b1dc30961315f074699b73deae1"
+    },
+    {
+      "file": "wheat_AU.zip",
+      "sha256": "fc1c4096aaace381e0ef84af518b4af3b76a4f838e07fd0a6d72eccdc9750414"
+    },
+    {
+      "file": "wheat_BE.zip",
+      "sha256": "970ffdc3b8814f782535d53923c3f3a52f5a8c29d6a47c4b338ff7e8c633ee13"
+    },
+    {
+      "file": "wheat_BG.zip",
+      "sha256": "f279f1cfaa4abebaadf38614fdd38ec353d9d5f8c7b3dbd09781b3f639c72c50"
+    },
+    {
+      "file": "wheat_CN.zip",
+      "sha256": "b2dba374b910ed66895ec17d7f97cf371c3e71ecb4b4366e826c2d3d1dbd0f64"
+    },
+    {
+      "file": "wheat_CZ.zip",
+      "sha256": "98a23d20d5a8957a5d76570e8dc5612a8ed8a437bcc509b9e6e789a00e9387ef"
+    },
+    {
+      "file": "wheat_DE.zip",
+      "sha256": "09bc7f06067fd1253548a75c7e62eb878742d6a9a0d4b4163523827e1bcc276c"
+    },
+    {
+      "file": "wheat_DK.zip",
+      "sha256": "a472f7e5ceffdbbd59b916e91a3d960a28d65db110279cc4853a2f2e1f0d35c5"
+    },
+    {
+      "file": "wheat_ES.zip",
+      "sha256": "c281908d90db2d89da651fa5b58b71f693cb642ee704080a96cc8b7b880d36cf"
+    },
+    {
+      "file": "wheat_FI.zip",
+      "sha256": "da5ed7af3f9a397ced4494956bbe684bec478dfd3ab3adaed7406bbd473d73bc"
+    },
+    {
+      "file": "wheat_FR.zip",
+      "sha256": "db443b4e1b8edeb51241525d4663da7579a57b77436fa00854ca0a2a0b6f90c3"
+    },
+    {
+      "file": "wheat_HU.zip",
+      "sha256": "8c8e4c97d5520a6f72bb0a6722362843830847f6de9154f80a39a90ca2b8e7d0"
+    },
+    {
+      "file": "wheat_IT.zip",
+      "sha256": "8ca1cfe9bfc6def7785792697344a9a77cc73190bf7b9fd66ba734979c936faf"
+    },
+    {
+      "file": "wheat_NL.zip",
+      "sha256": "ca3d007c9e1e81fb9324641bd52f3424f3f18704efd1a863ca5e12a9d179966f"
+    },
+    {
+      "file": "wheat_PL.zip",
+      "sha256": "219be25f18db33ccc4574ffe7fd2fafbf9394eed8ff40127f0f47361ce2e6322"
+    },
+    {
+      "file": "wheat_PT.zip",
+      "sha256": "ffa0795ca26c126af02ac0cc1410972805a3f5845ecc3eba617727876d9c3e3d"
+    },
+    {
+      "file": "wheat_RO.zip",
+      "sha256": "d82417c0c9428a69fbb95fd0749b5e72702987d08ac0b7e0950951fed23c5b1d"
+    },
+    {
+      "file": "wheat_SE.zip",
+      "sha256": "aacce482321a789200649d444333a09b02ee53c848bb16ce7fa0303af3f09920"
+    }
+  ],
+  "groups": [
+    {
+      "crop": "maize",
+      "country_code": "AO",
+      "source_rows": 378,
+      "invalid_or_duplicate_rows": 0,
+      "missing_or_invalid_calendar": 0,
+      "insufficient_climate_history": 124,
+      "insufficient_mid_weather": 88,
+      "rows": 378,
+      "first_year": 1997,
+      "last_year": 2017,
+      "yield_above_paper_range": 0
+    },
+    {
+      "crop": "maize",
+      "country_code": "BE",
+      "source_rows": 86,
+      "invalid_or_duplicate_rows": 1,
+      "missing_or_invalid_calendar": 0,
+      "insufficient_climate_history": 0,
+      "insufficient_mid_weather": 0,
+      "rows": 85,
+      "first_year": 2011,
+      "last_year": 2020,
+      "yield_above_paper_range": 1
+    },
+    {
+      "crop": "maize",
+      "country_code": "BG",
+      "source_rows": 180,
+      "invalid_or_duplicate_rows": 0,
+      "missing_or_invalid_calendar": 0,
+      "insufficient_climate_history": 72,
+      "insufficient_mid_weather": 60,
+      "rows": 180,
+      "first_year": 1991,
+      "last_year": 2020,
+      "yield_above_paper_range": 0
+    },
+    {
+      "crop": "maize",
+      "country_code": "CN",
+      "source_rows": 998,
+      "invalid_or_duplicate_rows": 0,
+      "missing_or_invalid_calendar": 0,
+      "insufficient_climate_history": 388,
+      "insufficient_mid_weather": 326,
+      "rows": 998,
+      "first_year": 1990,
+      "last_year": 2022,
+      "yield_above_paper_range": 0
+    },
+    {
+      "crop": "maize",
+      "country_code": "CZ",
+      "source_rows": 216,
+      "invalid_or_duplicate_rows": 4,
+      "missing_or_invalid_calendar": 0,
+      "insufficient_climate_history": 0,
+      "insufficient_mid_weather": 0,
+      "rows": 212,
+      "first_year": 2005,
+      "last_year": 2020,
+      "yield_above_paper_range": 0
+    },
+    {
+      "crop": "maize",
+      "country_code": "DE",
+      "source_rows": 9095,
+      "invalid_or_duplicate_rows": 0,
+      "missing_or_invalid_calendar": 2438,
+      "insufficient_climate_history": 3295,
+      "insufficient_mid_weather": 2784,
+      "rows": 6657,
+      "first_year": 1990,
+      "last_year": 2021,
+      "yield_above_paper_range": 3
+    },
+    {
+      "crop": "maize",
+      "country_code": "ES",
+      "source_rows": 1146,
+      "invalid_or_duplicate_rows": 1,
+      "missing_or_invalid_calendar": 51,
+      "insufficient_climate_history": 230,
+      "insufficient_mid_weather": 144,
+      "rows": 1094,
+      "first_year": 1998,
+      "last_year": 2020,
+      "yield_above_paper_range": 17
+    },
+    {
+      "crop": "maize",
+      "country_code": "ET",
+      "source_rows": 1050,
+      "invalid_or_duplicate_rows": 0,
+      "missing_or_invalid_calendar": 17,
+      "insufficient_climate_history": 267,
+      "insufficient_mid_weather": 162,
+      "rows": 1033,
+      "first_year": 1999,
+      "last_year": 2020,
+      "yield_above_paper_range": 0
+    },
+    {
+      "crop": "maize",
+      "country_code": "FR",
+      "source_rows": 3026,
+      "invalid_or_duplicate_rows": 86,
+      "missing_or_invalid_calendar": 110,
+      "insufficient_climate_history": 1202,
+      "insufficient_mid_weather": 1018,
+      "rows": 2830,
+      "first_year": 1990,
+      "last_year": 2020,
+      "yield_above_paper_range": 3
+    },
+    {
+      "crop": "maize",
+      "country_code": "HU",
+      "source_rows": 459,
+      "invalid_or_duplicate_rows": 0,
+      "missing_or_invalid_calendar": 0,
+      "insufficient_climate_history": 100,
+      "insufficient_mid_weather": 68,
+      "rows": 459,
+      "first_year": 1996,
+      "last_year": 2020,
+      "yield_above_paper_range": 0
+    },
+    {
+      "crop": "maize",
+      "country_code": "IT",
+      "source_rows": 2325,
+      "invalid_or_duplicate_rows": 0,
+      "missing_or_invalid_calendar": 23,
+      "insufficient_climate_history": 611,
+      "insufficient_mid_weather": 411,
+      "rows": 2302,
+      "first_year": 1995,
+      "last_year": 2020,
+      "yield_above_paper_range": 10
+    },
+    {
+      "crop": "maize",
+      "country_code": "MG",
+      "source_rows": 397,
+      "invalid_or_duplicate_rows": 0,
+      "missing_or_invalid_calendar": 0,
+      "insufficient_climate_history": 265,
+      "insufficient_mid_weather": 264,
+      "rows": 397,
+      "first_year": 1990,
+      "last_year": 2010,
+      "yield_above_paper_range": 0
+    },
+    {
+      "crop": "maize",
+      "country_code": "MX",
+      "source_rows": 141,
+      "invalid_or_duplicate_rows": 76,
+      "missing_or_invalid_calendar": 0,
+      "insufficient_climate_history": 0,
+      "insufficient_mid_weather": 0,
+      "rows": 65,
+      "first_year": 2014,
+      "last_year": 2019,
+      "yield_above_paper_range": 0
+    },
+    {
+      "crop": "maize",
+      "country_code": "NL",
+      "source_rows": 129,
+      "invalid_or_duplicate_rows": 3,
+      "missing_or_invalid_calendar": 0,
+      "insufficient_climate_history": 0,
+      "insufficient_mid_weather": 0,
+      "rows": 126,
+      "first_year": 2008,
+      "last_year": 2020,
+      "yield_above_paper_range": 6
+    },
+    {
+      "crop": "maize",
+      "country_code": "PL",
+      "source_rows": 301,
+      "invalid_or_duplicate_rows": 0,
+      "missing_or_invalid_calendar": 0,
+      "insufficient_climate_history": 0,
+      "insufficient_mid_weather": 0,
+      "rows": 301,
+      "first_year": 2003,
+      "last_year": 2020,
+      "yield_above_paper_range": 0
+    },
+    {
+      "crop": "maize",
+      "country_code": "PT",
+      "source_rows": 243,
+      "invalid_or_duplicate_rows": 13,
+      "missing_or_invalid_calendar": 24,
+      "insufficient_climate_history": 82,
+      "insufficient_mid_weather": 68,
+      "rows": 206,
+      "first_year": 1990,
+      "last_year": 2020,
+      "yield_above_paper_range": 0
+    },
+    {
+      "crop": "maize",
+      "country_code": "RO",
+      "source_rows": 946,
+      "invalid_or_duplicate_rows": 4,
+      "missing_or_invalid_calendar": 0,
+      "insufficient_climate_history": 206,
+      "insufficient_mid_weather": 122,
+      "rows": 942,
+      "first_year": 1998,
+      "last_year": 2020,
+      "yield_above_paper_range": 0
+    },
+    {
+      "crop": "maize",
+      "country_code": "ZA",
+      "source_rows": 316,
+      "invalid_or_duplicate_rows": 0,
+      "missing_or_invalid_calendar": 27,
+      "insufficient_climate_history": 122,
+      "insufficient_mid_weather": 104,
+      "rows": 289,
+      "first_year": 1990,
+      "last_year": 2022,
+      "yield_above_paper_range": 0
+    },
+    {
+      "crop": "maize",
+      "country_code": "ZM",
+      "source_rows": 2368,
+      "invalid_or_duplicate_rows": 0,
+      "missing_or_invalid_calendar": 673,
+      "insufficient_climate_history": 701,
+      "insufficient_mid_weather": 559,
+      "rows": 1695,
+      "first_year": 1990,
+      "last_year": 2017,
+      "yield_above_paper_range": 0
+    },
+    {
+      "crop": "wheat",
+      "country_code": "AU",
+      "source_rows": 747,
+      "invalid_or_duplicate_rows": 0,
+      "missing_or_invalid_calendar": 1,
+      "insufficient_climate_history": 280,
+      "insufficient_mid_weather": 256,
+      "rows": 746,
+      "first_year": 1990,
+      "last_year": 2024,
+      "yield_above_paper_range": 0
+    },
+    {
+      "crop": "wheat",
+      "country_code": "BE",
+      "source_rows": 216,
+      "invalid_or_duplicate_rows": 0,
+      "missing_or_invalid_calendar": 0,
+      "insufficient_climate_history": 32,
+      "insufficient_mid_weather": 11,
+      "rows": 216,
+      "first_year": 2000,
+      "last_year": 2020,
+      "yield_above_paper_range": 61
+    },
+    {
+      "crop": "wheat",
+      "country_code": "BG",
+      "source_rows": 46,
+      "invalid_or_duplicate_rows": 0,
+      "missing_or_invalid_calendar": 0,
+      "insufficient_climate_history": 1,
+      "insufficient_mid_weather": 1,
+      "rows": 46,
+      "first_year": 1998,
+      "last_year": 2020,
+      "yield_above_paper_range": 0
+    },
+    {
+      "crop": "wheat",
+      "country_code": "CN",
+      "source_rows": 821,
+      "invalid_or_duplicate_rows": 0,
+      "missing_or_invalid_calendar": 0,
+      "insufficient_climate_history": 322,
+      "insufficient_mid_weather": 268,
+      "rows": 821,
+      "first_year": 1990,
+      "last_year": 2022,
+      "yield_above_paper_range": 0
+    },
+    {
+      "crop": "wheat",
+      "country_code": "CZ",
+      "source_rows": 294,
+      "invalid_or_duplicate_rows": 0,
+      "missing_or_invalid_calendar": 0,
+      "insufficient_climate_history": 42,
+      "insufficient_mid_weather": 14,
+      "rows": 294,
+      "first_year": 2000,
+      "last_year": 2020,
+      "yield_above_paper_range": 0
+    },
+    {
+      "crop": "wheat",
+      "country_code": "DE",
+      "source_rows": 15233,
+      "invalid_or_duplicate_rows": 0,
+      "missing_or_invalid_calendar": 4223,
+      "insufficient_climate_history": 4767,
+      "insufficient_mid_weather": 4050,
+      "rows": 11010,
+      "first_year": 1990,
+      "last_year": 2021,
+      "yield_above_paper_range": 523
+    },
+    {
+      "crop": "wheat",
+      "country_code": "DK",
+      "source_rows": 165,
+      "invalid_or_duplicate_rows": 0,
+      "missing_or_invalid_calendar": 0,
+      "insufficient_climate_history": 0,
+      "insufficient_mid_weather": 0,
+      "rows": 165,
+      "first_year": 2006,
+      "last_year": 2020,
+      "yield_above_paper_range": 3
+    },
+    {
+      "crop": "wheat",
+      "country_code": "ES",
+      "source_rows": 721,
+      "invalid_or_duplicate_rows": 0,
+      "missing_or_invalid_calendar": 23,
+      "insufficient_climate_history": 157,
+      "insufficient_mid_weather": 111,
+      "rows": 698,
+      "first_year": 1998,
+      "last_year": 2020,
+      "yield_above_paper_range": 1
+    },
+    {
+      "crop": "wheat",
+      "country_code": "FI",
+      "source_rows": 197,
+      "invalid_or_duplicate_rows": 0,
+      "missing_or_invalid_calendar": 0,
+      "insufficient_climate_history": 16,
+      "insufficient_mid_weather": 7,
+      "rows": 197,
+      "first_year": 2000,
+      "last_year": 2020,
+      "yield_above_paper_range": 0
+    },
+    {
+      "crop": "wheat",
+      "country_code": "FR",
+      "source_rows": 2571,
+      "invalid_or_duplicate_rows": 0,
+      "missing_or_invalid_calendar": 57,
+      "insufficient_climate_history": 842,
+      "insufficient_mid_weather": 656,
+      "rows": 2514,
+      "first_year": 1990,
+      "last_year": 2020,
+      "yield_above_paper_range": 54
+    },
+    {
+      "crop": "wheat",
+      "country_code": "HU",
+      "source_rows": 318,
+      "invalid_or_duplicate_rows": 0,
+      "missing_or_invalid_calendar": 0,
+      "insufficient_climate_history": 20,
+      "insufficient_mid_weather": 0,
+      "rows": 318,
+      "first_year": 2002,
+      "last_year": 2020,
+      "yield_above_paper_range": 0
+    },
+    {
+      "crop": "wheat",
+      "country_code": "IT",
+      "source_rows": 1833,
+      "invalid_or_duplicate_rows": 2,
+      "missing_or_invalid_calendar": 0,
+      "insufficient_climate_history": 536,
+      "insufficient_mid_weather": 412,
+      "rows": 1831,
+      "first_year": 1995,
+      "last_year": 2020,
+      "yield_above_paper_range": 0
+    },
+    {
+      "crop": "wheat",
+      "country_code": "NL",
+      "source_rows": 242,
+      "invalid_or_duplicate_rows": 0,
+      "missing_or_invalid_calendar": 0,
+      "insufficient_climate_history": 35,
+      "insufficient_mid_weather": 12,
+      "rows": 242,
+      "first_year": 2000,
+      "last_year": 2020,
+      "yield_above_paper_range": 59
+    },
+    {
+      "crop": "wheat",
+      "country_code": "PL",
+      "source_rows": 301,
+      "invalid_or_duplicate_rows": 0,
+      "missing_or_invalid_calendar": 0,
+      "insufficient_climate_history": 0,
+      "insufficient_mid_weather": 0,
+      "rows": 301,
+      "first_year": 2003,
+      "last_year": 2020,
+      "yield_above_paper_range": 0
+    },
+    {
+      "crop": "wheat",
+      "country_code": "PT",
+      "source_rows": 216,
+      "invalid_or_duplicate_rows": 0,
+      "missing_or_invalid_calendar": 28,
+      "insufficient_climate_history": 89,
+      "insufficient_mid_weather": 77,
+      "rows": 188,
+      "first_year": 1990,
+      "last_year": 2020,
+      "yield_above_paper_range": 0
+    },
+    {
+      "crop": "wheat",
+      "country_code": "RO",
+      "source_rows": 455,
+      "invalid_or_duplicate_rows": 0,
+      "missing_or_invalid_calendar": 0,
+      "insufficient_climate_history": 65,
+      "insufficient_mid_weather": 39,
+      "rows": 455,
+      "first_year": 1998,
+      "last_year": 2020,
+      "yield_above_paper_range": 0
+    },
+    {
+      "crop": "wheat",
+      "country_code": "SE",
+      "source_rows": 327,
+      "invalid_or_duplicate_rows": 0,
+      "missing_or_invalid_calendar": 0,
+      "insufficient_climate_history": 41,
+      "insufficient_mid_weather": 15,
+      "rows": 327,
+      "first_year": 2000,
+      "last_year": 2020,
+      "yield_above_paper_range": 0
+    }
+  ],
+  "dataset_sha256": "b09d15d5ef1d31c1c98a7ff271f9f6e83dab1c0f152a08685f73b396bfaa2609"
+}

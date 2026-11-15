@@ -1,0 +1,6 @@
+-r requirements.txt
+catboost==1.2.8
+xgboost==3.0.2
+optuna==4.3.0
+matplotlib==3.7.1
+pytest>=7,<10

@@ -1,0 +1,710 @@
+{
+  "schema_version": 1,
+  "sources_reviewed_on": "2026-11-15",
+  "crops": {
+    "wheat": {
+      "name": "Wheat",
+      "botanical_family": "Poaceae",
+      "yield_forecast_scope": "grain",
+      "irrigation": {
+        "kc_root_height_source": {
+          "source_id": "fao56-rev1",
+          "table": "6.2",
+          "printed_page": 170
+        },
+        "depletion_source": {
+          "source_id": "fao56-rev1",
+          "table": "8.2",
+          "printed_page": 260
+        },
+        "reference_depletion_fraction_at_etc_5_mm_day": 0.5,
+        "variants": {
+          "common-winter-dry-grain": {
+            "label": "Common winter wheat, harvested at low grain moisture",
+            "kc": {
+              "initial": 0.7,
+              "mid_season": 1.15,
+              "end": 0.25
+            },
+            "max_effective_root_depth_m": [1, 1.5],
+            "max_crop_height_m": [0.7, 1.1]
+          },
+          "common-winter-wet-grain": {
+            "label": "Common winter wheat, harvested at high grain moisture",
+            "kc": {
+              "initial": 0.7,
+              "mid_season": 1.15,
+              "end": 0.55
+            },
+            "max_effective_root_depth_m": [1, 1.5],
+            "max_crop_height_m": [0.7, 1.1]
+          },
+          "common-spring-dry-grain": {
+            "label": "Common spring wheat, harvested at low grain moisture",
+            "kc": {
+              "initial": 0.3,
+              "mid_season": 1.15,
+              "end": 0.25
+            },
+            "max_effective_root_depth_m": [1, 1.5],
+            "max_crop_height_m": [0.7, 1.1]
+          },
+          "common-spring-wet-grain": {
+            "label": "Common spring wheat, harvested at high grain moisture",
+            "kc": {
+              "initial": 0.3,
+              "mid_season": 1.15,
+              "end": 0.45
+            },
+            "max_effective_root_depth_m": [1, 1.5],
+            "max_crop_height_m": [0.7, 1.1]
+          },
+          "durum-winter-dry-grain": {
+            "label": "Winter durum wheat, harvested at low grain moisture",
+            "kc": {
+              "initial": 0.5,
+              "mid_season": 1.05,
+              "end": 0.25
+            },
+            "max_effective_root_depth_m": [1, 1.5],
+            "max_crop_height_m": [0.7, 1.1]
+          },
+          "durum-winter-wet-grain": {
+            "label": "Winter durum wheat, harvested at high grain moisture",
+            "kc": {
+              "initial": 0.5,
+              "mid_season": 1.05,
+              "end": 0.55
+            },
+            "max_effective_root_depth_m": [1, 1.5],
+            "max_crop_height_m": [0.7, 1.1]
+          }
+        }
+      }
+    },
+    "barley": {
+      "name": "Barley",
+      "botanical_family": "Poaceae",
+      "yield_forecast_scope": null,
+      "irrigation": {
+        "kc_root_height_source": {
+          "source_id": "fao56-rev1",
+          "table": "6.2",
+          "printed_page": 169
+        },
+        "depletion_source": {
+          "source_id": "fao56-rev1",
+          "table": "8.2",
+          "printed_page": 260
+        },
+        "reference_depletion_fraction_at_etc_5_mm_day": 0.55,
+        "variants": {
+          "grain": {
+            "label": "Barley grain",
+            "kc": {
+              "initial": 0.3,
+              "mid_season": 1.1,
+              "end": 0.25
+            },
+            "max_effective_root_depth_m": [0.6, 1.2],
+            "max_crop_height_m": [0.7, 0.9]
+          }
+        }
+      }
+    },
+    "maize": {
+      "name": "Maize",
+      "botanical_family": "Poaceae",
+      "yield_forecast_scope": "grain",
+      "irrigation": {
+        "kc_root_height_source": {
+          "source_id": "fao56-rev1",
+          "table": "6.2",
+          "printed_page": 169
+        },
+        "depletion_source": {
+          "source_id": "fao56-rev1",
+          "table": "8.2",
+          "printed_page": 260
+        },
+        "reference_depletion_fraction_at_etc_5_mm_day": 0.5,
+        "variants": {
+          "dry-grain": {
+            "label": "Maize harvested at low grain moisture",
+            "kc": {
+              "initial": 0.3,
+              "mid_season": 1.2,
+              "end": 0.3
+            },
+            "max_effective_root_depth_m": [0.6, 1.5],
+            "max_crop_height_m": [2.5, 3.5]
+          },
+          "wet-grain": {
+            "label": "Maize harvested at high grain moisture",
+            "kc": {
+              "initial": 0.3,
+              "mid_season": 1.2,
+              "end": 0.65
+            },
+            "max_effective_root_depth_m": [0.6, 1.5],
+            "max_crop_height_m": [2.5, 3.5]
+          },
+          "silage": {
+            "label": "Silage maize",
+            "kc": {
+              "initial": 0.3,
+              "mid_season": 1.15,
+              "end": 0.95
+            },
+            "max_effective_root_depth_m": [0.6, 1.5],
+            "max_crop_height_m": [2.5, 3.2]
+          },
+          "sweet": {
+            "label": "Sweet maize",
+            "kc": {
+              "initial": 0.3,
+              "mid_season": 1.15,
+              "end": 1.05
+            },
+            "max_effective_root_depth_m": [0.6, 1.5],
+            "max_crop_height_m": [1.5, 2.5]
+          }
+        }
+      }
+    },
+    "sorghum": {
+      "name": "Sorghum",
+      "botanical_family": "Poaceae",
+      "yield_forecast_scope": null,
+      "irrigation": {
+        "kc_root_height_source": {
+          "source_id": "fao56-rev1",
+          "table": "6.2",
+          "printed_page": 169
+        },
+        "depletion_source": {
+          "source_id": "fao56-rev1",
+          "table": "8.2",
+          "printed_page": 260
+        },
+        "reference_depletion_fraction_at_etc_5_mm_day": 0.55,
+        "variants": {
+          "grain": {
+            "label": "Grain sorghum",
+            "kc": {
+              "initial": 0.3,
+              "mid_season": 1.05,
+              "end": 0.45
+            },
+            "max_effective_root_depth_m": [1, 1.5],
+            "max_crop_height_m": [1.5, 2]
+          },
+          "silage": {
+            "label": "Silage sorghum",
+            "kc": {
+              "initial": 0.3,
+              "mid_season": 1.05,
+              "end": 0.9
+            },
+            "max_effective_root_depth_m": [1, 1.5],
+            "max_crop_height_m": [2, 3]
+          },
+          "sweet": {
+            "label": "Sweet sorghum",
+            "kc": {
+              "initial": 0.3,
+              "mid_season": 1.1,
+              "end": 0.95
+            },
+            "max_effective_root_depth_m": [0.6, 1.5],
+            "max_crop_height_m": [3, 4]
+          }
+        }
+      }
+    },
+    "chickpea": {
+      "name": "Chickpea",
+      "botanical_family": "Fabaceae",
+      "yield_forecast_scope": null,
+      "irrigation": {
+        "kc_root_height_source": {
+          "source_id": "fao56-rev1",
+          "table": "6.2",
+          "printed_page": 168
+        },
+        "depletion_source": {
+          "source_id": "fao56-rev1",
+          "table": "8.2",
+          "printed_page": 260
+        },
+        "reference_depletion_fraction_at_etc_5_mm_day": 0.45,
+        "variants": {
+          "dry": {
+            "label": "Chickpea",
+            "kc": {
+              "initial": 0.4,
+              "mid_season": 1.05,
+              "end": 0.35
+            },
+            "max_effective_root_depth_m": [0.7, 1],
+            "max_crop_height_m": [0.5, 0.7]
+          }
+        }
+      }
+    },
+    "lentil": {
+      "name": "Lentil",
+      "botanical_family": "Fabaceae",
+      "yield_forecast_scope": null,
+      "irrigation": {
+        "kc_root_height_source": {
+          "source_id": "fao56-rev1",
+          "table": "6.2",
+          "printed_page": 168
+        },
+        "depletion_source": {
+          "source_id": "fao56-rev1",
+          "table": "8.2",
+          "printed_page": 260
+        },
+        "reference_depletion_fraction_at_etc_5_mm_day": 0.5,
+        "variants": {
+          "dry": {
+            "label": "Lentil",
+            "kc": {
+              "initial": 0.4,
+              "mid_season": 1.05,
+              "end": 0.3
+            },
+            "max_effective_root_depth_m": [0.6, 0.8],
+            "max_crop_height_m": [0.5, 0.5]
+          }
+        }
+      }
+    },
+    "faba-bean": {
+      "name": "Faba bean",
+      "botanical_family": "Fabaceae",
+      "yield_forecast_scope": null,
+      "irrigation": {
+        "kc_root_height_source": {
+          "source_id": "fao56-rev1",
+          "table": "6.2",
+          "printed_page": 168
+        },
+        "depletion_source": {
+          "source_id": "fao56-rev1",
+          "table": "8.2",
+          "printed_page": 260
+        },
+        "reference_depletion_fraction_at_etc_5_mm_day": 0.45,
+        "variants": {
+          "dry": {
+            "label": "Dry faba bean",
+            "kc": {
+              "initial": 0.4,
+              "mid_season": 1.1,
+              "end": 0.4
+            },
+            "max_effective_root_depth_m": [0.5, 0.7],
+            "max_crop_height_m": [0.8, 0.8]
+          },
+          "fresh": {
+            "label": "Fresh faba bean",
+            "kc": {
+              "initial": 0.5,
+              "mid_season": 1.1,
+              "end": 1
+            },
+            "max_effective_root_depth_m": [0.5, 0.7],
+            "max_crop_height_m": [0.8, 0.8]
+          }
+        }
+      }
+    },
+    "sunflower": {
+      "name": "Sunflower",
+      "botanical_family": "Asteraceae",
+      "yield_forecast_scope": null,
+      "irrigation": {
+        "kc_root_height_source": {
+          "source_id": "fao56-rev1",
+          "table": "6.2",
+          "printed_page": 169
+        },
+        "depletion_source": {
+          "source_id": "fao56-rev1",
+          "table": "8.2",
+          "printed_page": 260
+        },
+        "reference_depletion_fraction_at_etc_5_mm_day": 0.5,
+        "variants": {
+          "seed": {
+            "label": "Sunflower",
+            "kc": {
+              "initial": 0.35,
+              "mid_season": 1.15,
+              "end": 0.3
+            },
+            "max_effective_root_depth_m": [0.8, 2],
+            "max_crop_height_m": [2, 2]
+          }
+        }
+      }
+    },
+    "potato": {
+      "name": "Potato",
+      "botanical_family": "Solanaceae",
+      "yield_forecast_scope": null,
+      "irrigation": {
+        "kc_root_height_source": {
+          "source_id": "fao56-rev1",
+          "table": "6.1",
+          "printed_page": 165
+        },
+        "depletion_source": {
+          "source_id": "fao56-rev1",
+          "table": "8.1",
+          "printed_page": 258
+        },
+        "reference_depletion_fraction_at_etc_5_mm_day": 0.4,
+        "variants": {
+          "long-season": {
+            "label": "Long-season potato",
+            "kc": {
+              "initial": 0.5,
+              "mid_season": 1.1,
+              "end": 0.4
+            },
+            "max_effective_root_depth_m": [0.4, 0.6],
+            "max_crop_height_m": [0.6, 0.6]
+          },
+          "short-season": {
+            "label": "Short-season potato",
+            "kc": {
+              "initial": 0.5,
+              "mid_season": 1.1,
+              "end": 0.6
+            },
+            "max_effective_root_depth_m": [0.4, 0.6],
+            "max_crop_height_m": [0.6, 0.6]
+          }
+        }
+      }
+    },
+    "tomato": {
+      "name": "Open-field tomato",
+      "botanical_family": "Solanaceae",
+      "yield_forecast_scope": null,
+      "irrigation": {
+        "kc_root_height_source": {
+          "source_id": "fao56-rev1",
+          "table": "6.1",
+          "printed_page": 167
+        },
+        "depletion_source": {
+          "source_id": "fao56-rev1",
+          "table": "8.1",
+          "printed_page": 259
+        },
+        "reference_depletion_fraction_at_etc_5_mm_day": 0.4,
+        "variants": {
+          "processing": {
+            "label": "Open-field processing tomato",
+            "kc": {
+              "initial": 0.6,
+              "mid_season": 1.1,
+              "end": 0.85
+            },
+            "max_effective_root_depth_m": [0.6, 1.2],
+            "max_crop_height_m": [0.6, 0.6]
+          },
+          "fresh": {
+            "label": "Open-field fresh-market tomato",
+            "kc": {
+              "initial": 0.6,
+              "mid_season": 1.1,
+              "end": 1
+            },
+            "max_effective_root_depth_m": [0.6, 1.2],
+            "max_crop_height_m": [0.6, 0.6]
+          },
+          "fresh-trellised": {
+            "label": "Trellised open-field fresh-market tomato",
+            "kc": {
+              "initial": 0.6,
+              "mid_season": 1.15,
+              "end": 0.9
+            },
+            "max_effective_root_depth_m": [0.6, 1.2],
+            "max_crop_height_m": [1.5, 1.5]
+          }
+        }
+      }
+    }
+  },
+  "rotation_hazards": [
+    {
+      "id": "cereal-crown-rot",
+      "title": "Cereal crown rot",
+      "candidate_crops": [
+        "wheat",
+        "barley"
+      ],
+      "preceding_crops": [
+        "wheat",
+        "barley"
+      ],
+      "review": "Check local Fusarium crown rot history, cereal residue and volunteer grasses. Use the regional break recommendation for the field.",
+      "evidence": [
+        {
+          "source_id": "au-vic-cereal-roots",
+          "locator": "Crown rot, Hosts and Control"
+        }
+      ]
+    },
+    {
+      "id": "wheat-chickpea-root-lesion-nematodes",
+      "title": "Root-lesion nematodes",
+      "candidate_crops": [
+        "wheat",
+        "chickpea"
+      ],
+      "preceding_crops": [
+        "wheat",
+        "chickpea"
+      ],
+      "review": "Check the local Pratylenchus species, test results and the susceptibility of both cultivars.",
+      "evidence": [
+        {
+          "source_id": "au-vic-cereal-roots",
+          "locator": "Root lesion nematodes, Control"
+        }
+      ]
+    },
+    {
+      "id": "maize-gray-leaf-spot",
+      "title": "Maize gray leaf spot",
+      "candidate_crops": [
+        "maize"
+      ],
+      "preceding_crops": [
+        "maize"
+      ],
+      "review": "Review maize residue, field disease history and hybrid resistance.",
+      "evidence": [
+        {
+          "source_id": "us-umn-maize-gray-leaf-spot",
+          "locator": "Conditions and timing that favor disease, and Disease management"
+        }
+      ]
+    },
+    {
+      "id": "continuous-grain-sorghum",
+      "title": "Continuous sorghum",
+      "candidate_crops": [
+        "sorghum"
+      ],
+      "preceding_crops": [
+        "sorghum"
+      ],
+      "review": "Review whether another crop fits the local grain sorghum rotation. The cited yield response to rotation varied with Kansas tillage systems.",
+      "evidence": [
+        {
+          "source_id": "us-ksu-sorghum",
+          "locator": "Page 1, Tillage and Rotations"
+        }
+      ]
+    },
+    {
+      "id": "chickpea-ascochyta",
+      "title": "Chickpea Ascochyta blight",
+      "candidate_crops": [
+        "chickpea"
+      ],
+      "preceding_crops": [
+        "chickpea"
+      ],
+      "review": "Review chickpea residue, nearby inoculum sources and the locally recommended interval between chickpea plantings.",
+      "evidence": [
+        {
+          "source_id": "au-vic-chickpea-ascochyta",
+          "locator": "Disease cycle and Management"
+        }
+      ]
+    },
+    {
+      "id": "lentil-residue-disease",
+      "title": "Lentil residue-borne diseases",
+      "candidate_crops": [
+        "lentil"
+      ],
+      "preceding_crops": [
+        "lentil"
+      ],
+      "review": "Review lentil residue and the local disease-specific interval between lentil plantings.",
+      "evidence": [
+        {
+          "source_id": "ca-sk-lentil-diseases",
+          "locator": "Crop Rotation"
+        }
+      ]
+    },
+    {
+      "id": "faba-bean-chocolate-spot",
+      "title": "Faba bean chocolate spot",
+      "candidate_crops": [
+        "faba-bean"
+      ],
+      "preceding_crops": [
+        "faba-bean"
+      ],
+      "review": "Check faba bean residue and nearby chickpea, lentil and vetch stubble. Use this alert for prior faba bean in the same field. Review neighboring stubble separately.",
+      "evidence": [
+        {
+          "source_id": "au-vic-faba-chocolate-spot",
+          "locator": "Paddock selection"
+        }
+      ]
+    },
+    {
+      "id": "sunflower-lentil-sclerotinia",
+      "title": "Sclerotinia white mold",
+      "candidate_crops": [
+        "sunflower",
+        "lentil"
+      ],
+      "preceding_crops": [
+        "sunflower",
+        "lentil"
+      ],
+      "review": "Check local Sclerotinia sclerotiorum history and the full host list, including crops and weeds beyond the product catalog.",
+      "evidence": [
+        {
+          "source_id": "us-ndsu-sunflower",
+          "locator": "Crop Rotation and Sclerotinia Wilt and Head Rot"
+        },
+        {
+          "source_id": "ca-sk-lentil-diseases",
+          "locator": "Sclerotinia (White Mold)"
+        }
+      ]
+    },
+    {
+      "id": "potato-tomato-verticillium",
+      "title": "Verticillium wilt",
+      "candidate_crops": [
+        "potato",
+        "tomato"
+      ],
+      "preceding_crops": [
+        "potato",
+        "tomato"
+      ],
+      "review": "Check local Verticillium history, crop susceptibility and the locally advised non-host break. Include other susceptible hosts and weeds in the review.",
+      "evidence": [
+        {
+          "source_id": "us-uc-ipm-potato-verticillium",
+          "locator": "Management"
+        },
+        {
+          "source_id": "us-uc-ipm-tomato-rotation",
+          "locator": "Crop rotation table, Verticillium wilt"
+        }
+      ]
+    }
+  ],
+  "sources": {
+    "fao56-rev1": {
+      "publisher": "Food and Agriculture Organization of the United Nations",
+      "authors": [
+        "Santos Pereira, L.",
+        "Allen, R.G.",
+        "Paredes, P.",
+        "López-Urrea, R.",
+        "Raes, D.",
+        "Smith, M.",
+        "Kilic, A.",
+        "Salman, M."
+      ],
+      "title": "Crop evapotranspiration. Guidelines for computing crop water requirements",
+      "edition": "FAO Irrigation and Drainage Paper No. 56, revision 1, 2025",
+      "url": "https://doi.org/10.4060/cd6621en",
+      "full_text_url": "https://agrhysmo.agr.unipi.it/wp-content/uploads/2025/09/FAO56%202025.pdf",
+      "sha256": "f0dcfe5e31c485814fe3523316444172a52239e2743bdfd43897a0e3fcc3d8e8",
+      "license": "CC BY 4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/"
+    },
+    "au-vic-cereal-roots": {
+      "publisher": "Agriculture Victoria",
+      "title": "Cereal root diseases",
+      "url": "https://agriculture.vic.gov.au/biosecurity/plant-diseases/grain-pulses-and-cereal-diseases/cereal-root-diseases",
+      "geography": "Victoria, Australia"
+    },
+    "us-umn-maize-gray-leaf-spot": {
+      "publisher": "University of Minnesota Extension",
+      "title": "Gray leaf spot on corn",
+      "url": "https://extension.umn.edu/agriculture/crop-production/corn/gray-leaf-spot-on-corn",
+      "geography": "Minnesota, United States"
+    },
+    "us-ksu-sorghum": {
+      "publisher": "Kansas State University Research and Extension",
+      "title": "Kansas Sorghum Management 2022",
+      "url": "https://bookstore.ksre.ksu.edu/pubs/kansas-sorghum-management-2022_MF3046.pdf",
+      "geography": "Kansas, United States"
+    },
+    "au-vic-chickpea-ascochyta": {
+      "publisher": "Agriculture Victoria",
+      "title": "Ascochyta blight of chickpea",
+      "url": "https://agriculture.vic.gov.au/biosecurity/plant-diseases/grain-pulses-and-cereal-diseases/ascochyta-blight-of-chickpea",
+      "geography": "Victoria, Australia"
+    },
+    "ca-sk-lentil-diseases": {
+      "publisher": "Government of Saskatchewan",
+      "title": "Lentil Diseases, Identification and Management",
+      "url": "https://www.saskatchewan.ca/business/agriculture-natural-resources-and-industry/agribusiness-farmers-and-ranchers/crops-and-irrigation/disease/lentil-diseases-identification-and-management",
+      "geography": "Saskatchewan, Canada"
+    },
+    "au-vic-faba-chocolate-spot": {
+      "publisher": "Agriculture Victoria",
+      "title": "Chocolate spot of faba bean",
+      "url": "https://agriculture.vic.gov.au/biosecurity/plant-diseases/grain-pulses-and-cereal-diseases/chocolate-spot-of-faba-bean",
+      "geography": "Victoria, Australia"
+    },
+    "us-ndsu-sunflower": {
+      "publisher": "North Dakota State University Extension",
+      "title": "Sunflower Production Guide",
+      "url": "https://www.ndsu.edu/agriculture/sites/default/files/2023-12/a1995.pdf",
+      "geography": "Northern Great Plains, United States"
+    },
+    "us-uc-ipm-potato-verticillium": {
+      "publisher": "University of California Statewide Integrated Pest Management Program",
+      "title": "Verticillium Wilt in Potato",
+      "url": "https://ipm.ucanr.edu/agriculture/potato/verticillium-wilt/",
+      "geography": "California, United States"
+    },
+    "us-uc-ipm-tomato-rotation": {
+      "publisher": "University of California Statewide Integrated Pest Management Program",
+      "title": "Tomato Crop Rotation",
+      "url": "https://ipm.ucanr.edu/agriculture/tomato/crop-rotation/",
+      "geography": "California, United States"
+    },
+    "fao-crop-calendar": {
+      "publisher": "Food and Agriculture Organization of the United Nations",
+      "title": "Crop Calendar",
+      "url": "https://cropcalendar.apps.fao.org/?language=en&pagename=%2Fwelcome.do",
+      "api_url": "https://api-cropcalendar.apps.fao.org/"
+    },
+    "copernicus-agera5": {
+      "publisher": "Copernicus Climate Change Service",
+      "title": "Agrometeorological indicators from 1979 to present derived from reanalysis",
+      "url": "https://cds.climate.copernicus.eu/datasets/sis-agrometeorological-indicators?tab=overview"
+    },
+    "isric-soilgrids": {
+      "publisher": "ISRIC - World Soil Information",
+      "title": "SoilGrids FAQ and water-retention layer information",
+      "url": "https://docs.isric.org/globaldata/soilgrids/SoilGrids_faqs_01.html",
+      "field_capacity_layer_url": "https://maps.isric.org/generated/soilgrids/wv0033.html"
+    }
+  }
+}

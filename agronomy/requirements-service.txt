@@ -1,0 +1,3 @@
+-r requirements-field-data.txt
+fastapi>=0.115,<1
+pyproj>=3.6,<4

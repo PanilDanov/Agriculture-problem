@@ -1,0 +1,76 @@
+{
+  "type": "Feature",
+  "geometry": {
+    "type": "Point",
+    "coordinates": [
+      -4.5,
+      37.5,
+      507.07
+    ]
+  },
+  "properties": {
+    "parameter": {
+      "T2M": {
+        "202301": 7.74,
+        "202302": 8.94,
+        "202313": 18.27,
+        "202607": 29.51,
+        "202609": 26.47,
+        "202610": -999.0
+      },
+      "PRECTOTCORR": {
+        "202301": 0.54,
+        "202302": 0.73,
+        "202313": 0.7,
+        "202607": 0.01,
+        "202609": 0.13,
+        "202610": -999.0
+      },
+      "ALLSKY_SFC_SW_DWN": {
+        "202301": 9.86,
+        "202302": 13.01,
+        "202313": 18.66,
+        "202607": 27.59,
+        "202609": -999.0,
+        "202610": -999.0
+      }
+    }
+  },
+  "header": {
+    "title": "NASA/POWER Source Native Resolution Monthly and Annual",
+    "api": {
+      "version": "v2.10.0",
+      "name": "POWER Monthly and Annual API"
+    },
+    "sources": [
+      "SRB",
+      "SYN1DEG",
+      "MERRA2",
+      "POWER"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "LST",
+    "start": "19900101",
+    "end": "20261130"
+  },
+  "messages": [],
+  "parameters": {
+    "T2M": {
+      "units": "C",
+      "longname": "Temperature at 2 Meters"
+    },
+    "PRECTOTCORR": {
+      "units": "mm/day",
+      "longname": "Precipitation Corrected"
+    },
+    "ALLSKY_SFC_SW_DWN": {
+      "units": "MJ/m^2/day",
+      "longname": "All Sky Surface Shortwave Downward Irradiance"
+    }
+  },
+  "times": {
+    "data": 0.349,
+    "process": 0.02
+  },
+  "_fixtureSource": "Actual NASA POWER monthly response retrieved 2026-11-15 at 37.5N, 4.5W; selected months only. Radiation is not yet reported for September."
+}

@@ -21,7 +21,7 @@ const test = base.extend<{ runtimeErrors: string[] }>({
   }, { auto: true }],
 });
 
-function responseFixture(request: AnalysisRequest, partial = false): AnalysisResult {
+function responseFixture(request: AnalysisRequest, partial = false, province = false): AnalysisResult {
   const base = makeMockAnalysis(request, 'normal');
   const harvestYear = request.yieldForecast?.harvestYear ?? 2026;
   const nasa = { dataset: 'NASA POWER Daily', url: 'https://power.larc.nasa.gov/docs/services/api/temporal/daily/', version: 'browser-test' };
@@ -36,8 +36,8 @@ function responseFixture(request: AnalysisRequest, partial = false): AnalysisRes
       reasons: ['Historical NASA temperature and supplied soil evidence were evaluated.'] })),
     yieldForecasts: CROPS.map(([cropId], index) => partial && cropId === 'lentil'
       ? { cropId, status: 'unavailable', harvestYear, mode: 'annual_history', reason: 'No observed lentil yield history is available for this country.' }
-      : { cropId, status: 'available', harvestYear, mode: partial && cropId === 'wheat' ? 'mid_season' : 'annual_history',
-        forecast: { crop: cropId, mode: partial && cropId === 'wheat' ? 'mid_season' : 'annual_history',
+      : { cropId, status: 'available', harvestYear, mode: province || partial && cropId === 'wheat' ? 'mid_season' : 'annual_history',
+        forecast: { crop: cropId, mode: province || partial && cropId === 'wheat' ? 'mid_season' : 'annual_history',
           predicted_yield_t_ha: cropId === 'tomato' ? 52.4 : 2.5 + index / 2,
           spatial_level: partial && cropId === 'wheat' ? 'administrative_region' : 'country',
           model_version: `browser-test-${cropId}-v1`, country_code: 'FR', country_name: 'France', harvest_year: harvestYear, data_through: '2024',
@@ -48,7 +48,17 @@ function responseFixture(request: AnalysisRequest, partial = false): AnalysisRes
           validation: { holdout_years: [2022, 2023, 2024], holdout: { mae_t_ha: .8, last_yield_baseline_mae_t_ha: cropId === 'barley' ? .7 : 1.1 } },
           source: { dataset: 'FAOSTAT QCL integration fixture', url: 'https://www.fao.org/faostat/en/#data/QCL', published_on: '2026-11-15' },
           warnings: ['The model is a national or regional estimate; field-level accuracy has not been validated.',
-            ...(cropId === 'tomato' ? ['Tomato data combine production systems; the model is not specific to open-field tomato.'] : [])] } }),
+            ...(cropId === 'tomato' ? ['Tomato data combine production systems; the model is not specific to open-field tomato.'] : [])],
+          ...(province ? { spatial_level: 'administrative_region', region_name: 'Albacete', region_id: '02', country_code: 'ES', country_name: 'Spain',
+            release_status: 'experimental', quality_status: 'beats_last_yield_on_holdout', weather_support: 'representative_point', data_through: '2026-05',
+            forecast_date: '2026-06-14', is_replay: true, temporal_status: 'retrospective_estimate',
+            source: { labels: { dataset: 'MAPA provincial statistics integration fixture', url: 'https://www.mapa.gob.es/es/estadistica/temas/estadisticas-agrarias/' },
+              calendar: { reference_period: '2014–2016', source_files: [{ id: 'MAPA monthly crop calendar', url: 'https://www.mapa.gob.es/es/estadistica/temas/estadisticas-agrarias/agricultura/calendarios-siembras-recoleccion/' }] },
+              weather: { product: 'NASA POWER Monthly', url: 'https://power.larc.nasa.gov/' } },
+            validation: { holdout_years: [2022, 2023, 2024], metrics: { mae_t_ha: 1.5, last_yield_baseline_mae_t_ha: 1.8 },
+              conservative_policy_metrics: { mae_t_ha: 1.2, last_yield_baseline_mae_t_ha: 1.4 },
+              metrics_by_label_age: { '2': { mae_t_ha: 1.2, last_yield_baseline_mae_t_ha: 1.4 }, '3': { mae_t_ha: 1.4, last_yield_baseline_mae_t_ha: 1.6 } } } } : {}) },
+          ...(province ? { diagnostics: { labelDataThrough: 2024, labelAgeYears: 2, labelCutoffYear: 2024 } } : {}) }),
     recentWeather: { status: partial ? 'partial' : 'available', periodStart: '2026-10-16', periodEnd: '2026-11-14',
       meanTemperatureC: 18.4, precipitationMm: 0, latestEt0MmDay: partial ? null : 4.1, observedOn: '2026-11-14', source: nasa.url },
     irrigationAssessment: request.localInputs.fieldObservations ? {
@@ -64,19 +74,20 @@ function responseFixture(request: AnalysisRequest, partial = false): AnalysisRes
   };
 }
 
-async function setupApi(page: Page, baseURL: string, partial = false) {
+async function setupApi(page: Page, baseURL: string, partial = false, province = false) {
   await page.clock.setFixedTime(new Date('2026-11-15T12:00:00Z'));
   await page.route(/^https:\/\/(?:[abc]\.)?tile\.openstreetmap\.org\//, route => route.abort());
   const farm = createScenarioState('normal');
   farm.name = 'Analysis Integration Test Farm';
   farm.boundary = { type: 'Polygon', coordinates: [[[2, 48], [2.001, 48], [2.001, 48.001], [2, 48.001], [2, 48]]] };
+  if (province) farm.boundary = { type: 'Polygon', coordinates: [[[-1.87, 38.99], [-1.869, 38.99], [-1.869, 38.991], [-1.87, 38.991], [-1.87, 38.99]]] };
   farm.analysis = null;
   await page.addInitScript(({ farm, baseURL, storageKey, providerKey }) => {
     localStorage.setItem(storageKey, JSON.stringify(farm));
     localStorage.setItem(providerKey, JSON.stringify({ mode: 'api', baseUrl: `${baseURL}/analysis-integration` }));
   }, { farm, baseURL, storageKey: STORAGE_KEY, providerKey: PROVIDER_SETTINGS_KEY });
   await page.route('**/analysis-integration/v1/analysis', async route => {
-    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(responseFixture(route.request().postDataJSON() as AnalysisRequest, partial)) });
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(responseFixture(route.request().postDataJSON() as AnalysisRequest, partial, province)) });
   });
   await page.goto('/#/farm');
   await expect(page.getByRole('main')).toBeVisible();
@@ -114,6 +125,31 @@ test('all ten yield forecasts retain their national scale, quality and source ev
   await wheat.getByText('Model & evidence', { exact: true }).click();
   await expectNoOverflow(page);
   await page.screenshot({ path: info.outputPath('orbitFarm-analysis-desktop.png'), fullPage: true, animations: 'disabled' });
+});
+
+test('provincial NASA point estimates keep their release badge, age-matched validation and source precision', async ({ page, baseURL }, info) => {
+  await setupApi(page, baseURL!, false, true);
+  await page.getByRole('button', { name: 'Analyze field', exact: true }).click();
+  await expect(page.getByText('10 / 10 available', { exact: true })).toBeVisible();
+  await expect(page.locator('.of-yield-card')).toHaveCount(10);
+  for (const [, name] of CROPS) {
+    const card = page.getByRole('article', { name: `${name} yield forecast`, exact: true });
+    await expect(card).toContainText('Experimental');
+    await expect(card).toContainText('Province: Albacete (02)');
+    await expect(card).toContainText('NASA monthly point proxy');
+  }
+  const wheat = page.getByRole('article', { name: 'Wheat yield forecast', exact: true });
+  await wheat.getByText('Model & evidence', { exact: true }).click();
+  await expect(wheat.locator('.of-analysis-dl')).toContainText('Weather observed throughMay 2026');
+  await expect(wheat.locator('.of-analysis-dl')).toContainText('Latest yield label2024');
+  await expect(wheat.getByRole('table', { name: 'Held-out error by yield history age' })).toContainText('2 years1.21.4');
+  await expect(wheat.getByRole('link', { name: 'MAPA provincial statistics integration fixture' })).toBeVisible();
+  await expect(page.getByRole('article', { name: 'Open-field tomato yield forecast', exact: true })).toContainText('not specific to open-field tomato');
+  for (const width of [1440, 390, 320]) {
+    await page.setViewportSize({ width, height: 900 });
+    await expectNoOverflow(page);
+    await wheat.screenshot({ path: info.outputPath(`orbitFarm-province-point-${width}.png`), animations: 'disabled' });
+  }
 });
 
 test('advanced field evidence reaches the API with measured water, dates and both planned crops', async ({ page, baseURL }, info) => {

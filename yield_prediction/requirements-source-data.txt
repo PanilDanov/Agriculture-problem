@@ -1,0 +1,2 @@
+# Optional, only for reproducing the MAPA source extraction. Not an ML/API runtime dependency.
+xlrd==2.0.2

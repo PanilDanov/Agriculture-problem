@@ -23,7 +23,7 @@ from .native import prepare_native_runtime
 
 LOG = logging.getLogger("orbitfarm.ml")
 REGIONAL_MODES = ("pre_season", "mid_season", *CANDIDATE_MODES)
-INPUT_KINDS = ("environmentalInput", "features", "nationalInput")
+INPUT_KINDS = ("environmentalInput", "features", "nationalInput", "provinceInput")
 MAX_BODY_BYTES = 4 * 1024 * 1024
 SOCKET_TIMEOUT_SECONDS = 15
 _model_lock = threading.Lock()
@@ -82,10 +82,15 @@ def readiness():
             raise RuntimeError("Invalid national readiness report")
     except (ImportError, OSError, ValueError, RuntimeError) as error:
         national = {"status": "unavailable", "reason": str(error)}
+    try:
+        from .province import province_readiness
+        provincial = province_readiness()
+    except (ImportError, OSError, ValueError, RuntimeError) as error:
+        provincial = {"status": "unavailable", "reason": str(error)}
     regional_ready = all(model["status"] == "ready" for model in models)
-    ready = regional_ready and national.get("status") == "ready"
+    ready = regional_ready and national.get("status") == "ready" and provincial.get("status") == "ready"
     return {"status": "ready" if ready else "degraded", "service": "orbitfarm-yield",
-            "regionalModels": models, "nationalModels": national,
+            "regionalModels": models, "nationalModels": national, "provinceModels": provincial,
             "regionalReady": regional_ready, "nationalReady": national.get("status") == "ready"}
 
 
@@ -105,7 +110,7 @@ def predict_request(body):
         raise RequestError("INVALID_REQUEST", "crop must be a crop identifier.")
     present = [key for key in INPUT_KINDS if key in body]
     if len(present) != 1 or not isinstance(body[present[0]], dict):
-        raise RequestError("INVALID_REQUEST", "Supply exactly one object: environmentalInput, features, or nationalInput.")
+        raise RequestError("INVALID_REQUEST", "Supply exactly one object: environmentalInput, features, nationalInput, or provinceInput.")
     kind = present[0]
     crop = body["crop"]
     mode = body.get("mode", "annual_history" if kind == "nationalInput" else "pre_season")
@@ -127,6 +132,11 @@ def predict_request(body):
             diagnostics.update(resolvedMode="annual_history", source=forecast.get("source"),
                                dataThrough=forecast.get("data_through"),
                                forecastScope="country", usesCurrentSeasonWeather=False)
+            issued = date.fromisoformat(forecast["forecast_date"])
+        elif kind == "provinceInput":
+            from .province import predict_province_yield
+            forecast, provincial_diagnostics = predict_province_yield(crop=crop, mode=mode, province_input=payload)
+            diagnostics.update(provincial_diagnostics)
             issued = date.fromisoformat(forecast["forecast_date"])
         else:
             if crop not in ("maize", "wheat") or mode not in REGIONAL_MODES:

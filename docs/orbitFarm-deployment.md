@@ -1,6 +1,6 @@
 # Run and deploy the complete orbitFarm application
 
-The integrated checkout contains the website, NASA field API, crop assessments and all yield-model artifacts. The field API and ML process use **separate Python environments**: the field service supports Python 3.11/3.12, while the released ML package requires Python 3.11 and exact model-library versions. National annual-history forecasts cover all ten product crops; regional environmental models cover wheat and maize where verified crop-mask regional inputs are installed.
+The integrated checkout contains the website, NASA field API, crop assessments and all yield-model artifacts. The field API and ML process use **separate Python environments**: the field service supports Python 3.11/3.12, while the released ML package requires Python 3.11 and exact model-library versions. National annual-history forecasts cover all ten crops. Separate experimental NASA/MAPA models cover both seasonal modes for all ten crops in verified Spanish provinces. The original wheat/maize models retain their AgERA5 crop-mask contract.
 
 ## Local setup and run
 
@@ -12,7 +12,7 @@ python3 scripts/orbitFarm-local.py check
 python3 scripts/orbitFarm-local.py run
 ```
 
-The setup command creates `.venv-api` and `.venv-ml`, installs the frontend lockfile and exact model dependencies, and verifies all 18 model artifacts. On Apple Silicon it installs a checksum-verified OpenMP library only under `.runtime/native`, retaining its license. Linux hosts need their native OpenMP runtime; the containers below install it explicitly. The launcher can use an official Node distribution already extracted under `.runtime/node-v*/` when the global Node is too old.
+The setup command creates `.venv-api` and `.venv-ml`, installs the frontend lockfile, Copernicus downloader and exact model dependencies, and verifies all 38 model artifacts. On Apple Silicon it installs a checksum-verified OpenMP library only under `.runtime/native`, retaining its license. Linux hosts need their native OpenMP runtime; the containers below install it explicitly. The launcher can use an official Node distribution already extracted under `.runtime/node-v*/` when the global Node is too old.
 
 `run` builds the website with same-origin real API enabled, starts inference on port 8001 and serves the API plus built website at **http://127.0.0.1:8000**. It waits for actual model readiness and stops its own child processes on Ctrl+C. Use `--no-build` for an existing verified build, or `--reuse-ml` to connect to an already running inference service. Ports and optional service token are configurable through `.env`; copy `.env.example` to see supported settings. Shell environment values take precedence. Tokens are not printed.
 
@@ -35,7 +35,7 @@ docker compose up --build --detach --wait --wait-timeout 120
 curl --fail http://127.0.0.1:8000/ready
 ```
 
-The website is available at **http://127.0.0.1:8000**. Only the API port is published to loopback; ML stays on the internal service network at `http://ml:8001`. A host reverse proxy can expose the website over HTTPS. Source responses persist in the named `field-cache` volume. The API image includes the audited ES112 regional registry; requests beyond its crop/year/geographic coverage remain explicit coverage gaps. National forecasts still operate where FAOSTAT country histories are available. Additional audited registries can be installed in a custom image or mounted with a Compose override and `ORBITFARM_REGIONAL_INPUT_DIR`.
+The website is available at **http://127.0.0.1:8000**. Only the API port is published to loopback; ML stays on the internal service network at `http://ml:8001`. A host reverse proxy can expose the website over HTTPS. Source responses persist in the named `field-cache` volume. The API image includes both the audited ES112 crop-mask registry and the 50-province NASA point archive. Crop, mode, year and history coverage remain explicit. National forecasts still operate where FAOSTAT country histories are available. Additional audited registries can be installed in a custom image or mounted with a Compose override and `ORBITFARM_REGIONAL_INPUT_DIR` or `ORBITFARM_PROVINCE_INPUT_DIR`.
 
 Use `docker compose logs --follow` for diagnostics and `docker compose down` to stop the stack. Avoid deleting the cache volume when a source replay is needed. Source caches and regional datasets have separate provenance and data dates.
 
@@ -46,6 +46,17 @@ Use `docker compose logs --follow` for diagnostics and `docker compose down` to 
 The national models and filtered reproducible FAOSTAT source snapshot are included in Git. Country coverage differs by crop; absent production histories remain unavailable rather than borrowing another country's estimate. Source dates, versions, forecast horizon and experimental quality status are returned. See [national data and models](../yield_prediction/docs/national_models.md) for retraining and label units.
 
 Regional models require daily AgERA5 aggregated over the correct administrative crop mask, a verified boundary/ID crosswalk, publication dates and eligible calendars. A real [ES112/Lugo 2026 pre-season release](../yield_prediction/docs/published_regional_inputs.md) for wheat and maize is included by default, using five published 2019-2023 seasons and original verified 2025 source availability. These estimates are explicitly historical replays: their January/April nominal forecast dates remain distinct from the actual calculation timestamp and 2023 climate cutoff. NASA POWER remains the real source for field weather, water and suitability assessments; a NASA point is never relabelled a regional AgERA5 aggregate. See [regional data contract](../yield_prediction/docs/data_engineer_contract.md) and [ML service contract](../yield_prediction/docs/inference_service.md).
+
+Explicit `pre_season` and `mid_season` requests can additionally select the separate [NASA/MAPA province model family](../yield_prediction/docs/province_models.md). It uses fixed representative-point monthly weather, historical provincial statistics and modal-month calendar scenarios. All twenty models remain experimental; their metrics and baseline comparisons are returned. The original crop-mask model is preferred where its exact data are installed. Automatic mode retains the established crop-mask/national routing. No request outside verified province geometry borrows a neighbouring province's weather or labels.
+
+`deployment/smoke-province-field.json` is an illustrative Zaragoza field for checking both seasonal modes for harvest 2026. Actual crop and year eligibility is checked again by the model. To update the NASA archive and publish verified inputs:
+
+```bash
+.venv-api/bin/python scripts/orbitFarm-province-weather.py
+.venv-api/bin/python scripts/orbitFarm-publish-province-inputs.py
+```
+
+The frozen compressed weather release, filtered MAPA labels, calendar source records and model evaluation are included in Git. Reproducing the trained models uses that frozen release; downloading newer revised weather creates a new input snapshot.
 
 ## Verification before publishing
 

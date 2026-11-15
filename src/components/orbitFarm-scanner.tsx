@@ -1,7 +1,9 @@
 import { useId } from 'react';
 import './orbitFarm-scanner.css';
+import { ORBIT_SCANNER_SPRITE } from '../domain/orbitFarm-assets';
+import { SatelliteFallback, useVisualImage } from './orbitFarm-image';
 
-export const ORBIT_SCANNER_SPRITE = `${import.meta.env.BASE_URL}assets/orbit-1/orbit-1-scanner-v1.png`;
+export { ORBIT_SCANNER_SPRITE } from '../domain/orbitFarm-assets';
 
 interface OrbitScannerProps {
   state?: 'scanning' | 'complete';
@@ -13,6 +15,7 @@ interface OrbitScannerProps {
 export function OrbitScanner({ state = 'scanning', mode = 'demo', compact = false }: OrbitScannerProps) {
   const titleId = useId();
   const complete = state === 'complete';
+  const visual = useVisualImage(ORBIT_SCANNER_SPRITE);
   return (
     <section
       className={`of-orbit-scanner${compact ? ' of-orbit-scanner-compact' : ''}`}
@@ -56,9 +59,12 @@ export function OrbitScanner({ state = 'scanning', mode = 'demo', compact = fals
 
         <div className="of-scanner-flight">
           <div className="of-scanner-pass">
-            <div className="of-scanner-hover" data-testid="orbit-scanner-craft">
+            <div className="of-scanner-hover" data-testid="orbit-scanner-craft" data-asset-state={visual.state}>
               <div className="of-scanner-beam" data-testid="orbit-scanner-beam"><span /><span /><span /></div>
-              <img className="of-scanner-sprite" src={ORBIT_SCANNER_SPRITE} width="1536" height="1024" alt="" draggable={false} />
+              <div className="of-scanner-artwork">
+                {!visual.ready && <svg className="of-scanner-fallback" viewBox="0 0 160 100" data-testid="orbit-scanner-fallback" shapeRendering="crispEdges"><SatelliteFallback /></svg>}
+                <img key={visual.imageKey} className="of-scanner-sprite" src={ORBIT_SCANNER_SPRITE} width="1536" height="1024" alt="" draggable={false} loading="eager" decoding="async" fetchPriority="high" style={{ visibility: visual.ready ? 'visible' : 'hidden' }} onLoad={visual.onLoad} onError={visual.onError} />
+              </div>
               <span className="of-scanner-sensor" />
             </div>
           </div>

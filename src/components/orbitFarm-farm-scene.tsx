@@ -3,7 +3,8 @@ import type { FarmLayout, LayoutPoint, Plot } from '../domain/orbitFarm-types';
 import { getPlotLabel } from '../domain/orbitFarm-layout';
 import { getGrowthStage } from '../domain/orbitFarm-model';
 import { FarmBedLayer, type FarmBedVisual } from './orbitFarm-bed-layer';
-import { ORBIT_SCANNER_SPRITE } from './orbitFarm-scanner';
+import { ORBIT_SCANNER_SPRITE } from '../domain/orbitFarm-assets';
+import { SatelliteFallback, SvgAssetImage } from './orbitFarm-image';
 import { FarmWorld, FARM_WORLD_WIDTH } from './orbitFarm-world';
 import './orbitFarm-scenes.css';
 
@@ -22,7 +23,7 @@ export { CropSprite } from './orbitFarm-crop-sprite';
 
 function SatelliteDrawing() {
   return (
-    <image href={ORBIT_SCANNER_SPRITE} x="-10" y="-16" width="180" height="120" />
+    <SvgAssetImage src={ORBIT_SCANNER_SPRITE} x={-10} y={-16} width={180} height={120} fallback={<SatelliteFallback />} fallbackViewBox="0 0 160 100" />
   );
 }
 

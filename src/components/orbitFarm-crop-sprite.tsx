@@ -1,5 +1,7 @@
 import type { CropId } from '../domain/orbitFarm-types';
 import type { GrowthStage } from '../domain/orbitFarm-model';
+import { getCropSpriteUrl } from '../domain/orbitFarm-assets';
+import { PlantFallback, SvgAssetImage } from './orbitFarm-image';
 
 type PlantedStage = Exclude<GrowthStage, 'Planned'>;
 const STAGE_ARTWORK: Record<PlantedStage, string> = {
@@ -30,11 +32,13 @@ export function CropSprite({ cropId, stage = 'Ready to harvest', size = 36, x, y
       data-growth-stage={stage}
       data-crop-artwork={`crop/${cropId}/${STAGE_ARTWORK[stage]}`}
     >
-      <image
+      <SvgAssetImage
         className="of-crop-body of-scene-motion"
-        href={`${import.meta.env.BASE_URL}assets/farm/crops/${cropId}-${STAGE_ARTWORK[stage]}.png`}
-        width="32"
-        height="32"
+        src={getCropSpriteUrl(cropId, STAGE_ARTWORK[stage])}
+        width={32}
+        height={32}
+        fallback={<PlantFallback />}
+        fallbackViewBox="0 0 32 32"
       />
     </svg>
   );

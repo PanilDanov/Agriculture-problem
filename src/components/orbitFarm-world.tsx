@@ -1,5 +1,6 @@
-import { useEffect, useId, useMemo, useRef, useState, type SyntheticEvent } from 'react';
-import { ORBIT_SCANNER_SPRITE } from './orbitFarm-scanner';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
+import { FARM_MEADOW_SPRITE, ORBIT_SCANNER_SPRITE } from '../domain/orbitFarm-assets';
+import { SatelliteFallback, SvgAssetImage, useVisualImage } from './orbitFarm-image';
 import { FarmDog } from './orbitFarm-dog';
 import { FARM_SEASONS, getFarmSeasonBlend, type FarmSeason, type SeasonBlend } from './orbitFarm-seasons';
 import { paintTerrain } from './orbitFarm-terrain';
@@ -8,10 +9,12 @@ import './orbitFarm-world.css';
 
 export const FARM_WORLD_WIDTH = 800;
 export const FARM_WORLD_VIEW_BOX = `0 0 ${FARM_WORLD_WIDTH} 612`;
-const assets = `${import.meta.env.BASE_URL}assets/farm/`;
 
 function SeasonalTerrain({ blend }: { blend: SeasonBlend }) {
   const root = useRef<HTMLDivElement>(null);
+  const sourceImage = useRef<HTMLImageElement>(null);
+  const initializedImage = useRef<HTMLImageElement | null>(null);
+  const visual = useVisualImage(FARM_MEADOW_SPRITE);
   const vegetation = useRef<HTMLCanvasElement>(null);
   const paint = useRef<((season: SeasonBlend) => void) | null>(null);
   const displayed = useRef(blend);
@@ -61,8 +64,13 @@ function SeasonalTerrain({ blend }: { blend: SeasonBlend }) {
     frameRequest.current = null;
   }, []);
 
-  function loadArtwork(event: SyntheticEvent<HTMLImageElement>) {
-    const image = event.currentTarget;
+  useEffect(() => {
+    const image = sourceImage.current;
+    if (image?.complete && image.naturalWidth > 0) loadArtwork(image);
+  }, [visual.imageKey]);
+
+  function loadArtwork(image: HTMLImageElement) {
+    if (initializedImage.current === image) return;
     const source = document.createElement('canvas');
     source.width = image.naturalWidth;
     source.height = image.naturalHeight;
@@ -96,14 +104,22 @@ function SeasonalTerrain({ blend }: { blend: SeasonBlend }) {
       for (const frame of frames) frame.canvas.style.opacity = String(season[frame.season]);
       paintPlants(season);
     };
+    initializedImage.current = image;
     displayed.current = blend;
     paint.current(blend);
     setReady(true);
   }
 
   return (
-    <div ref={root} className="of-season-terrain" data-terrain-ready={ready ? 'true' : undefined} aria-hidden="true">
-      <img src={`${assets}orbitFarm-meadow-v2.png`} alt="" onLoad={loadArtwork} draggable={false} />
+    <div ref={root} className="of-season-terrain" data-terrain-ready={ready ? 'true' : undefined} data-source-ready={visual.ready ? 'true' : 'false'} aria-hidden="true">
+      {!ready && !visual.ready && <svg className="of-terrain-fallback" viewBox="0 0 400 300" preserveAspectRatio="none" shapeRendering="crispEdges" data-testid="terrain-fallback">
+        <path d="M18 40h364v14h13v211h-13v15H18v-15H5V54h13z" fill="#CDD9A0" />
+        <path d="M19 239h362v18H19z" fill="#E8D2A1" />
+        <path d="M24 84h352v4H24zm0 130h352v4H24z" fill="#B59059" />
+        <path d="M24 80h4v13h-4zm50 0h4v13h-4zm50 0h4v13h-4zm50 0h4v13h-4zm50 0h4v13h-4zm50 0h4v13h-4zm50 0h4v13h-4zm50 0h4v13h-4z" fill="#8A7650" />
+        <path d="M19 144h29v29H19z" fill="#8BB8A7" />
+      </svg>}
+      <img key={visual.imageKey} ref={sourceImage} src={FARM_MEADOW_SPRITE} alt="" onLoad={event => { visual.onLoad(event); loadArtwork(event.currentTarget); }} onError={visual.onError} draggable={false} loading="eager" decoding="async" fetchPriority="high" />
       {FARM_SEASONS.map(season => <canvas key={season} data-season={season} />)}
       <canvas ref={vegetation} data-seasonal-plants="" />
     </div>
@@ -220,7 +236,7 @@ export function FarmWorld({ scanning, viewDate }: { scanning: boolean; viewDate:
         {scanning && <>
           <path className="of-scan-beam of-scene-motion" d="M638 80H661L692 422H163Z" fill="#93DFEB" opacity=".18" />
           <g className="of-satellite-scanning of-scene-motion" transform="translate(574 18)">
-            <image href={ORBIT_SCANNER_SPRITE} x="-10" y="-16" width="180" height="120" />
+            <SvgAssetImage src={ORBIT_SCANNER_SPRITE} x={-10} y={-16} width={180} height={120} fallback={<SatelliteFallback />} fallbackViewBox="0 0 160 100" />
           </g>
         </>}
       </svg>

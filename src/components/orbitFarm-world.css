@@ -103,3 +103,6 @@
   .of-season-detail { transition: none; }
   .of-spring-petal, .of-summer-glint, .of-autumn-leaf, .of-pond-mist { animation: none; }
 }
+
+.of-terrain-fallback{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated}
+.of-season-terrain[data-source-ready="false"]>img{visibility:hidden}

@@ -42,3 +42,67 @@ jobs:
             test-results/
           if-no-files-found: ignore
           retention-days: 7
+
+  deploy:
+    name: Build the Vercel release and publish
+    needs: verify
+    if: github.event_name == 'push' && github.ref == 'refs/heads/frontend'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: frontend
+    env:
+      BACKEND_REVISION: 7d369758f03e442df4a7d61d0b21e6339a8bc430
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          path: frontend
+          persist-credentials: false
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.BACKEND_REVISION }}
+          path: backend
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install release tools
+        run: |
+          if ! command -v bsdtar >/dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y libarchive-tools
+          fi
+          npm install --global --no-audit --no-fund vercel@65.16.0
+      - name: Stage frontend and FastAPI
+        id: release
+        shell: bash
+        run: |
+          npm ci
+          npm run deploy:stage -- ../backend | tee "$RUNNER_TEMP/orbitfarm-release.log"
+          release_dir=$(sed -n 's/^Vercel release directory: //p' "$RUNNER_TEMP/orbitfarm-release.log")
+          test -f "$release_dir/dist/index.html"
+          printf 'path=%s\n' "$release_dir" >> "$GITHUB_OUTPUT"
+      - name: Publish verified release
+        env:
+          RELEASE_DIR: ${{ steps.release.outputs.path }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: team_zJUC8g6TYHP6x0MnkZkfG0Wt
+          VERCEL_PROJECT_ID: prj_ZutDvTPGMissMKemd3RXAErMjueA
+        shell: bash
+        run: |
+          if [[ -z "$VERCEL_TOKEN" ]]; then
+            echo '::warning::Vercel publishing requires the VERCEL_TOKEN Actions secret.'
+            echo 'Release built. Publishing awaits the `VERCEL_TOKEN` repository secret.' >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          cd "$RELEASE_DIR"
+          vercel_args=(--scope lu1dgys-projects --token "$VERCEL_TOKEN")
+          deployment=$(vercel deploy --prod --skip-domain --yes "${vercel_args[@]}" \
+            --meta "orbitFarmFrontendSha=$GITHUB_SHA" --meta "orbitFarmBackendSha=$BACKEND_REVISION")
+          vercel curl /health --deployment "$deployment" --yes "${vercel_args[@]}" -- \
+            --fail --silent --show-error --max-time 30 | jq -e '.status == "ok"'
+          vercel promote "$deployment" --yes "${vercel_args[@]}"
+          printf 'Published %s to https://orbitfarm.vercel.app/\n' "$deployment" >> "$GITHUB_STEP_SUMMARY"

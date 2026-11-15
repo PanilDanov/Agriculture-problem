@@ -2,6 +2,12 @@
 
 The `lu1dgys-projects/orbitfarm` project serves the Vite frontend and FastAPI on [orbitfarm.vercel.app](https://orbitfarm.vercel.app/). New sessions start in live API mode and submit the field contour to `POST /v1/analysis` at the site's origin. Saved farms use browser local storage. The backend fetches source data on demand and caches responses in the function's temporary filesystem. [Vercel FastAPI hosting](https://vercel.com/docs/frameworks/backend/fastapi) · [Vercel function filesystem](https://vercel.com/docs/functions/runtimes#file-system-support)
 
+## Deploy from GitHub
+
+Each push to `frontend` runs `orbitFarm checks`. After the tests pass, the workflow packages the frontend and FastAPI, checks `/health` on the staged deployment, and promotes it to the public site.
+
+Set `VERCEL_TOKEN` as a repository Actions secret with deploy access to `lu1dgys-projects/orbitfarm`. The workflow builds the release while publishing awaits this secret. To upgrade FastAPI, update `BACKEND_REVISION` in `.github/workflows/orbitFarm-checks.yml` to the tested backend commit.
+
 ## Build a release
 
 Use Node.js 22.12 or newer and an authenticated Vercel CLI. The release script uses the Windows system `tar.exe` or `bsdtar` on macOS and Linux.

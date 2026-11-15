@@ -71,30 +71,29 @@ index. Keep dataset-specific citations in addition to this index:
   CC BY 4.0. CropHarvest v8 validation inputs: [publisher record](https://zenodo.org/records/5533193),
   CC BY-SA 4.0. These are distinct datasets with distinct conditions.
 - Country geography: Natural Earth 5.1.2, public domain.
-  Spanish statistical geometry: GISCO NUTS 2016/2024, subject to the specific
-  noncommercial terms and **© EuroGeographics for the administrative boundaries**.
+  Current Spanish selection geometry: official IGN WFS, CC BY 4.0,
+  **Obra derivada de Unidades Administrativas (IGN), consulta 2026-11-15, CC-BY 4.0 ign.es**.
+  Original GISCO/CY-Bench geography remains a historical source reference,
+  without redistributing its polygons as the current selection boundaries.
 
 ## Boundary-source assessment
 
-The frozen Spanish province and ES112 geometry currently originates from
-GISCO. [GISCO's statistical-unit terms](https://ec.europa.eu/eurostat/en/web/gisco/geodata/statistical-units)
-permit noncommercial use/process with the specified visible attribution; they
-do not provide unrestricted commercial reuse. This noncommercial demonstration
-preserves that exception. The [2026 competition terms](https://www.spaceappschallenge.org/legal/)
-also address third-party materials. The documentation records this condition
-without claiming that the competition has approved it or that an attribution
-alone removes the restriction.
+The current frozen 50-province lookup and Lugo/ES112 selection geometry use
+Spain's official IGN WFS under CC BY 4.0, independently acquired and converted
+from EPSG:4258. The [geography release and audit](../yield_prediction/docs/ign_geography.md)
+record the actual 53-source-unit to 50-province code crosswalk, original GML
+hash, transformations, simplification and geodesic area changes. All 50 fixed
+NASA sampling points remain unchanged and lie inside both the original and
+released IGN polygons. The release contains no silent geometry repairs.
 
-A possible official alternative is Spain's IGN/CNIG *Límites y Unidades
-Administrativas*. The [IGN data policy](https://www.ign.es/web/ign/portal/politica-datos)
-and its [use licence](https://www.ign.es/resources/licencia/Condiciones_licenciaUso_IGN.pdf)
-are expressly compatible with CC BY 4.0. The [official LILIM download catalogue](https://centrodedescargas.cnig.es/CentroDescargas/buscar.do?filtro.codFamilia=LILIM)
-offers current province/municipality boundaries; it is a candidate replacement,
-not the source of the present frozen geometry.
+**Obra derivada de Unidades Administrativas (IGN), consulta 2026-11-15,
+CC-BY 4.0 ign.es.** Preserve this attribution and the declared precision policy
+when using these adapted lookup boundaries. [Official IGN data policy](https://www.ign.es/web/ign/portal/politica-datos)
+· [Use licence](https://www.ign.es/resources/licencia/Condiciones_licenciaUso_IGN.pdf).
 
-A valid replacement needs an audited province-code crosswalk, island coverage,
-CRS handling and containment check for every existing NASA sampling point.
-Changing model `geometry_source`, registries, hashes or provenance requires a
-new versioned release. Existing training features cannot silently inherit a
-new geometry claim. Do not rename or rewrite the frozen GISCO evidence merely
-to change the licence shown in the interface.
+The former GISCO polygon coordinates were replaced, while the historical
+source citations and original point-selection definition remain visible.
+ES112's IGN boundary is an independent administrative selection boundary, not
+a new crop-mask weather aggregation. The original CY-Bench inputs and their
+provenance remain unchanged. This distinction is required to reproduce the
+models and avoid claiming that their training data used a new geometry.

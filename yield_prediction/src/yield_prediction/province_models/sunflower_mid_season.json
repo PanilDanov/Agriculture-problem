@@ -2,8 +2,8 @@
   "schema_version": "province-monthly-experimental-v1",
   "crop": "sunflower",
   "mode": "mid_season",
-  "model_version": "province-monthly-v1+f15bb8648847",
-  "artifact_sha256": "9a9e64ca6ba74f803a04ba9c7a61ff2dd50e6a8b6aebe74ede0e7cc95c75d054",
+  "model_version": "province-monthly-v1+31a80b10d08b",
+  "artifact_sha256": "f09aa127aaa6f1de8c9a8065f176234cd0731ac7d8c6f38173b4393614a4f28d",
   "spatial_level": "administrative_region",
   "weather_support": "representative_point",
   "release_status": "experimental",
@@ -49,6 +49,7 @@
     "49",
     "50"
   ],
+  "geography_archive_sha256": "56c005d8ee91a58fd25ce3b16bf2d85e98a6284d17153a657ca447abb2e8ab80",
   "training_through": 2024,
   "features": [
     "log_lag1",
@@ -633,6 +634,6 @@
   "current_missing_regions": {
     "04": "The five latest observed provincial yields must be consecutive"
   },
-  "training_code_sha256": "45fb445f9e2c0e546734e2b54204acd95599fd1a8bdfce7c05178d4da171b9b6",
+  "training_code_sha256": "a78e670720b8de6bd0b8f061d969e369429bf01e317f3aa302ef6f6e94919709",
   "feature_code_sha256": "bccc227c79b1e0622ef5ee24b002821c1f908b4bd21a2d2978ea57f13fb2093c"
 }

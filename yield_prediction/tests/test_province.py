@@ -144,6 +144,12 @@ def test_all_twenty_real_mapa_nasa_estimators_and_provenance(crop, mode):
         assert all(np.isfinite(value) for key, value in validation["metrics"].items() if key != "count")
         assert "published_on" in forecast["source"]["calendar"]
         assert forecast["source"]["calendar"]["published_on"] is None
+        geometry = forecast["source"]["geometry"]
+        assert geometry["license"] == "CC-BY-4.0"
+        assert geometry["license_url"].startswith("https://www.ign.es/")
+        assert geometry["point_provenance"]["retained_coordinates"] is True
+        assert metadata["geography_archive_sha256"] == hashlib.sha256(
+            (Path(__file__).resolve().parents[1] / "artifacts/provincial/provinces.json").read_bytes()).hexdigest()
         assert forecast["is_replay"] is True
         break
     assert successes, f"No real released province supports {crop}/{mode} in 2026"
@@ -177,7 +183,7 @@ def test_real_barley_retraining_is_reproducible_from_tracked_portable_weather(tm
         actual = json.loads(model_path.with_suffix(".json").read_text())
         original, released = load_province("barley", mode)
         assert actual["model_version"] == released["model_version"]
-        for key in ("features", "provinces", "runtime", "source", "training_code_sha256", "feature_code_sha256"):
+        for key in ("features", "provinces", "runtime", "source", "training_code_sha256", "feature_code_sha256", "geography_archive_sha256"):
             assert actual[key] == released[key]
         # Each artifact retains strict checksum integrity. Serialized bytes and
         # BLAS rounding need not be identical across macOS ARM and Linux x86.

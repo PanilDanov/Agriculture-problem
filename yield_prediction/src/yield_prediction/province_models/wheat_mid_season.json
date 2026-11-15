@@ -2,8 +2,8 @@
   "schema_version": "province-monthly-experimental-v1",
   "crop": "wheat",
   "mode": "mid_season",
-  "model_version": "province-monthly-v1+639d58587a9e",
-  "artifact_sha256": "92eeeb776c295efc32fc95c6e5cdd441f00f5544e280ab721d34177a0c7f1862",
+  "model_version": "province-monthly-v1+e4c2631596ec",
+  "artifact_sha256": "ea75775410577caec8d10f1d4c2efad14cf0c656eebe956b9d4979866b7a0c7c",
   "spatial_level": "administrative_region",
   "weather_support": "representative_point",
   "release_status": "experimental",
@@ -57,6 +57,7 @@
     "49",
     "50"
   ],
+  "geography_archive_sha256": "56c005d8ee91a58fd25ce3b16bf2d85e98a6284d17153a657ca447abb2e8ab80",
   "training_through": 2024,
   "features": [
     "log_lag1",
@@ -656,6 +657,6 @@
   "current_missing_regions": {
     "33": "The frozen observed yield history is too old for this forecast horizon"
   },
-  "training_code_sha256": "45fb445f9e2c0e546734e2b54204acd95599fd1a8bdfce7c05178d4da171b9b6",
+  "training_code_sha256": "a78e670720b8de6bd0b8f061d969e369429bf01e317f3aa302ef6f6e94919709",
   "feature_code_sha256": "bccc227c79b1e0622ef5ee24b002821c1f908b4bd21a2d2978ea57f13fb2093c"
 }

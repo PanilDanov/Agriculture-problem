@@ -148,7 +148,10 @@ def train(args):
             geo = regions[code]
             static[code] = {"name": geo["province_name"], "point": {key: geo[key] for key in ("latitude", "longitude")},
                             "history": sorted(histories[(crop, code)].items()), "calendar": crop_calendar,
-                            "geometry_source": {key: geography.get(key) for key in ("source_url", "source_sha256", "attribution", "region_namespace")}}
+                            "geometry_source": {
+                                **{key: geography.get(key) for key in ("source_url", "source_sha256", "attribution", "region_namespace",
+                                                                      "license", "license_url", "point_definition", "point_provenance")},
+                                "point_method": geo.get("point_method"), "point_source": geo.get("point_source")}}
         for mode in MODES:
             examples = []
             rejected = defaultdict(int)
@@ -228,6 +231,7 @@ def train(args):
                         "model_version": model_version, "artifact_sha256": sha(path),
                         "spatial_level": "administrative_region", "weather_support": "representative_point",
                         "release_status": "experimental", "provinces": supported,
+                        "geography_archive_sha256": report["geography_archive_sha256"],
                         "training_through": max(years), "features": [*BASE_FEATURES, *("province_" + code for code in supported)],
                         "source": crop_source, "quality_status": "beats_last_yield_on_holdout" if beats else "does_not_beat_last_yield_on_holdout",
                         "validation": validation_report,

@@ -2,8 +2,8 @@
   "schema_version": "province-monthly-experimental-v1",
   "crop": "tomato",
   "mode": "pre_season",
-  "model_version": "province-monthly-v1+0e884c174f36",
-  "artifact_sha256": "9b9a2bee1b05a8aa3babba16eb3f50f68587f002b5223dfd7c8764f018a7a984",
+  "model_version": "province-monthly-v1+135bafbd01a4",
+  "artifact_sha256": "b7cf3b0734495a182017d0607114cf21dcd3af3f4ea0ea2c055348e878c65e89",
   "spatial_level": "administrative_region",
   "weather_support": "representative_point",
   "release_status": "experimental",
@@ -58,6 +58,7 @@
     "49",
     "50"
   ],
+  "geography_archive_sha256": "56c005d8ee91a58fd25ce3b16bf2d85e98a6284d17153a657ca447abb2e8ab80",
   "training_through": 2024,
   "features": [
     "log_lag1",
@@ -660,6 +661,6 @@
     "05": "The five latest observed provincial yields must be consecutive",
     "39": "The frozen observed yield history is too old for this forecast horizon"
   },
-  "training_code_sha256": "45fb445f9e2c0e546734e2b54204acd95599fd1a8bdfce7c05178d4da171b9b6",
+  "training_code_sha256": "a78e670720b8de6bd0b8f061d969e369429bf01e317f3aa302ef6f6e94919709",
   "feature_code_sha256": "bccc227c79b1e0622ef5ee24b002821c1f908b4bd21a2d2978ea57f13fb2093c"
 }

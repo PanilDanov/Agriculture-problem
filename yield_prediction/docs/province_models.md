@@ -90,8 +90,13 @@ errors, model selection, source/code hashes and actual current coverage.
 ## Reproduction and HTTP contract
 
 Actual source archives are extracted by `extract_mapa_calendars.py` and the
-MAPA provincial label ingester. Verified GISCO geometry and source coordinates
-are recorded in `artifacts/provincial/provinces.json`. Collect weather with
+MAPA provincial label ingester. Official IGN WFS province geometry under
+CC-BY-4.0 is recorded in `artifacts/provincial/provinces.json`, with download
+hashes, attribution, licence URL and the coordinate/compactness audit. The
+existing fixed NASA sampling coordinates are retained and checked inside the
+IGN polygons; they are not recomputed or claimed as new IGN representative
+points. Their historical selection method remains explicit provenance.
+Collect weather with
 `scripts/orbitFarm-province-weather.py` using the separate API environment.
 Then, in the pinned Python 3.11 ML environment:
 
@@ -113,6 +118,16 @@ in a temporary directory, checks source/version identity and each artifact's
 checksum, and compares real predictions and holdout metrics within tight numeric
 tolerances. Serialized bytes can differ across operating systems and BLAS
 implementations; binary equality is not a cross-platform training guarantee.
+
+The IGN geometry release was followed by a genuine refit of all twenty province
+models using the same pinned pipeline and unchanged weather, calendar and yield
+snapshots. All 776 previously covered 2026 cases retained identical feature
+vectors, predictions and holdout metrics on the comparison platform. New model
+versions and artifact checksums record the new geography/code provenance; the
+eight crop-mask and ten national artifacts remain byte-for-byte unchanged.
+`artifacts/provincial/geometry_migration_regression.json` records the old/new
+hashes and comparison results. This is a consistency check, not additional
+evidence of predictive accuracy or a new validation dataset.
 
 `POST /v1/yield` accepts exactly one input kind. For this family:
 

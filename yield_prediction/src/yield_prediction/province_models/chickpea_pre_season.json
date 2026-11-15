@@ -2,8 +2,8 @@
   "schema_version": "province-monthly-experimental-v1",
   "crop": "chickpea",
   "mode": "pre_season",
-  "model_version": "province-monthly-v1+4d6b72a38a7a",
-  "artifact_sha256": "11103c9b5db2c3635792ef8d3d9f38452f54710b72c055483611501f7e6183a4",
+  "model_version": "province-monthly-v1+cfa9fde0d945",
+  "artifact_sha256": "bc8ed92094bbe90070f9a3d2f13a83c78741068074b60d610febdba8ad790507",
   "spatial_level": "administrative_region",
   "weather_support": "representative_point",
   "release_status": "experimental",
@@ -52,6 +52,7 @@
     "49",
     "50"
   ],
+  "geography_archive_sha256": "56c005d8ee91a58fd25ce3b16bf2d85e98a6284d17153a657ca447abb2e8ab80",
   "training_through": 2024,
   "features": [
     "log_lag1",
@@ -642,6 +643,6 @@
     "44": "The five latest observed provincial yields must be consecutive",
     "46": "The five latest observed provincial yields must be consecutive"
   },
-  "training_code_sha256": "45fb445f9e2c0e546734e2b54204acd95599fd1a8bdfce7c05178d4da171b9b6",
+  "training_code_sha256": "a78e670720b8de6bd0b8f061d969e369429bf01e317f3aa302ef6f6e94919709",
   "feature_code_sha256": "bccc227c79b1e0622ef5ee24b002821c1f908b4bd21a2d2978ea57f13fb2093c"
 }

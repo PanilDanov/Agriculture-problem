@@ -1,0 +1,3 @@
+# Exact environment used to release the official IGN selection boundaries.
+shapely==2.2.0
+pyproj==3.7.2

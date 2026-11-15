@@ -6,7 +6,7 @@ orbitFarm is Team HaHaton's project for [Field Shift: Adapting Farms with NASA D
 
 The implemented journey is **draw a field → analyze source evidence → compare rotations → record planting → care → harvest → plant the next crop**. All ten product crops are supported in the planting lifecycle. Farm records persist in the browser.
 
-The public application runs the React/TypeScript website, Python analysis API and separate pinned ML runtime together at [orbitfarm.vercel.app](https://orbitfarm.vercel.app/#/farm). NASA POWER weather, ISRIC soil estimates, published crop calendars and explicitly sourced farmer inputs remain distinguishable. Live analysis does not use synthetic test-bench responses.
+The public application runs the React/TypeScript website, Python analysis API and separate pinned ML runtime together at [orbitfarm.vercel.app](https://orbitfarm.vercel.app). NASA POWER weather, ISRIC soil estimates, published crop calendars and explicitly sourced farmer inputs remain distinguishable. Live analysis does not use synthetic test-bench responses.
 
 The model bundle contains 20 experimental NASA/MAPA provincial crop/mode models, ten FAOSTAT national models and eight original wheat/maize regional artifacts. These families have distinct input requirements and coverage; they do not establish field-level accuracy. Missing inputs, historical replays and baseline failures are disclosed.
 

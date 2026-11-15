@@ -3,8 +3,8 @@
   "as_of": "2026-11-15",
   "label_archive_sha256": "e13a6868e273badcc68b8182fb09ac8bf8786092c8670d6821adeb05d2e105aa",
   "calendar_archive_sha256": "aa3e15d2f9524edc4c7c2cf1a196827c04f04c64e7e9567f6afc089c06b59055",
-  "geography_archive_sha256": "04457273bbd2493b6d6d3b51bf6f171781f96c37d7686786f58faf4a7b083cc6",
-  "training_code_sha256": "45fb445f9e2c0e546734e2b54204acd95599fd1a8bdfce7c05178d4da171b9b6",
+  "geography_archive_sha256": "56c005d8ee91a58fd25ce3b16bf2d85e98a6284d17153a657ca447abb2e8ab80",
+  "training_code_sha256": "a78e670720b8de6bd0b8f061d969e369429bf01e317f3aa302ef6f6e94919709",
   "feature_code_sha256": "bccc227c79b1e0622ef5ee24b002821c1f908b4bd21a2d2978ea57f13fb2093c",
   "weather_source": {
     "kind": "hash_verified_portable_release",
@@ -15,7 +15,7 @@
     {
       "crop": "wheat",
       "mode": "pre_season",
-      "modelVersion": "province-monthly-v1+6f1fd7547b0a",
+      "modelVersion": "province-monthly-v1+98a39827c375",
       "provinces": 48,
       "trainingExamples": 2127,
       "holdoutYears": [
@@ -93,7 +93,7 @@
     {
       "crop": "wheat",
       "mode": "mid_season",
-      "modelVersion": "province-monthly-v1+639d58587a9e",
+      "modelVersion": "province-monthly-v1+e4c2631596ec",
       "provinces": 48,
       "trainingExamples": 2127,
       "holdoutYears": [
@@ -171,7 +171,7 @@
     {
       "crop": "barley",
       "mode": "pre_season",
-      "modelVersion": "province-monthly-v1+a833cfafe66c",
+      "modelVersion": "province-monthly-v1+d783d9c13cd7",
       "provinces": 47,
       "trainingExamples": 2041,
       "holdoutYears": [
@@ -247,7 +247,7 @@
     {
       "crop": "barley",
       "mode": "mid_season",
-      "modelVersion": "province-monthly-v1+bc4d70884f3d",
+      "modelVersion": "province-monthly-v1+e47d1cd994d2",
       "provinces": 47,
       "trainingExamples": 2041,
       "holdoutYears": [
@@ -323,7 +323,7 @@
     {
       "crop": "maize",
       "mode": "pre_season",
-      "modelVersion": "province-monthly-v1+7e35c286d665",
+      "modelVersion": "province-monthly-v1+38e224014c6b",
       "provinces": 49,
       "trainingExamples": 2193,
       "holdoutYears": [
@@ -402,7 +402,7 @@
     {
       "crop": "maize",
       "mode": "mid_season",
-      "modelVersion": "province-monthly-v1+b1ed54965ada",
+      "modelVersion": "province-monthly-v1+611e0ea110e2",
       "provinces": 49,
       "trainingExamples": 2193,
       "holdoutYears": [
@@ -481,7 +481,7 @@
     {
       "crop": "sorghum",
       "mode": "pre_season",
-      "modelVersion": "province-monthly-v1+c100aca62b4b",
+      "modelVersion": "province-monthly-v1+e8f9de704fc0",
       "provinces": 27,
       "trainingExamples": 848,
       "holdoutYears": [
@@ -538,7 +538,7 @@
     {
       "crop": "sorghum",
       "mode": "mid_season",
-      "modelVersion": "province-monthly-v1+1cd191d56d6b",
+      "modelVersion": "province-monthly-v1+1d1df737cc58",
       "provinces": 27,
       "trainingExamples": 848,
       "holdoutYears": [
@@ -595,7 +595,7 @@
     {
       "crop": "chickpea",
       "mode": "pre_season",
-      "modelVersion": "province-monthly-v1+4d6b72a38a7a",
+      "modelVersion": "province-monthly-v1+cfa9fde0d945",
       "provinces": 43,
       "trainingExamples": 1810,
       "holdoutYears": [
@@ -668,7 +668,7 @@
     {
       "crop": "chickpea",
       "mode": "mid_season",
-      "modelVersion": "province-monthly-v1+9ca441d281c1",
+      "modelVersion": "province-monthly-v1+52a1e667ea31",
       "provinces": 43,
       "trainingExamples": 1765,
       "holdoutYears": [
@@ -741,7 +741,7 @@
     {
       "crop": "lentil",
       "mode": "pre_season",
-      "modelVersion": "province-monthly-v1+5d64efd56478",
+      "modelVersion": "province-monthly-v1+c4c8ea6078c8",
       "provinces": 35,
       "trainingExamples": 1234,
       "holdoutYears": [
@@ -806,7 +806,7 @@
     {
       "crop": "lentil",
       "mode": "mid_season",
-      "modelVersion": "province-monthly-v1+ef418b858a75",
+      "modelVersion": "province-monthly-v1+dcb35fe23fa1",
       "provinces": 35,
       "trainingExamples": 1234,
       "holdoutYears": [
@@ -871,7 +871,7 @@
     {
       "crop": "faba-bean",
       "mode": "pre_season",
-      "modelVersion": "province-monthly-v1+e95a45cc2557",
+      "modelVersion": "province-monthly-v1+0bc545b974d5",
       "provinces": 34,
       "trainingExamples": 1191,
       "holdoutYears": [
@@ -935,7 +935,7 @@
     {
       "crop": "faba-bean",
       "mode": "mid_season",
-      "modelVersion": "province-monthly-v1+a089cd1e15c9",
+      "modelVersion": "province-monthly-v1+6159cd098e11",
       "provinces": 34,
       "trainingExamples": 1191,
       "holdoutYears": [
@@ -999,7 +999,7 @@
     {
       "crop": "sunflower",
       "mode": "pre_season",
-      "modelVersion": "province-monthly-v1+5aaa9d030f88",
+      "modelVersion": "province-monthly-v1+7fa84f0714e2",
       "provinces": 40,
       "trainingExamples": 1710,
       "holdoutYears": [
@@ -1069,7 +1069,7 @@
     {
       "crop": "sunflower",
       "mode": "mid_season",
-      "modelVersion": "province-monthly-v1+f15bb8648847",
+      "modelVersion": "province-monthly-v1+31a80b10d08b",
       "provinces": 40,
       "trainingExamples": 1710,
       "holdoutYears": [
@@ -1139,7 +1139,7 @@
     {
       "crop": "potato",
       "mode": "pre_season",
-      "modelVersion": "province-monthly-v1+1f81e74201c0",
+      "modelVersion": "province-monthly-v1+2bb9784286dd",
       "provinces": 50,
       "trainingExamples": 2223,
       "holdoutYears": [
@@ -1218,7 +1218,7 @@
     {
       "crop": "potato",
       "mode": "mid_season",
-      "modelVersion": "province-monthly-v1+eab272c2eea0",
+      "modelVersion": "province-monthly-v1+d70bdb3b1980",
       "provinces": 50,
       "trainingExamples": 2133,
       "holdoutYears": [
@@ -1298,7 +1298,7 @@
     {
       "crop": "tomato",
       "mode": "pre_season",
-      "modelVersion": "province-monthly-v1+0e884c174f36",
+      "modelVersion": "province-monthly-v1+135bafbd01a4",
       "provinces": 49,
       "trainingExamples": 2063,
       "holdoutYears": [
@@ -1377,7 +1377,7 @@
     {
       "crop": "tomato",
       "mode": "mid_season",
-      "modelVersion": "province-monthly-v1+ddffda9df8fa",
+      "modelVersion": "province-monthly-v1+a0dc3eba85e3",
       "provinces": 49,
       "trainingExamples": 2030,
       "holdoutYears": [

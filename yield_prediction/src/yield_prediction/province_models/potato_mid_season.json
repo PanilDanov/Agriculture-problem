@@ -2,8 +2,8 @@
   "schema_version": "province-monthly-experimental-v1",
   "crop": "potato",
   "mode": "mid_season",
-  "model_version": "province-monthly-v1+eab272c2eea0",
-  "artifact_sha256": "f5ec045d96b3984374ce6c9bf0f2578d809a252eb32616b363ef59537d21e15e",
+  "model_version": "province-monthly-v1+d70bdb3b1980",
+  "artifact_sha256": "39f3c1ef548548ccc8d8acb6dc03bc8ac84f37d6026cc73c4bc894a4ab87a729",
   "spatial_level": "administrative_region",
   "weather_support": "representative_point",
   "release_status": "experimental",
@@ -59,6 +59,7 @@
     "49",
     "50"
   ],
+  "geography_archive_sha256": "56c005d8ee91a58fd25ce3b16bf2d85e98a6284d17153a657ca447abb2e8ab80",
   "training_through": 2024,
   "features": [
     "log_lag1",
@@ -664,6 +665,6 @@
     "03": "No complete current-season weather month precedes the midpoint minus 14 days",
     "45": "No complete current-season weather month precedes the midpoint minus 14 days"
   },
-  "training_code_sha256": "45fb445f9e2c0e546734e2b54204acd95599fd1a8bdfce7c05178d4da171b9b6",
+  "training_code_sha256": "a78e670720b8de6bd0b8f061d969e369429bf01e317f3aa302ef6f6e94919709",
   "feature_code_sha256": "bccc227c79b1e0622ef5ee24b002821c1f908b4bd21a2d2978ea57f13fb2093c"
 }

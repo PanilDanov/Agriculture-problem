@@ -14,7 +14,7 @@ orbitFarm helps farmers turn Earth observations into understandable crop and rot
 
 ## Public links
 
-- Final project: https://orbitfarm.vercel.app/#/farm
+- Final project: https://orbitfarm.vercel.app
 - Source code: https://github.com/PanilDanov/Agriculture-problem
 - Demo: supplied separately by the team when ready.
 
@@ -53,10 +53,11 @@ OpenAI Codex assisted with code, debugging, tests, integration, deployment and d
 - [NASA POWER](https://power.larc.nasa.gov/)
 - [POWER Daily API](https://power.larc.nasa.gov/docs/services/api/temporal/daily/)
 - [POWER Monthly API](https://power.larc.nasa.gov/docs/services/api/temporal/monthly/)
+- [NASA Harvest CropHarvest](https://zenodo.org/records/5533193) — independent source-collection validation boundaries, rather than the operational province geometry.
 
 ## Other resources
 
-The submission links the public repository and [third-party notices](../../THIRD_PARTY_NOTICES.md), plus the primary ISRIC, MAPA, FAO/FAOSTAT, CY-Bench, Copernicus/AgERA5 and GISCO sources catalogued there. The notice covers libraries, fonts and artwork. Source rights are not replaced by the original-code Apache 2.0 licence; GISCO-derived geometry retains non-commercial conditions.
+The submission links the public repository and [third-party notices](../../THIRD_PARTY_NOTICES.md), plus the primary ISRIC, MAPA, FAO/FAOSTAT, CY-Bench, Copernicus/AgERA5 and IGN/CNIG sources catalogued there. The notice covers libraries, fonts and artwork. Source rights are not replaced by the original-code Apache 2.0 licence. Current Spanish selection boundaries use official IGN/CNIG data under CC BY 4.0; historical source references remain identifiable.
 
 ## Team completion steps
 

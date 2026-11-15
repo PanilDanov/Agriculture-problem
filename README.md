@@ -2,7 +2,7 @@
 
 **From orbit to your next season.** An interactive farm planner using NASA Earth observations to help farmers compare crops, explore rotations and record care and harvests.
 
-[Open the application](https://orbitfarm.vercel.app/#/farm) · [Team HaHaton](https://www.spaceappschallenge.org/2026/find-a-team/team-robert/?tab=project) · [Submission material](docs/submission/project.md)
+[Open the application](https://orbitfarm.vercel.app) · [Team HaHaton](https://www.spaceappschallenge.org/2026/find-a-team/team-robert/?tab=project) · [Submission material](docs/submission/project.md)
 
 Built for NASA Space Apps Challenge 2026: [Field Shift: Adapting Farms with NASA Data](https://www.spaceappschallenge.org/2026/challenges/adapting-farms-with-nasa-data/). The live application includes the website, field-analysis API and 38 trained model artifacts, hosted together on Vercel Container Runtime.
 
@@ -22,15 +22,16 @@ Built for NASA Space Apps Challenge 2026: [Field Shift: Adapting Farms with NASA
 | [NASA POWER Daily](https://power.larc.nasa.gov/docs/services/api/temporal/daily/) | Historical temperature screening and field weather evidence | Point data; historical climate scenarios are distinguished from forecasts |
 | [NASA POWER Monthly](https://power.larc.nasa.gov/docs/services/api/temporal/monthly/) | Weather features for 20 provincial models: ten crops × pre-season/mid-season | Actual monthly data at a fixed representative point in each supported Spanish province |
 | [ISRIC SoilGrids](https://www.isric.org/explore/soilgrids), MAPA and FAO references | Soil estimates, published crop calendars, crop statistics and reference water calculations | Separate sources with their own resolution, dates and limitations |
+| [IGN/CNIG administrative units](https://www.ign.es/wfs-inspire/unidades-administrativas?service=WFS&request=GetCapabilities) | Independently sourced Spanish province selection boundaries | CC BY 4.0; audited CRS conversion and simplification, not surveyed field boundaries |
 | FAOSTAT / CY-Bench / Copernicus AgERA5 | Ten national annual-history models and eight original wheat/maize regional artifacts | National models use yield history; regional models require compatible crop-mask weather inputs |
 
 NASA POWER is listed in the challenge's [official resources](https://www.spaceappschallenge.org/2026/challenges/adapting-farms-with-nasa-data/?tab=resources). NASA data is used in analysis and provincial ML features; the project does not imply NASA endorsement.
 
 ## Try the complete flow
 
-1. Open the [farm](https://orbitfarm.vercel.app/#/farm), draw a boundary and enter the known field information.
-2. For the fullest currently audited seasonal model coverage, choose a field in **Ciudad Real, Granada, Huesca, Lleida, Tarragona or Zaragoza, Spain**, with harvest year **2026**.
-3. Analyze the field and inspect source evidence and experimental model validation. Missing soil, calendar or water inputs remain visible and can prevent a complete recommendation.
+1. Open the [farm](https://orbitfarm.vercel.app), draw a boundary and enter the known field information.
+2. For the fullest currently audited seasonal model coverage, choose a field in **Ciudad Real, Granada, Huesca, Lleida, Tarragona or Zaragoza, Spain**. In **Edit field information**, expand **Forecast settings & existing plan**, set **Harvest year** to **2026** and **Forecast mode** to **Regional pre-season**.
+3. Analyze the field and inspect source evidence and experimental model validation. Repeat with **Regional mid-season** to compare the second model mode. The automatic setting can select national annual estimates instead. Missing soil, calendar or water inputs remain visible and can prevent a complete recommendation.
 4. Compare a rotation, record a planting, then record its harvest to advance the plan. The [test benches](https://orbitfarm.vercel.app/#/lab) provide explicitly labelled synthetic demonstrations.
 
 All 20 provincial crop/mode combinations have frozen 2026 coverage in those six provinces. Coverage elsewhere is checked per crop and mode. A province-level estimate is not a prediction validated for an individual field. Thirteen of the 20 provincial models beat their baseline in both the overall holdout and conservative label-age check; all 20 remain experimental. National sorghum, chickpea and tomato models also remain experimental after failing their holdout baseline comparison.
@@ -65,6 +66,6 @@ Run `npm run verify` for frontend checks and browser tests; install Chromium fir
 
 ## Credits and reuse
 
-Original project code is licensed under [Apache 2.0](LICENSE). Third-party code, data, fonts and assets retain their own terms; see [third-party notices](THIRD_PARTY_NOTICES.md). Bundled GISCO-derived geometry has non-commercial reuse conditions and is excluded from the original-code licence.
+Original project code is licensed under [Apache 2.0](LICENSE). Third-party code, data, fonts and assets retain their own terms; see [third-party notices](THIRD_PARTY_NOTICES.md). Current Spanish selection boundaries use official IGN/CNIG data under CC BY 4.0; their source, transformation and retained NASA-point checks are [audited separately](yield_prediction/docs/ign_geography.md).
 
 [AI usage disclosure](AI_USAGE.md) documents Codex assistance and generated artwork. Source prompts and provenance are retained. The observed NASA, MAPA and FAOSTAT datasets are not AI-generated. `AgroWise_crop_requirements_clean.csv` retains its legacy filename for compatibility; **orbitFarm** is the current product name.

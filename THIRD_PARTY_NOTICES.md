@@ -20,8 +20,9 @@ manifests, metadata, citations and limitations when redistributing these files.
 | NASA Langley POWER | Daily environmental context and frozen monthly point-proxy weather used by the Spanish provincial models | Public NASA data service. Credit NASA Langley Research Center's POWER project, funded through NASA's Earth Science Division; retain the actual service version and access date in each response/snapshot. See the [POWER referencing guide](https://power.larc.nasa.gov/docs/referencing/). No NASA endorsement is implied. |
 | FAO FAOSTAT QCL | Ten national annual-history training snapshots and models | FAO. 2025. FAOSTAT: Crops and livestock products (QCL), accessed 15 November 2026. CC BY 4.0, subject to the [FAO Statistical Database Terms of Use](https://www.fao.org/contact-us/terms/db-terms-of-use/en/). Project filtering/training are adaptations; FAO does not endorse the predictions. [National provenance](yield_prediction/docs/national_models.md). |
 | Ministerio de Agricultura, Pesca y Alimentación (MAPA), Spain | Provincial 2004–2024 yield labels, 2014–2016 calendars and their derived provincial models | Cite MAPA, the yearbook/calendar edition and original URL. [MAPA legal notice](https://www.mapa.gob.es/es/atencion-al-ciudadano/aviso-legal) permits reuse with source acknowledgement, subject to third-party rights and preservation of relevant metadata. We do not assign an invented CC licence to the workbooks. Extraction corrections, area-basis changes and source cells remain in the frozen audit. [Label provenance](yield_prediction/docs/provincial_sources.md), [calendar provenance](yield_prediction/docs/mapa_calendars.md). |
-| CY-Bench 1.10, Kallenberg et al. | Eight wheat/maize estimator artifacts, examples and the ES112 frozen regional input release | The [publisher's record](https://zenodo.org/records/17279151) identifies EUPL-1.2. Cite Kallenberg et al., *CY-Bench: a comprehensive benchmark dataset for sub-national crop yield forecasting*, [DOI 10.5194/essd-18-3997-2026](https://doi.org/10.5194/essd-18-3997-2026), and the corresponding national-statistics sources identified by the release. Component data retain their own conditions, including the GISCO boundary conditions below. This is not a blanket Apache relicensing of the dataset or its derivatives. |
-| Eurostat / GISCO NUTS 2016 and 2024, EuroGeographics | ES112 boundary verification; Spanish province polygons assembled from NUTS3 and copied into runtime registries/model provenance | **Noncommercial use only under the specific GISCO statistical-unit conditions. © EuroGeographics for the administrative boundaries.** Preserve this notice in electronic/printed publications and map legends using these data. Commercial reuse requires a separate agreement. [Exact official terms](https://ec.europa.eu/eurostat/en/web/gisco/geodata/statistical-units). See the affected files and submission qualification below. |
+| CY-Bench 1.10, Kallenberg et al. | Eight wheat/maize estimator artifacts, examples and the ES112 frozen regional input release | The [publisher's record](https://zenodo.org/records/17279151) identifies EUPL-1.2. Cite Kallenberg et al., *CY-Bench: a comprehensive benchmark dataset for sub-national crop yield forecasting*, [DOI 10.5194/essd-18-3997-2026](https://doi.org/10.5194/essd-18-3997-2026), and the corresponding national-statistics sources identified by the release. Component data retain their own conditions. Historical source-boundary documentation remains distinct from the new IGN runtime selection polygons described below. This is not a blanket Apache relicensing of the dataset or its derivatives. |
+| IGN / CNIG, Spain, Unidades Administrativas WFS | Current 50-province polygons and the independent Lugo/ES112 runtime selection boundary | **CC BY 4.0. Obra derivada de Unidades Administrativas (IGN), consulta 2026-11-15, CC-BY 4.0 ign.es.** The [official use licence](https://www.ign.es/resources/licencia/Condiciones_licenciaUso_IGN.pdf) and [data policy](https://www.ign.es/web/ign/portal/politica-datos) require attribution and identification of adaptations. Source, crosswalk, precision/area audit and original NASA-point definition are retained in [the geography release](yield_prediction/docs/ign_geography.md). |
+| Eurostat / GISCO NUTS 2016 and 2024, EuroGeographics | Historical source verification and the historical definition of fixed NASA sampling sites; superseded as bundled selection polygons | The original GISCO source has **noncommercial** conditions and **© EuroGeographics for the administrative boundaries** attribution. [Exact official terms](https://ec.europa.eu/eurostat/en/web/gisco/geodata/statistical-units). These original source references are retained, without relabelling historical CY-Bench crop-mask aggregation as IGN-derived. Current runtime selection geometry is separately sourced IGN data, not a relicensed GISCO polygon. |
 | Natural Earth 5.1.2 | Country lookup and FAO M49/ISO2 crosswalk | [Public domain](https://www.naturalearthdata.com/about/terms-of-use/). Made with Natural Earth. Preserve the pinned-file URL/hash for scientific reproducibility. |
 | ISRIC SoilGrids 2.0 | Static soil-property predictions and water-retention inputs | [CC BY 4.0](https://isric.org/explore/soilgrids). Credit ISRIC – World Soil Information and SoilGrids 2.0; retain depth, unit conversions and product metadata. These are modelled soil properties, not a field soil test. |
 | Copernicus Climate Change Service / ECMWF AgERA5 v2.0 | Gridded daily-data download/aggregation pipeline, actual access proof and CY-Bench meteorological inputs | [Official catalogue](https://cds.climate.copernicus.eu/api/catalogue/v1/collections/sis-agrometeorological-indicators) specifies CC BY 4.0. Cite *Agrometeorological indicators from 1979 to present derived from reanalysis*, [DOI 10.24381/cds.6c68c9bb](https://doi.org/10.24381/cds.6c68c9bb), version and retrieval date. Project transformations are not an official Copernicus product. [Access and reproduction](agronomy/copernicus-data.md). |
@@ -32,25 +33,27 @@ manifests, metadata, citations and limitations when redistributing these files.
 | NASA Harvest CropHarvest v8 | Independent source-collection validation boundaries | [CC BY-SA 4.0 publisher record](https://zenodo.org/records/5533193). Credit the CropHarvest authors; derived boundary redistributions remain subject to share-alike. Raw boundary download/cache is not bundled as Apache code. [Validation record](agronomy/field-data-validation.md). |
 | Eurostat APRO_CPSHR statistical samples | Small source-feasibility samples, not training labels | Cite Eurostat, dataset APRO_CPSHR and retrieval date. [General reuse policy](https://ec.europa.eu/eurostat/web/main/help/copyright-notice) is separate from, and does not override, GISCO's geographic-data conditions. Original request URLs and hashes remain in `yield_prediction/artifacts/reference/`. Project interpretations are its authors' responsibility, not Eurostat's. |
 
-## GISCO scope and competition qualification
+## Current and historical geography
 
-The project is a noncommercial demonstration. Its GISCO-derived material is
-excluded from the Apache-2.0 grant. The affected material includes
-`yield_prediction/artifacts/provincial/provinces.json`,
-`agronomy/province_inputs/registry.json`, the regional ES112 registry/input
-provenance, and retained geometry/source metadata in provincial model bundles.
-Unions, coordinate conversion, point derivation or inclusion in a JSON file do
-not remove the original boundary conditions. The frozen geometry and weather
-points have not been silently replaced.
+The current `yield_prediction/artifacts/provincial/provinces.json`,
+`agronomy/province_inputs/registry.json` and ES112 selection registry use the
+independently acquired official IGN boundaries under CC BY 4.0. Their exact
+attribution and adaptation policy accompany the source and model metadata.
+The Apache-2.0 grant on project code does not replace that licence.
 
-GISCO's permission supports noncommercial use with the required attribution;
-this is not a claim of unrestricted redistribution. The [2026 Space Apps
-participant terms](https://www.spaceappschallenge.org/legal/) also place
-conditions on third-party Solution Materials. Listing a source here does not
-certify competition acceptance of a restrictive licence. The specific GISCO
-condition must remain visible in submission references; an unrestricted
-geography replacement requires a reviewed release, as described in
-[the boundary-source assessment](docs/data-sources.md#boundary-source-assessment).
+The previous GISCO polygon coordinates were replaced rather than relabelled.
+Historical source citations, source hashes and the original fixed-point
+selection method remain identified in the audit. NASA point coordinates and
+weather are unchanged. ES112's original CY-Bench crop-mask/calendar/soil data
+were not reaggregated, and their original provenance and conditions remain
+applicable. Read the [migration and reproducibility record](yield_prediction/docs/ign_geography.md)
+when restoring an older release; its original GISCO files retain their own
+noncommercial conditions.
+
+The [2026 Space Apps participant terms](https://www.spaceappschallenge.org/legal/)
+require citation and appropriate rights for third-party Solution Materials.
+This index records the actual sources and applicable conditions; it is not a
+statement that NASA or any data publisher has endorsed the project.
 
 ## Software, fonts and literature
 
@@ -65,7 +68,7 @@ The exact installed font notices accompany the built site under
 OpenMP/Expat binary distributions retain the licences supplied with those
 distributions. A project-level Apache licence does not replace these notices.
 
-The field map uses OpenStreetMap tiles/data, independently of GISCO model
+The field map uses OpenStreetMap tiles/data, independently of IGN model-selection
 geography: **© OpenStreetMap contributors**, [ODbL and attribution](https://www.openstreetmap.org/copyright).
 Keep the visible map attribution and comply with the tile provider's usage
 policy. No map imagery is claimed as original orbitFarm artwork.

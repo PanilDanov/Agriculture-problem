@@ -23,7 +23,7 @@ The complete flow uses NASA POWER historical and recent weather, SoilGrids estim
 
 Source and model coverage vary by crop, province, country and season. Sorghum, chickpea and tomato national models did not improve on their last-yield holdout baselines and are explicitly experimental. All NASA/MAPA province models are experimental and expose their temporal validation against the last-observed-yield baseline. Provincial weather points, monthly calendar scenarios and aggregate crop statistics do not establish accuracy for an individual field. Past issue dates are labelled historical replays.
 
-The integrated version is served locally at port 8000. The public deployment remains unchanged until the new API release and a reachable ML service are published.
+The integrated version is served locally at port 8000 and publicly at [orbitfarm.vercel.app](https://orbitfarm.vercel.app). The public deployment runs the website, API and all 38 models together on Vercel Container Runtime; a separate server is not required. See the [deployment guide](docs/orbitFarm-deployment.md) for the tested container configuration and the alternative split-service deployment.
 
 Copernicus CDS is optional for national and NASA/MAPA forecasts and required for new compatible AgERA5 regional weather ingestion. After manually creating a CDS account and accepting the dataset licence, use `python3 scripts/orbitFarm-copernicus.py configure` to save a token outside Git. [Copernicus data pipeline](agronomy/copernicus-data.md) · [NASA/MAPA seasonal models](yield_prediction/docs/province_models.md) · [National models](yield_prediction/docs/national_models.md) · [Scoring and water evidence](agronomy/scoring-and-water.md) · [ML service](yield_prediction/docs/inference_service.md)
 

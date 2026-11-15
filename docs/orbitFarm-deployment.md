@@ -91,7 +91,26 @@ The integrated release uses the **current tested checkout** for both frontend an
 
 ## Vercel website and field API
 
-Vercel remains an alternative host for the frontend and field API. The ML service runs separately in its Python 3.11 environment; set **`ORBITFARM_ML_URL` to its reachable HTTPS URL**. A localhost address cannot connect separate cloud deployments. An optional shared `ORBITFARM_ML_TOKEN` is passed by the field API. Regional input files must also be available to the field API when regional forecasting is enabled.
+### Complete application on Vercel Container Runtime
+
+The complete application was deployed and publicly checked at **https://orbitfarm.vercel.app** on November 15, 2026. It runs all 38 estimators, the field API and website in one cloud container. Both seasonal modes returned all ten real NASA/MAPA forecasts for the illustrative Zaragoza field. No separate server or running developer computer is required.
+
+The [Vercel Container Runtime](https://vercel.com/docs/functions/runtimes/container) builds the Docker image remotely. `deployment/fullstack.Dockerfile` retains Python 3.11 and two independent scientific environments. Node.js only builds the website. The image build checks all 38 model artifacts and eight native-estimator reference predictions on Linux. The supervisor keeps ML on private loopback, serves the API and website on `PORT`, and stops both processes on termination. Model weights and their numerical runtime pins remain unchanged.
+
+Deploy from a clean, reviewed checkout using Node.js 22.12+ and an authenticated Vercel CLI:
+
+```bash
+cp deployment/fullstack.Dockerfile Dockerfile.vercel
+npx vercel@65.16.0 deploy --local-config deployment/vercel-container.json --env PORT=8000 --yes
+```
+
+Check the preview's `/ready` and actual analysis before publishing with the same command plus `--prod`. The project must already be linked to the intended Vercel account/project. `PORT=8000` is configured for this project's preview and production environments and is also explicit in the command. Runtime caches use `/tmp`; scale-down discards them. A cold instance reloads the models and may fetch external sources again. Platform quotas and billing still apply.
+
+This container path does not require an external `ORBITFARM_ML_URL`. The existing GitHub publishing job below packages the alternative split Python deployment; until that job is migrated, use the container command for this complete deployment.
+
+### Alternative split Python deployment
+
+Vercel can also host only the frontend and field API. In that alternative, the ML service runs separately in its Python 3.11 environment; set **`ORBITFARM_ML_URL` to its reachable HTTPS URL**. A localhost address cannot connect separate cloud deployments. An optional shared `ORBITFARM_ML_TOKEN` is passed by the field API. Regional input files must also be available to the field API when regional forecasting is enabled.
 
 Build a combined release from the integrated checkout:
 
@@ -104,4 +123,4 @@ Release staging uses Node 24. The script builds Vite with the real same-origin A
 
 To use the existing GitHub publishing workflow, configure `VERCEL_TOKEN` and `ORBITFARM_ML_URL` as Actions secrets, plus `ORBITFARM_ML_TOKEN` when the inference service uses a token. The workflow builds and tests the release but does not publish a partially configured application when the token or ML URL is absent. It supplies the service settings at runtime, checks `/ready`, and performs the complete public release smoke check after publication.
 
-The previously hosted orbitfarm.vercel.app deployment predates this integration until a new verified release is published. Local tests or a successful build do not claim that the public deployment has been updated.
+For either deployment path, verify the public `/ready` response and actual source/model inference after publication. A local build alone does not establish the state of the public deployment.

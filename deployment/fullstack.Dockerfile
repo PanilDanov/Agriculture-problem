@@ -1,0 +1,75 @@
+# syntax=docker/dockerfile:1
+# Build context is the repository root. No Node.js is copied into runtime.
+FROM node:24-bookworm-slim AS website
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci --no-audit --no-fund
+COPY index.html vite.config.ts tsconfig.json playwright.config.ts ./
+COPY src ./src
+COPY public ./public
+COPY tests ./tests
+COPY contracts ./contracts
+COPY brand/sprites/crops-v1/manifest.json ./brand/sprites/crops-v1/manifest.json
+COPY agronomy/crop_profiles.json ./agronomy/crop_profiles.json
+COPY scripts/orbitFarm-verify-content.mjs ./scripts/orbitFarm-verify-content.mjs
+ENV VITE_ORBITFARM_LIVE_API=1 VITE_API_BASE_URL=""
+RUN npm run build
+
+FROM python:3.11-slim-bookworm AS python-dependencies
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 \
+    OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
+RUN apt-get update && apt-get install --yes --no-install-recommends libexpat1 libgomp1 libstdc++6 \
+    && rm -rf /var/lib/apt/lists/*
+COPY agronomy/requirements-*.txt /tmp/agronomy/
+RUN python -m venv /opt/api \
+    && /opt/api/bin/python -m pip install --no-cache-dir -r /tmp/agronomy/requirements-api.txt
+COPY yield_prediction/requirements.txt yield_prediction/pyproject.toml /tmp/yield_prediction/
+COPY yield_prediction/src /tmp/yield_prediction/src
+# Preserve the xgboost distribution/version used by the artifact manifests.
+# GPU/NCCL and plotting dependencies are unnecessary for CPU inference.
+RUN python -m venv /opt/ml \
+    && /opt/ml/bin/python -m pip install --no-cache-dir /tmp/yield_prediction 'six>=1.16,<2' \
+    && /opt/ml/bin/python -m pip install --no-cache-dir --no-deps catboost==1.2.8 xgboost==3.0.2 \
+    && /opt/ml/bin/python -m yield_prediction.service --check
+COPY yield_prediction/artifacts/examples/*.json /tmp/model-examples/
+COPY yield_prediction/artifacts/generalization/*candidate_example.json /tmp/model-examples/
+# Run the actual native estimators on Linux during the remote image build.
+RUN /opt/ml/bin/python - <<'PY'
+import json
+from pathlib import Path
+from yield_prediction.service import predict_request
+paths = list(Path('/tmp/model-examples').glob('*.json'))
+assert len(paths) == 8
+for path in paths:
+    row = json.loads(path.read_text())
+    mode = 'mid_season_v2' if 'midseason_candidate' in path.name else row['mode']
+    result = predict_request({'crop': row['crop'], 'mode': mode, 'features': row['features']})
+    expected = row.get('expected_yield_t_ha', row.get('predicted_yield_t_ha'))
+    assert abs(result['forecast']['predicted_yield_t_ha'] - expected) < 1e-7, path.name
+print('All eight real regional/native predictions match the frozen references.')
+PY
+
+FROM python:3.11-slim-bookworm AS runtime
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PORT=8000 \
+    OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 \
+    ORBITFARM_API_PYTHON=/opt/api/bin/python ORBITFARM_ML_PYTHON=/opt/ml/bin/python \
+    ORBITFARM_FRONTEND_DIR=/app/dist ORBITFARM_CACHE_DIR=/tmp/orbitfarm/field-sources \
+    ORBITFARM_REGIONAL_INPUT_DIR=/app/agronomy/regional_inputs \
+    ORBITFARM_PROVINCE_INPUT_DIR=/app/agronomy/province_inputs
+WORKDIR /app
+RUN apt-get update && apt-get install --yes --no-install-recommends libexpat1 libgomp1 libstdc++6 \
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd --uid 10001 --create-home orbitfarm
+COPY --from=python-dependencies /opt/api /opt/api
+COPY --from=python-dependencies /opt/ml /opt/ml
+COPY agronomy/*.py agronomy/*.json ./agronomy/
+COPY agronomy/regional_inputs ./agronomy/regional_inputs
+COPY agronomy/province_inputs ./agronomy/province_inputs
+COPY data_pipeline.py AgroWise_crop_requirements_clean.csv ./
+COPY deployment/run-container.py ./deployment/run-container.py
+COPY --from=website /app/dist ./dist
+USER orbitfarm
+EXPOSE 8000
+HEALTHCHECK --interval=20s --timeout=10s --start-period=45s --retries=3 \
+    CMD python -c "import os,urllib.request; urllib.request.urlopen('http://127.0.0.1:'+os.environ.get('PORT','8000')+'/ready', timeout=8).read()"
+CMD ["python", "deployment/run-container.py"]

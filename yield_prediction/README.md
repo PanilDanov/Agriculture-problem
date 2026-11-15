@@ -6,6 +6,11 @@ The field API consumes that service; country annual-history forecasts and region
 
 The package includes eight regional artifacts (four released models and four experimental candidates)
 and [ten national annual-history models](docs/national_models.md), one for every product crop.
+It also includes [twenty experimental NASA/MAPA provincial models](docs/province_models.md):
+pre-season and mid-season for each of the ten crops where audited Spanish provincial
+labels and calendars support them. NASA monthly weather describes a fixed representative
+point, and individual-field accuracy remains unverified. Sources, holdout errors,
+label ages, spatial support and historical replay dates remain explicit.
 National models use observed FAOSTAT yield histories; their output is a country estimate and does not
 incorporate current-season NASA weather. NASA field observations remain part of the field analysis.
 
@@ -15,7 +20,7 @@ Use `build_model_features(raw_input, crop, mode)` to convert compatible daily en
 
 `cold_start_pre_season` and `mid_season_v2` are opt-in candidates. Install them with `python -m pip install ".[candidates]"` from `yield_prediction`. Both use the existing `predict_yield` interface. Cold-start accepts a missing `adm_id` and uses no regional yield history. The two established modes still load their original bundles. [Cold-start evaluation](reports/cold_start_evaluation.md) · [Mid-season revalidation](reports/midseason_revalidation.md).
 
-This module forecasts maize (`maize`) and wheat (`wheat`) yield in t/ha at the administrative-region level. Each crop has two trained models. `pre_season` forecasts on the day before the season starts. `mid_season` forecasts at the calendar midpoint using weather available by then after the AgERA5 publication lag.
+The CY-Bench family forecasts maize (`maize`) and wheat (`wheat`) yield in t/ha at the administrative-region level. Each crop has two trained models. `pre_season` forecasts on the day before the season starts. `mid_season` forecasts at the calendar midpoint using weather available by then after the AgERA5 publication lag.
 
 ## Run a forecast
 

@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "1.0",
+  "requestId": "2eaf1fb4-2856-46e2-b2c4-39a588ffaaf9",
+  "farmId": "release-smoke-zaragoza",
+  "boundaryVersion": 1,
+  "boundary": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          -1.1732109999999998,
+          41.833719
+        ],
+        [
+          -1.171211,
+          41.833719
+        ],
+        [
+          -1.171211,
+          41.835719
+        ],
+        [
+          -1.1732109999999998,
+          41.835719
+        ],
+        [
+          -1.1732109999999998,
+          41.833719
+        ]
+      ]
+    ]
+  },
+  "regionLabel": "Illustrative field in Zaragoza province",
+  "localInputs": {
+    "soil": {
+      "ph": null,
+      "texture": null,
+      "source": "unknown",
+      "sampledOn": null
+    },
+    "irrigation": {
+      "availability": "unknown",
+      "method": null,
+      "waterBudget": null,
+      "applicationEfficiency": null
+    },
+    "previousCropId": null,
+    "currentPlan": null
+  },
+  "priorities": [
+    "balanced"
+  ],
+  "yieldForecast": {
+    "mode": "pre_season",
+    "harvestYear": 2026
+  }
+}

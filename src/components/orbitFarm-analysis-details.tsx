@@ -15,6 +15,11 @@ export function analysisDate(value: unknown): string {
   if (typeof value === 'number') return String(value);
   if (typeof value !== 'string' || !value) return 'Unavailable';
   if (/^\d{4}$/.test(value)) return value;
+  if (/^\d{4}-\d{2}$/.test(value)) {
+    const parsed = new Date(`${value}-01T12:00:00Z`);
+    return Number.isFinite(parsed.valueOf()) && parsed.toISOString().slice(0, 7) === value
+      ? new Intl.DateTimeFormat('en-GB', { month: 'short', year: 'numeric', timeZone: 'UTC' }).format(parsed) : 'Unavailable';
+  }
   const calendar = value.slice(0, 10);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(calendar)) return value;
   const parsed = new Date(`${calendar}T12:00:00Z`);
@@ -61,27 +66,43 @@ function fieldLabel(field: string): string {
 function sourceDetails(source: unknown): { label?: string; href?: string; published?: string } {
   if (typeof source === 'string') return { label: source, href: /^https?:\/\//i.test(source) ? source : undefined };
   const record = object(source);
+  const latestYearbook = (Array.isArray(record.sources) ? record.sources.map(object) : [])
+    .filter(item => number(item.yearbook) !== null && Number.isInteger(item.yearbook)
+      && typeof item.index_url === 'string' && /^https?:\/\//i.test(item.index_url))
+    .sort((first, second) => (number(second.yearbook) ?? 0) - (number(first.yearbook) ?? 0))[0];
   const href = [record.url, record.download_url, record.source_url, record.source_reference, record.reference].find(value => typeof value === 'string' && /^https?:\/\//i.test(value));
   return {
-    label: text(record.dataset) ?? text(record.name) ?? text(record.title) ?? text(record.publisher) ?? text(record.product),
-    href: typeof href === 'string' ? href : undefined,
+    label: text(record.dataset) ?? text(record.name) ?? text(record.title) ?? text(record.publisher) ?? text(record.product)
+      ?? (latestYearbook ? `MAPA provincial crop statistics · yearbook ${latestYearbook.yearbook}` : text(record.id)),
+    href: typeof href === 'string' ? href : text(latestYearbook?.index_url),
     published: text(record.published_on),
   };
 }
 
-function Source({ value }: { value: unknown }) {
+function Source({ value, label = 'Source' }: { value: unknown; label?: string }) {
   const source = sourceDetails(value);
   if (!source.label && !source.href) return null;
-  return <p className="of-analysis-source">Source: {source.href
+  return <p className="of-analysis-source">{label}: {source.href
     ? <a href={source.href} target="_blank" rel="noreferrer noopener">{source.label ?? 'Source dataset'}</a> : source.label}
     {source.published && <> · published {analysisDate(source.published)}</>}</p>;
+}
+
+function ValidationByLabelAge({ validation }: { validation: Record<string, unknown> }) {
+  const metrics = object(validation.metrics_by_label_age);
+  const ages = ['1', '2', '3'].map(age => ({ age, metrics: object(metrics[age]) })).filter(row => number(row.metrics.mae_t_ha) !== null);
+  if (!ages.length) return null;
+  return <table className="of-analysis-validation"><caption>Held-out error by yield history age</caption>
+    <thead><tr><th scope="col">Yield history age</th><th scope="col">Model MAE<br />(t/ha)</th><th scope="col">Last-yield MAE<br />(t/ha)</th></tr></thead>
+    <tbody>{ages.map(row => <tr key={row.age}><th scope="row">{row.age} {row.age === '1' ? 'year' : 'years'}</th>
+      <td>{analysisNumber(row.metrics.mae_t_ha, 2)}</td><td>{analysisNumber(row.metrics.last_yield_baseline_mae_t_ha, 2)}</td></tr>)}</tbody>
+  </table>;
 }
 
 function ForecastCard({ cropId, name, entry }: { cropId: YieldForecast['cropId']; name: string; entry?: YieldForecast }) {
   const forecast = entry?.status === 'available' ? entry.forecast : undefined;
   const ready = forecast !== undefined && number(forecast.predicted_yield_t_ha) !== null;
   const quality = text(forecast?.quality_status);
-  const experimental = Boolean(forecast?.experimental || forecast?.mode.includes('cold_start') || forecast?.mode.includes('_v2')
+  const experimental = Boolean(forecast?.experimental || forecast?.release_status === 'experimental' || forecast?.mode.includes('cold_start') || forecast?.mode.includes('_v2')
     || (quality && quality !== 'beats_last_yield_on_holdout'));
   const diagnostics = object(entry?.diagnostics);
   const replay = forecast?.is_replay === true || forecast?.temporal_status === 'retrospective_estimate'
@@ -89,13 +110,21 @@ function ForecastCard({ cropId, name, entry }: { cropId: YieldForecast['cropId']
   const forecastDate = forecast?.forecast_date ?? diagnostics.forecastDate;
   const calculatedAt = forecast?.calculated_at ?? diagnostics.calculatedAt;
   const validation = object(forecast?.validation);
-  const holdout = Object.keys(object(validation.holdout)).length ? object(validation.holdout) : validation;
+  const conservative = object(validation.conservative_policy_metrics);
+  const holdout = number(conservative.mae_t_ha) !== null ? conservative : Object.keys(object(validation.holdout)).length
+    ? object(validation.holdout) : Object.keys(object(validation.metrics)).length ? object(validation.metrics) : validation;
   const source = forecast?.source ?? diagnostics.source;
+  const sourceRecord = object(source);
   const dataThrough = forecast?.data_through ?? forecast?.last_observed_year ?? diagnostics.dataThrough;
+  const pointWeather = forecast?.weather_support === 'representative_point';
+  const regionName = text(forecast?.region_name);
+  const labelThrough = diagnostics.labelDataThrough;
   const mode = forecast?.mode ?? entry?.mode;
   const modeLabel = mode === 'annual_history' ? 'Annual yield history' : mode?.includes('mid_season') ? 'Mid-season' : mode?.includes('pre_season') ? 'Pre-season' : 'Forecast';
   const spatialLabel = forecast?.spatial_level === 'country' ? 'National estimate' : 'Regional estimate';
   const warnings = forecast?.warnings ?? [];
+  const productWarning = warnings.find(warning => /production systems|dry harvested|open-field.*tomato/i.test(warning))
+    ?? (pointWeather && cropId === 'tomato' ? 'Tomato data combine production systems; this estimate is not specific to open-field tomato.' : undefined);
   return <article className={`of-yield-card ${ready ? 'of-yield-card--ready' : 'of-yield-card--missing'}`} aria-label={`${name} yield forecast`}>
     <header><CropSprite cropId={cropId} size={36} /><div><h3>{name}</h3><span className="of-analysis-caption">{ready ? spatialLabel : 'Forecast unavailable'}</span></div>
       {experimental && <span className="of-analysis-tag of-analysis-tag--review">Experimental</span>}</header>
@@ -103,12 +132,18 @@ function ForecastCard({ cropId, name, entry }: { cropId: YieldForecast['cropId']
       <p className="of-yield-value"><strong>{analysisNumber(forecast.predicted_yield_t_ha, 2)}</strong><span>t/ha</span></p>
       <p className="of-analysis-caption">{modeLabel}{forecast.harvest_year ?? entry?.harvestYear ? ` · harvest ${forecast.harvest_year ?? entry?.harvestYear}` : ''}
         {text(forecast.country_name) ? ` · ${text(forecast.country_name)}` : forecast.country_code ? ` · ${forecast.country_code}` : ''}</p>
+      {regionName && <p className="of-analysis-caption">{pointWeather ? 'Province' : 'Region'}: {regionName}{text(forecast.region_id) ? ` (${text(forecast.region_id)})` : ''}</p>}
+      {pointWeather && <><p className="of-analysis-caption"><strong>NASA monthly point proxy</strong> · weather at one representative location in this province.</p>
+        <p className="of-analysis-caption">Season dates are approximations from MAPA's 2014–2016 monthly calendars. Individual-field accuracy has not been validated.</p></>}
       {replay && <p className="of-analysis-caption"><strong>Historical replay</strong> · forecast {analysisDate(forecastDate)}. Calculated later for a past forecast date; this estimate was not issued on that date.</p>}
       {text(forecast.target_product) && <p className="of-analysis-caption">Reported product: {text(forecast.target_product)}</p>}
-      {warnings.find(warning => /production systems|dry harvested/i.test(warning)) && <p className="of-analysis-caption">{warnings.find(warning => /production systems|dry harvested/i.test(warning))}</p>}
+      {productWarning && <p className="of-analysis-caption">{productWarning}</p>}
       <details className="of-analysis-disclosure"><summary>Model & evidence</summary><div className="of-analysis-disclosure-content">
         <dl className="of-analysis-dl"><div><dt>Model version</dt><dd>{forecast.model_version}</dd></div>
-          <div><dt>Yield data through</dt><dd>{analysisDate(dataThrough)}</dd></div>
+          <div><dt>{forecast.spatial_level === 'country' ? 'Yield data through' : 'Weather observed through'}</dt><dd>{analysisDate(dataThrough)}</dd></div>
+          {labelThrough !== undefined && <div><dt>Latest yield label</dt><dd>{analysisDate(labelThrough)}</dd></div>}
+          {number(diagnostics.labelAgeYears) !== null && <div><dt>Yield history age</dt><dd>{analysisNumber(diagnostics.labelAgeYears, 0)} years</dd></div>}
+          {diagnostics.labelCutoffYear !== undefined && <div><dt>Latest permitted label year</dt><dd>{analysisDate(diagnostics.labelCutoffYear)}</dd></div>}
           <div><dt>Forecast date</dt><dd>{analysisDate(forecastDate)}</dd></div>
           <div><dt>Calculated at</dt><dd>{analysisTimestamp(calculatedAt)}</dd></div>
           <div><dt>Target product</dt><dd>{text(forecast.target_product) ?? name}</dd></div>
@@ -118,9 +153,16 @@ function ForecastCard({ cropId, name, entry }: { cropId: YieldForecast['cropId']
           {number(holdout.last_yield_baseline_mae_t_ha) !== null && <div><dt>Last-yield baseline MAE</dt><dd>{analysisNumber(holdout.last_yield_baseline_mae_t_ha, 2)} t/ha</dd></div>}
           {Array.isArray(validation.holdout_years) && <div><dt>Validation harvest years</dt><dd>{validation.holdout_years.filter(value => typeof value === 'number').join(', ')}</dd></div>}
         </dl>
+        {number(conservative.mae_t_ha) !== null && <p className="of-analysis-caption">The reported MAE uses held-out cases matching the conservative yield-history availability policy.</p>}
+        <ValidationByLabelAge validation={validation} />
         {quality && <p className="of-analysis-caption">{quality === 'beats_last_yield_on_holdout'
-          ? 'Held-out error was lower than using the last reported yield.' : 'Held-out error did not improve on the last-reported-yield baseline.'}</p>}
-        <Source value={source} />
+          ? pointWeather ? 'Both the combined and conservative-policy holdout checks had lower error than the last-yield baseline.'
+            : 'Held-out error was lower than using the last reported yield.' : quality === 'does_not_beat_last_yield_on_holdout'
+            ? pointWeather ? 'At least one of the combined and conservative-policy holdout checks did not beat the last-yield baseline.'
+              : 'Held-out error did not improve on the last-reported-yield baseline.' : `Reported model quality: ${words(quality)}.`}</p>}
+        {pointWeather ? <><Source value={sourceRecord.labels} label="Yield labels" />
+          {Array.isArray(object(sourceRecord.calendar).source_files) && (object(sourceRecord.calendar).source_files as unknown[]).map((file, index) => <Source key={index} value={file} label="Crop calendar" />)}
+          <Source value={sourceRecord.weather} label="NASA weather" /><Source value={sourceRecord.geometry} label="Province boundaries" /></> : <Source value={source} />}
         {warnings.length > 0 && <ul className="of-analysis-notes">{warnings.map((warning, index) => <li key={`${index}-${warning}`}>{warning}</li>)}</ul>}
       </div></details>
     </> : <p className="of-analysis-unavailable">{entry?.reason ?? 'This analysis does not include a trained-model forecast for this crop.'}</p>}

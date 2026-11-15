@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agrowise-yield-prediction"
-version = "1.1.0"
+version = "1.2.0"
 requires-python = ">=3.11,<3.12"
 dynamic = ["dependencies"]
 
@@ -22,7 +22,7 @@ dependencies = {file = ["requirements.txt"]}
 where = ["src"]
 
 [tool.setuptools.package-data]
-yield_prediction = ["models/*.joblib", "models/*.json", "candidate_models/*.joblib", "candidate_models/*.json", "national_models/*.joblib", "national_models/*.json", "schemas/*.json"]
+yield_prediction = ["models/*.joblib", "models/*.json", "candidate_models/*.joblib", "candidate_models/*.json", "national_models/*.joblib", "national_models/*.json", "province_models/*.joblib", "province_models/*.json", "schemas/*.json"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

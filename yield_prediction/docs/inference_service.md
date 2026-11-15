@@ -38,7 +38,8 @@ or internal container network. Model features and observations are not logged.
 
 - `GET /health` returns 200 while the process runs.
 - `GET /ready` verifies hashes, pinned dependency versions and native loading for
-  all eight regional artifacts, and the ten-crop national release. It returns
+  all eight crop-mask artifacts, ten national models and twenty experimental
+  NASA/MAPA provincial models. It returns
   200 only when all models are ready, otherwise 503 with per-model diagnostics.
 - `python -m yield_prediction.service --check` performs the same check and exits
   nonzero when a model is unavailable.
@@ -54,6 +55,7 @@ A health response alone does not establish that model inference works.
 | `environmentalInput` | The versioned regional daily input contract. Its source, spatial aggregation, calendar and data coverage are validated by `build_model_features()`. |
 | `features` | Already prepared regional seasonal features. The service checks their schema, dates and ranges, but cannot verify the upstream spatial aggregation. This input is labelled client supplied. |
 | `nationalInput` | `{countryCode, harvestYear?, asOf?}` for annual country yield-history forecasts across ten crops. The only mode for this input is `annual_history`. |
+| `provinceInput` | An audited Spanish INE province, target year, current archive date and provenance-bearing NASA monthly representative-point weather; experimental `pre_season` / `mid_season` models. See [provincial models](province_models.md). |
 
 Example national request:
 

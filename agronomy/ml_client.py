@@ -11,6 +11,7 @@ import requests
 
 from .assessment import load_profiles
 from .regional_store import RegionalInputStore
+from .province_store import ProvinceInputStore
 
 CROPS = tuple(load_profiles()["crops"])
 
@@ -18,7 +19,7 @@ CROPS = tuple(load_profiles()["crops"])
 def validated_forecast(result, request):
     if not isinstance(result, dict) or result.get("crop") != request["crop"]:
         raise ValueError("The model response belongs to a different crop")
-    payload = request.get("nationalInput", request.get("environmentalInput"))
+    payload = next((request[key] for key in ("nationalInput", "environmentalInput", "provinceInput") if key in request), None)
     fingerprint = hashlib.sha256(json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()).hexdigest()
     diagnostics = result.get("diagnostics")
     if not isinstance(diagnostics, dict) or diagnostics.get("inputSha256") != fingerprint:
@@ -39,6 +40,18 @@ def validated_forecast(result, request):
                 or forecast.get("country_code") != expected["countryCode"]
                 or forecast.get("harvest_year") != expected["harvestYear"]):
             raise ValueError("Country, year or scope differs from the requested national forecast")
+    elif "provinceInput" in request:
+        expected = request["provinceInput"]
+        region = (diagnostics.get("source") or {}).get("region") or {}
+        if (forecast.get("spatial_level") != "administrative_region"
+                or forecast.get("country_code") != expected["countryCode"]
+                or forecast.get("region_id") != expected["regionId"]
+                or forecast.get("harvest_year") != expected["harvestYear"]
+                or forecast.get("mode") != request["mode"]
+                or forecast.get("weather_support") != "representative_point"
+                or region.get("adm_id") != expected["regionId"]
+                or region.get("country_code") != expected["countryCode"]):
+            raise ValueError("Province model response has mismatched point support, identity, year or mode")
     else:
         diagnostics = result.get("diagnostics") or {}
         source = diagnostics.get("source") or {}
@@ -53,7 +66,7 @@ def validated_forecast(result, request):
 
 
 class YieldClient:
-    def __init__(self, base_url=None, *, timeout=8, regional_store=None):
+    def __init__(self, base_url=None, *, timeout=8, regional_store=None, province_store=None):
         self.base_url = (base_url if base_url is not None else os.environ.get("ORBITFARM_ML_URL", "")).rstrip("/")
         parsed = urlsplit(self.base_url)
         if self.base_url and (parsed.scheme not in ("http", "https") or not parsed.netloc or parsed.username or parsed.password or parsed.query or parsed.fragment):
@@ -62,6 +75,7 @@ class YieldClient:
         token = os.environ.get("ORBITFARM_ML_TOKEN", "")
         self.headers = {"Authorization": f"Bearer {token}"} if token else {}
         self.store = regional_store or RegionalInputStore(os.environ.get("ORBITFARM_REGIONAL_INPUT_DIR") or Path(__file__).with_name("regional_inputs"))
+        self.provinces = province_store or ProvinceInputStore(os.environ.get("ORBITFARM_PROVINCE_INPUT_DIR"))
 
     def ready(self):
         if not self.base_url:
@@ -86,12 +100,17 @@ class YieldClient:
                 request = {"crop": crop, "mode": regional_mode, "environmentalInput": regional["environmentalInput"]}
                 context = {key: value for key, value in regional.items() if key != "environmentalInput"}
             elif mode in ("pre_season", "mid_season"):
-                # Explicit regional requests must never silently change their scientific scope.
-                requests_body.append(None)
-                contexts.append({"cropId": crop, "status": "unavailable", "mode": mode,
-                                 "reason": (regional or {}).get("reason", "This crop has no regional model."),
-                                 "code": (regional or {}).get("code", "REGIONAL_MODEL_UNAVAILABLE")})
-                continue
+                province = self.provinces.select(boundary, crop, mode, year, as_of) if country == "ES" else None
+                if province and province["status"] == "available":
+                    request = {"crop": crop, "mode": mode, "provinceInput": province["provinceInput"]}
+                    context = {key: value for key, value in province.items() if key != "provinceInput"}
+                else:
+                    # Explicit seasonal requests retain their scientific scale.
+                    requests_body.append(None)
+                    contexts.append({"cropId": crop, "status": "unavailable", "mode": mode,
+                                     "reason": (province or regional or {}).get("reason", "No compatible seasonal model inputs are installed for this crop and field."),
+                                     "code": (province or regional or {}).get("code", "REGIONAL_MODEL_UNAVAILABLE")})
+                    continue
             else:
                 request = {"crop": crop, "mode": "annual_history", "nationalInput": {
                     "countryCode": country, "harvestYear": year, "asOf": as_of}}
@@ -133,6 +152,8 @@ class YieldClient:
                 continue
             output.append({**context, "status": "available", "forecast": forecast,
                            "diagnostics": result.get("diagnostics", {}),
-                           "usesNasaWeather": False,
-                           "nasaContext": "NASA POWER weather is used independently in the field water and suitability assessments."})
+                           "usesNasaWeather": "provinceInput" in request,
+                           "nasaContext": ("This province model uses NASA POWER monthly weather at its fixed representative point; field water and suitability use separate field-context observations."
+                                           if "provinceInput" in request else
+                                           "NASA POWER weather is used independently in the field water and suitability assessments.")})
         return output

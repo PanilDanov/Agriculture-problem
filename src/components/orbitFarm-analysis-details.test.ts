@@ -23,6 +23,8 @@ describe('analysis evidence display', () => {
     expect(analysisNumber(Number.NaN)).toBe('Unavailable');
     expect(analysisNumber(0)).toBe('0');
     expect(analysisDate('2024')).toBe('2024');
+    expect(analysisDate('2026-05')).toBe('May 2026');
+    expect(analysisDate('2026-13')).toBe('Unavailable');
     expect(analysisDate('2026-01-01')).toBe('1 Jan 2026');
     expect(analysisDate('2026-02-31')).toBe('Unavailable');
     expect(analysisTimestamp('2026-11-15T14:05:07+00:00')).toBe('15 Nov 2026, 14:05:07 UTC');
@@ -64,6 +66,61 @@ describe('analysis evidence display', () => {
     expect(html).toContain('this estimate was not issued on that date');
     expect(html).toContain('<dt>Forecast date</dt><dd>22 Jan 2026</dd>');
     expect(html).toContain('<dt>Calculated at</dt><dd>15 Nov 2026, 14:05:07 UTC</dd>');
+  });
+
+  it('keeps provincial point estimates experimental and separates weather from yield-label evidence', () => {
+    const result = analysis();
+    const entry = result.yieldForecasts![0];
+    Object.assign(entry.forecast!, { spatial_level: 'administrative_region', mode: 'mid_season',
+      release_status: 'experimental', quality_status: 'beats_last_yield_on_holdout', weather_support: 'representative_point',
+      region_name: 'Albacete', region_id: '02', country_code: 'ES', data_through: '2026-05',
+      source: { labels: { dataset: 'MAPA provincial statistics', url: 'https://www.mapa.gob.es/es/estadistica/temas/estadisticas-agrarias/' },
+        calendar: { source_files: [{ id: 'leguminosasgrano.xlsx', url: 'https://www.mapa.gob.es/calendar.xlsx' }] },
+        weather: { product: 'NASA POWER Monthly', url: 'https://power.larc.nasa.gov/' } },
+      validation: { holdout_years: [2022, 2023, 2024], metrics: { mae_t_ha: 4.56 },
+        conservative_policy_metrics: { mae_t_ha: 2.45, last_yield_baseline_mae_t_ha: 2.7 },
+        metrics_by_label_age: { '2': { mae_t_ha: 2.45, last_yield_baseline_mae_t_ha: 2.7 }, '3': { mae_t_ha: 2.6, last_yield_baseline_mae_t_ha: 2.9 } } } });
+    entry.diagnostics = { labelDataThrough: 2024, labelAgeYears: 2, labelCutoffYear: 2024 };
+    const html = renderToStaticMarkup(createElement(AnalysisDetails, { analysis: result }));
+    expect(html).toContain('Experimental');
+    expect(html).toContain('Province: Albacete (02)');
+    expect(html).toContain('NASA monthly point proxy');
+    expect(html).toContain('<dt>Weather observed through</dt><dd>May 2026</dd>');
+    expect(html).toContain('<dt>Latest yield label</dt><dd>2024</dd>');
+    expect(html).toContain('Held-out error by yield history age');
+    expect(html).toContain('Both the combined and conservative-policy holdout checks had lower error');
+    expect(html).toContain('2.45');
+    expect(html).not.toContain('4.56');
+    expect(html).toContain('Yield labels:');
+    expect(html).toContain('Crop calendar:');
+  });
+
+  it('does not describe a better provincial policy MAE as worse when the combined check failed', () => {
+    const result = analysis();
+    Object.assign(result.yieldForecasts![0].forecast!, { mode: 'pre_season', spatial_level: 'administrative_region',
+      country_code: 'ES', region_id: '50', region_name: 'Zaragoza', weather_support: 'representative_point', release_status: 'experimental',
+      quality_status: 'does_not_beat_last_yield_on_holdout',
+      validation: { metrics: { mae_t_ha: .9959, last_yield_baseline_mae_t_ha: .9673 },
+        conservative_policy_metrics: { mae_t_ha: .96755, last_yield_baseline_mae_t_ha: .96977 } } });
+    const html = renderToStaticMarkup(createElement(AnalysisDetails, { analysis: result }));
+    expect(html).toContain('At least one of the combined and conservative-policy holdout checks did not beat the last-yield baseline.');
+    expect(html).not.toContain('Held-out error did not improve on the last-reported-yield baseline.');
+    expect(html).toContain('held-out cases matching the conservative yield-history availability policy');
+  });
+
+  it('links nested MAPA label archives to the latest yearbook index instead of an arbitrary crop workbook', () => {
+    const result = analysis();
+    Object.assign(result.yieldForecasts![0].forecast!, { weather_support: 'representative_point',
+      source: { labels: { archive_sha256: 'fixture', sources: [
+        { yearbook: 2025, index_url: 'https://www.mapa.gob.es/anuario/2025', url: 'https://www.mapa.gob.es/2025-other-crop.xlsx' },
+        { yearbook: 2023, index_url: 'https://www.mapa.gob.es/anuario/2023', url: 'https://www.mapa.gob.es/2023-other-crop.xlsx' },
+      ] } } });
+    const html = renderToStaticMarkup(createElement(AnalysisDetails, { analysis: result }));
+    expect(html).toContain('Yield labels:');
+    expect(html).toContain('MAPA provincial crop statistics · yearbook 2025');
+    expect(html).toContain('href="https://www.mapa.gob.es/anuario/2025"');
+    expect(html).not.toContain('href="https://www.mapa.gob.es/anuario/2023"');
+    expect(html).not.toContain('other-crop.xlsx');
   });
 
   it('renders uncertain source strings as text rather than unsafe navigation', () => {

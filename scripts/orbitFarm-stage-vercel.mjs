@@ -62,6 +62,7 @@ await Promise.all([
   writeFile(join(staging, 'requirements.txt'), `${requirements.trimEnd()}\n`),
   stageExpat(staging),
   cp(join(backend, 'agronomy/regional_inputs'), join(staging, 'agronomy/regional_inputs'), { recursive: true }),
+  cp(join(backend, 'agronomy/province_inputs'), join(staging, 'agronomy/province_inputs'), { recursive: true }),
 ]);
 
 await build({

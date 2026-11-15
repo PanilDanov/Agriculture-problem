@@ -1,0 +1,318 @@
+{
+  "schema_version": "1.0",
+  "note": "Unmodified sparse source-cell excerpts from the reviewed official MAPA source workbooks. Empty rows/columns remain empty. Used only to verify source parsing, not to train models.",
+  "tables": [
+    {
+      "yearbook": 2015,
+      "source_id": "mapa-yearbook-2015",
+      "source_sheet": "13.1.3.3",
+      "source_province": "Alava",
+      "rows": {
+        "1": {
+          "1": "SUPERFICIES Y PRODUCCIONES DE CULTIVOS"
+        },
+        "3": {
+          "1": "13.1.3.3. CEREALES GRANO-CEBADA: Análisis provincial de superficie, rendimiento y producción, 2014"
+        },
+        "5": {
+          "1": "Provincias y Comunidades Autónomas",
+          "2": "Superficie",
+          "5": "Rendimiento",
+          "7": "Producción",
+          "8": "Paja"
+        },
+        "6": {
+          "2": "(hectáreas)",
+          "5": "(kg/ha)",
+          "7": "de grano",
+          "8": "cosechada"
+        },
+        "7": {
+          "2": "Secano",
+          "3": "Regadío",
+          "4": "Total",
+          "5": "Secano",
+          "6": "Regadío",
+          "7": "(toneladas)",
+          "8": "(toneladas)"
+        },
+        "18": {
+          "1": "Alava",
+          "2": "14870",
+          "3": "–",
+          "4": "14870",
+          "5": "4200",
+          "6": "–",
+          "7": "62454",
+          "8": "35786"
+        }
+      }
+    },
+    {
+      "yearbook": 2015,
+      "source_id": "mapa-yearbook-2015",
+      "source_sheet": "13.6.27.3",
+      "source_province": "A Coruña",
+      "rows": {
+        "1": {
+          "1": "SUPERFICIES Y PRODUCCIONES DE CULTIVOS"
+        },
+        "3": {
+          "1": "13.6.27.3. HORTALIZAS DE FRUTO-TOMATE: Análisis provincial de superficie, rendimiento y producción, 2014"
+        },
+        "5": {
+          "1": "Provincias y Comunidades Autónomas",
+          "2": "Superficie (hectáreas)",
+          "6": "Rendimiento (kg/ha)",
+          "9": "Producción (toneladas)"
+        },
+        "6": {
+          "2": "Secano",
+          "3": "Regadío",
+          "5": "Total",
+          "6": "Secano",
+          "7": "Regadío"
+        },
+        "7": {
+          "3": "Aire libre",
+          "4": "Protegido",
+          "7": "Aire libre",
+          "8": "Protegido"
+        },
+        "8": {
+          "1": "A Coruña",
+          "2": "–",
+          "3": "57",
+          "4": "228",
+          "5": "285",
+          "6": "–",
+          "7": "54090",
+          "8": "85900",
+          "9": "22668"
+        }
+      }
+    },
+    {
+      "yearbook": 2025,
+      "source_id": "mapa-yearbook-2025",
+      "source_sheet": "7.7.26.1.1",
+      "source_province": "Coruña, A",
+      "rows": {
+        "1": {
+          "1": "7.7.26.1. Tomate.- Resumen general"
+        },
+        "3": {
+          "1": "7.7.26.1.1 Tomate: Análisis provincial detallado, 2024"
+        },
+        "5": {
+          "1": "Provincias y Comunidades Autónomas",
+          "2": "SUPERFICIE",
+          "14": "RENDIMIENTO SUPERFICIE COSECHADA",
+          "17": "PRODUCCIÓN",
+          "22": "DESTINO DE LA PRODUCCIÓN DE  EN LAS EXPLOTACIONES PRODUCTORAS",
+          "29": "ÁREA PRINCIPAL"
+        },
+        "7": {
+          "2": "SUPERFICIE SEMBRADA\nsown area",
+          "6": "SUPERFICIE CULTIVADA\narea under cultivation",
+          "10": "SUPERFICIE COSECHADA\nhavested area",
+          "17": "PRODUCCIÓN BIOLOGICA",
+          "20": "PRODUCCIÓN COSECHADA",
+          "21": "PRODUCCIÓN NO COSECHADA",
+          "22": "Reserva para consumo propio",
+          "24": "Ventas fuera de las explotaciones",
+          "27": "Pérdida en Explotacion "
+        },
+        "8": {
+          "22": "Alimentación Animal  (Incluidas ventas a otras explotaciones agrarias)",
+          "23": "Alimentación humana",
+          "24": "Para consumo en fresco",
+          "25": "Exportación",
+          "26": "Para transformación ",
+          "27": "Retiradas",
+          "28": "Otras perdidas y mermas en explotacion"
+        },
+        "9": {
+          "2": "Secano",
+          "3": "Regadío",
+          "5": "Total",
+          "6": "Secano",
+          "7": "Regadío",
+          "9": "Total",
+          "10": "Secano",
+          "11": "Regadío",
+          "13": "Total",
+          "14": "Secano",
+          "15": "Regadío",
+          "17": "PRODUCCIÓN SECANO",
+          "18": "PRODUCCIÓN REGADIO",
+          "19": "PRODUCCIÓN TOTAL BIOLOGICA",
+          "20": "PC",
+          "21": "PNC",
+          "29": "Secano",
+          "30": "Regadío",
+          "32": "Total"
+        },
+        "10": {
+          "3": "Al aire libre",
+          "4": "Protegido",
+          "7": "Al aire libre",
+          "8": "Protegido",
+          "11": "Al aire libre",
+          "12": "Protegido",
+          "15": "Al aire libre",
+          "16": "Protegido",
+          "30": "Al aire libre",
+          "31": "Protegido"
+        },
+        "11": {
+          "1": "Coruña, A",
+          "2": "0",
+          "3": "209",
+          "4": "95",
+          "5": "304",
+          "6": "0",
+          "7": "209",
+          "8": "95",
+          "9": "304",
+          "10": "0",
+          "11": "209",
+          "12": "95",
+          "13": "304",
+          "14": "0",
+          "15": "65500",
+          "16": "80000",
+          "19": "21290",
+          "20": "21290",
+          "21": "0",
+          "22": "1092",
+          "23": "10407",
+          "24": "7598",
+          "25": "0",
+          "26": "2193",
+          "27": "0",
+          "28": "0",
+          "29": "0",
+          "30": "189",
+          "31": "87",
+          "32": "276"
+        }
+      }
+    },
+    {
+      "yearbook": 2025,
+      "source_id": "mapa-yearbook-2025",
+      "source_sheet": "7.1.8.1",
+      "source_province": " NAVARRA, COMUNIDAD FORAL DE",
+      "rows": {
+        "2": {
+          "1": "7.1.8.1 Cebada. Resumen General: Análisis provincial detallado, 2024"
+        },
+        "4": {
+          "1": "Provincias y Comunidades Autónomas",
+          "2": "Superficie",
+          "11": "Rendimiento superficie cosechada",
+          "13": "Producción",
+          "18": "Humedad",
+          "19": "Destino de la producción de grano en las explotaciones productoras",
+          "24": "Área principal",
+          "27": "Total semilla utilizada"
+        },
+        "6": {
+          "2": "Superficie sembrada",
+          "5": "Superficie cultivada",
+          "8": "Superficie cosechada",
+          "13": "Producción total biológica (Grano)",
+          "14": "Producción cosechada",
+          "17": "Producción no cosechada",
+          "18": "Humedad recogida (Grano)",
+          "19": "Reserva para consumo propio",
+          "22": "Ventas fuera de las explotaciones",
+          "23": "Pérdida en explotacion "
+        },
+        "7": {
+          "19": "Semilla",
+          "20": "Pienso (Incluidas ventas a otras explotaciones agrarias)",
+          "21": "Alimentación humana"
+        },
+        "8": {
+          "2": "Secano",
+          "3": "Regadío",
+          "4": "Total",
+          "5": "Secano",
+          "6": "Regadío",
+          "7": "Total",
+          "8": "Secano",
+          "9": "Regadío",
+          "10": "Total",
+          "11": "Secano",
+          "12": "Regadío",
+          "14": "Grano",
+          "15": "Biocombustible",
+          "16": "Paja cosechada",
+          "17": "Grano",
+          "24": "Secano",
+          "25": "Regadío",
+          "26": "Total"
+        },
+        "9": {
+          "2": "(hectáreas)",
+          "3": "(hectáreas)",
+          "4": "(hectáreas)",
+          "5": "(hectáreas)",
+          "6": "(hectáreas)",
+          "7": "(hectáreas)",
+          "8": "(hectáreas)",
+          "9": "(hectáreas)",
+          "10": "(hectáreas)",
+          "11": "kg/ha",
+          "12": "kg/ha",
+          "13": "(toneladas)",
+          "14": "(toneladas)",
+          "15": "(toneladas)",
+          "16": "(toneladas)",
+          "17": "(toneladas)",
+          "18": "%",
+          "19": "(toneladas)",
+          "20": "(toneladas)",
+          "21": "(toneladas)",
+          "22": "(toneladas)",
+          "23": "(toneladas)",
+          "24": "(hectáreas)",
+          "25": "(hectáreas)",
+          "26": "(hectáreas)",
+          "27": "(toneladas)"
+        },
+        "25": {
+          "1": " NAVARRA, COMUNIDAD FORAL DE",
+          "2": "59043",
+          "3": "11854",
+          "4": "70897",
+          "5": "59007",
+          "6": "11852",
+          "7": "70859",
+          "8": "59005",
+          "9": "11852",
+          "10": "70857",
+          "11": "4693",
+          "12": "6545",
+          "13": "354686",
+          "14": "354501",
+          "15": "17000",
+          "16": "267202",
+          "17": "185",
+          "18": "11.5",
+          "19": "0",
+          "20": "12381",
+          "21": "0",
+          "22": "338583",
+          "23": "3537",
+          "24": "59043",
+          "25": "9426",
+          "26": "68469",
+          "27": "13116"
+        }
+      }
+    }
+  ]
+}

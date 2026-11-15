@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0",
+  "purpose": "Official source coverage audit only; these Eurostat samples are not model training data.",
+  "sources": [
+    {
+      "file": "eurostat_ES61_2023.json",
+      "url": "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/apro_cpshr?lang=EN&geo=ES61&time=2023",
+      "sha256": "99a0927af2ecfe2a2e34f07f2a4b87451e1a67dc39e0b7095a512a188e8f92ea",
+      "bytes": 8981,
+      "dataset_updated": "2026-10-27T23:00:00+0100",
+      "retrieved_on": "2026-11-15"
+    },
+    {
+      "file": "eurostat_ES61_selected_2000_onward.json",
+      "url": "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/apro_cpshr?lang=EN&geo=ES61&sinceTimePeriod=2000&crops=C1300&crops=C1700&crops=P1200&crops=P9000&crops=R1000&crops=I1120",
+      "sha256": "76fd6b0fe4ffbc0835432cb02e5b9f79a43c5a77140c4b21d3cf869c59da640e",
+      "bytes": 8306,
+      "dataset_updated": "2026-10-27T23:00:00+0100",
+      "retrieved_on": "2026-11-15"
+    }
+  ],
+  "crop_codes": {
+    "barley": "C1300",
+    "sorghum": "C1700",
+    "faba-bean": "P1200",
+    "sunflower": "I1120",
+    "potato": "R1000",
+    "chickpea": null,
+    "lentil": null,
+    "tomato": null
+  },
+  "coverage_note": "APRO_CPSHR has 79 crop categories. Lentils and chickpeas are only pooled in P9000 with other pulses; tomato is not a separate regional category. Direct regional yield values for ES61 are absent; production and area are observed separately. A production/area ratio would need its source area basis checked.",
+  "model_data_choice": "MAPA provincial annual crop tables were selected for exact crop identity instead.",
+  "calendar_primary_url": "https://www.mapa.gob.es/es/estadistica/temas/estadisticas-agrarias/agricultura/calendarios-siembras-recoleccion/",
+  "mask_note": "SAGE calendars do not separate chickpea/lentil/faba or contain tomato; broad pulses calendars cannot replace crop calendars. JRC EUCROPMAP does not separate those pulses and sorghum; ITACyL distinguishes chickpea/lentil in newer Castilla y Leon maps, but not all ten crops consistently across Spain/years. No generic mask was relabelled as crop-specific.",
+  "mask_sources": [
+    "https://sage.nelson.wisc.edu/data-and-models/datasets/crop-calendar-dataset/netcdf-0-5-degree/",
+    "https://developers.google.com/earth-engine/datasets/catalog/JRC_D5_EUCROPMAP_V1",
+    "https://servicios.itacyl.es/arcgis/rest/services/MCSNCyL/MapServer/legend?f=pjson"
+  ]
+}

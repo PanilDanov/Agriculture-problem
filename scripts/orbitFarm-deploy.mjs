@@ -1,5 +1,5 @@
 import { appendFile, readFile, stat } from 'node:fs/promises';
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { verifyReleaseWithRetry } from './orbitFarm-smoke-release.mjs';
 
@@ -13,16 +13,80 @@ export function parseOptions(argv) {
 }
 
 export function deploymentArguments({ production, revision, token }) {
-  return ['--yes', 'vercel@65.16.0', 'deploy', '--yes', '--env', 'PORT=8000',
+  return ['--yes', 'vercel@65.16.0', 'deploy', '--json', '--yes', '--env', 'PORT=8000',
     '--meta', `orbitFarmCommit=${revision}`, ...(production ? ['--prod'] : []),
     ...(token ? ['--token', token] : [])];
 }
 
-export function deploymentUrl(stdout) {
-  const lines = stdout.replace(/\x1b\[[0-9;]*m/g, '').trim().split(/\s+/);
-  const url = lines.findLast(value => /^https:\/\/[a-z0-9-]+\.vercel\.app\/?$/i.test(value));
-  if (!url) throw new Error('The Vercel CLI did not return a deployment URL.');
-  return new URL(url);
+function immutableUrl(value) {
+  if (typeof value !== 'string') return null;
+  try {
+    const url = new URL(value.startsWith('https://') ? value : `https://${value}`);
+    if (url.protocol === 'https:' && !url.username && !url.password && !url.port &&
+        url.pathname === '/' && !url.search && !url.hash &&
+        /^[a-z0-9-]+-[a-z0-9]{9}(?:-[a-z0-9-]+)?\.vercel\.app$/i.test(url.hostname)) return url;
+  } catch { /* Not a deployment origin. */ }
+  return null;
+}
+
+export function deploymentUrl(stdout = '', stderr = '') {
+  const streams = [stdout, stderr].map(value => value.replace(/\x1b\[[0-?]*[ -/]*[@-~]/g, '').trim());
+  // CLI 65.16 supports --json. Read the deployment's url, never its aliases.
+  for (const stream of streams) {
+    for (const document of [stream, ...stream.split(/\r?\n/)]) {
+      try {
+        const data = JSON.parse(document);
+        const url = immutableUrl(data?.deployment?.url ?? data?.url);
+        if (url) return url;
+      } catch { /* Human-readable output is handled below. */ }
+    }
+  }
+  const labelled = new Set();
+  for (const line of streams.flatMap(value => value.split(/[\r\n]+/))) {
+    if (/\b(?:Aliased|Inspect):/i.test(line)) continue;
+    const match = line.match(/\b(?:Production|Preview):\s*(https:\/\/[^\s]+)/i);
+    const url = match && immutableUrl(match[1]);
+    if (url) labelled.add(url.origin);
+  }
+  if (labelled.size === 1) return new URL([...labelled][0]);
+  if (labelled.size > 1) throw new Error('The Vercel CLI returned conflicting deployment URLs.');
+  // Older CLI versions can print only the immutable URL to stdout.
+  const bare = new Set(streams[0].split(/[\r\n]+/).map(value => immutableUrl(value.trim())?.origin).filter(Boolean));
+  if (bare.size === 1) return new URL([...bare][0]);
+  throw new Error('The Vercel CLI did not return an unambiguous immutable deployment URL.');
+}
+
+export function runCli(command, args, { cwd = root, env = process.env,
+  writeStdout = value => process.stdout.write(value), writeStderr = value => process.stderr.write(value) } = {}) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args, { cwd, env, stdio: ['inherit', 'pipe', 'pipe'] });
+    const output = { stdout: '', stderr: '' };
+    const secrets = [env.VERCEL_TOKEN, env.VERCEL_AUTOMATION_BYPASS_SECRET].filter(Boolean);
+    const redact = value => secrets.reduce((text, secret) => text.split(secret).join('[REDACTED]'), value);
+    for (const [name, write] of [['stdout', writeStdout], ['stderr', writeStderr]]) {
+      let pending = '';
+      child[name].setEncoding('utf8');
+      child[name].on('data', chunk => {
+        output[name] = (output[name] + chunk).slice(-8 * 1024 * 1024);
+        pending += chunk;
+        let end;
+        while ((end = pending.search(/[\r\n]/)) !== -1) {
+          write(redact(pending.slice(0, end + 1)));
+          pending = pending.slice(end + 1);
+        }
+      });
+      child[name].on('end', () => { if (pending) write(redact(pending)); });
+    }
+    child.once('error', () => reject(new Error('The Vercel CLI could not be started.')));
+    child.once('close', (status, signal) => resolve({ ...output, status, signal }));
+  });
+}
+
+export async function verifyDeploymentResult(result, verify = verifyReleaseWithRetry) {
+  if (result.status !== 0 || result.signal) throw new Error('Vercel deployment failed; inspect the CLI diagnostics above.');
+  const url = deploymentUrl(result.stdout, result.stderr);
+  await verify(url);
+  return url;
 }
 
 function git(args) {
@@ -48,12 +112,10 @@ export async function main(argv = process.argv.slice(2)) {
     return;
   }
   if (dirty) throw new Error('Commit or isolate local changes before deploying a reviewed revision.');
-  const result = spawnSync(process.platform === 'win32' ? 'npx.cmd' : 'npx',
+  const result = await runCli(process.platform === 'win32' ? 'npx.cmd' : 'npx',
     deploymentArguments({ ...options, revision, token: process.env.VERCEL_TOKEN }),
-    { cwd: root, env: process.env, encoding: 'utf8', stdio: ['inherit', 'pipe', 'inherit'] });
-  if (result.error || result.status !== 0) throw new Error('Vercel deployment failed; inspect the CLI diagnostics above.');
-  const url = deploymentUrl(result.stdout);
-  await verifyReleaseWithRetry(url);
+    { cwd: root, env: process.env });
+  const url = await verifyDeploymentResult(result);
   if (process.env.GITHUB_OUTPUT) await appendFile(process.env.GITHUB_OUTPUT, `url=${url.origin}\n`);
   process.stdout.write(`Verified deployment: ${url.origin} (commit ${revision}).\n`);
 }

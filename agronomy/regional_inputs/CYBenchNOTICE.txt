@@ -1,0 +1,52 @@
+CY-Bench 1.10: scoped regional input redistribution notice
+
+Covered material
+----------------
+This notice accompanies only the CY-Bench-derived contents of:
+  ES112_maize_2026_pre_season.json
+  ES112_wheat_2026_pre_season.json
+
+Publisher and citation
+---------------------
+Kallenberg, Michiel, et al. (2025). CY-Bench: A comprehensive benchmark dataset
+for subnational crop yield forecasting. Version 1.10. AgML, Zenodo.
+Published 6 October 2025; DOI: https://doi.org/10.5281/zenodo.17279151
+Release and component-source references: https://zenodo.org/records/17279151
+Companion paper: https://doi.org/10.5194/essd-18-3997-2026
+
+Licence and retained upstream notice
+-----------------------------------
+The Zenodo 1.10 publisher record identifies EUPL-1.2. A complete copy is included
+as LICENSE-EUPL-1.2.txt and is also available at /licenses/EUPL-1.2.txt on the
+application website. Official text:
+https://interoperable-europe.ec.europa.eu/licence/european-union-public-licence-version-12-eupl
+
+The upstream software/repository notice states:
+Copyright 2024 AgML community (https://www.agml.org/)
+Licensed under the EUPL, Version 1.2 (the "Licence").
+https://github.com/WUR-AI/AgML-CY-Bench/blob/main/LICENSE
+
+That upstream notice explicitly limits its software licence to the Python
+package/Git repository and preserves the separate conditions of source data.
+The publisher likewise requests compliance with each included dataset's
+licensing and citation conditions. The included EUPL text does not replace
+those component conditions. See the publisher's component references, the
+upstream data_preparation source READMEs, and THIRD_PARTY_NOTICES.md at the
+repository root for the retained source attributions.
+
+Adaptation by orbitFarm contributors, 15 November 2026
+----------------------------------------------------
+The two JSON files are filtered, reformatted extracts of the original Spain
+maize/wheat crop-calendar, location, weather and soil CSV tables for ES112
+(Lugo). Dates were converted to ISO strings, numeric values serialized to JSON,
+and recurring calendar days converted to season windows for the 2026 scenario.
+The files add observation-availability and scenario metadata. Historical daily
+weather ends in 2023; the recurring calendar is not observed 2026 sowing data.
+Source table hashes and the extraction procedure are retained in
+source_provenance.json and yield_prediction/prepare_published_region.py.
+
+The independently sourced IGN selection geometry in registry.json is separate
+from CY-Bench's historical crop-mask aggregation geometry; its attribution and
+CC BY 4.0 conditions remain recorded in source_provenance.json. This notice
+does not relicense IGN geometry, original orbitFarm code, or all model weights
+under EUPL, and does not claim that source datasets are Apache-2.0 material.

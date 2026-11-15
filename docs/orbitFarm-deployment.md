@@ -76,9 +76,10 @@ is used. Project IDs can also be supplied through `VERCEL_ORG_ID` and
 The smoke check verifies HTML caching/assets, readiness for 8 crop-mask,
 10 national and 20 provincial estimators, actual NASA field context, ten
 national forecasts and both seasonal modes for all ten crops in Zaragoza.
-If preview Deployment Protection is enabled, provide
-`VERCEL_AUTOMATION_BYPASS_SECRET` for automated checks or permit public preview
-access. The secret is sent only to the deployment's own origin.
+For protected deployment URLs, supply an existing automation bypass secret as
+`VERCEL_AUTOMATION_BYPASS_SECRET`. This also applies to immutable production URLs
+when the project protects every domain except custom domains. The secret is sent
+only to the verified deployment's own origin; keep it outside Git.
 
 After inspecting the verified preview, publish the reviewed revision:
 
@@ -106,7 +107,7 @@ Configure these repository settings to enable it:
 
 - Variables: `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`.
 - Secret: `VERCEL_TOKEN`.
-- Optional secret for protected previews: `VERCEL_AUTOMATION_BYPASS_SECRET`.
+- Secret for checking protected deployment URLs: `VERCEL_AUTOMATION_BYPASS_SECRET`.
 
 The job verifies a preview before creating and verifying production. Without a
 configured project, tests still run and the deployment job is skipped. A green

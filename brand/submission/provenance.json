@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "1.0",
+  "asset": "orbitFarm-team-avatar-v1.png",
+  "project": "orbitFarm",
+  "generator": "built-in image_gen",
+  "createdAt": "2026-11-15T16:26:23Z",
+  "purpose": "NASA Space Apps team/project avatar",
+  "input": {
+    "path": "../../public/assets/farm/orbitFarm-dog-astronaut-v1.png",
+    "role": "Identity reference only; original runtime sprite remains unchanged",
+    "sha256": "a01de30bcf5dd6e08fa059c0e47fdcbdb80723b422bd5d97a499f94dc4f80132"
+  },
+  "output": {
+    "format": "PNG",
+    "width": 1254,
+    "height": 1254,
+    "transparentBackground": false,
+    "bytes": 1377770,
+    "sha256": "b3e3c18838bdd78f6d3cbe234a142857b903b7c9d881c789ea1b140d82a3a5a4",
+    "resolutionNote": "Prompt requested 1024 square; built-in tool returned 1254 square. Original generated pixels preserved."
+  },
+  "disclosure": {
+    "visibleWatermark": "AI-generated",
+    "preserveWatermark": true,
+    "circleSafeComposition": true
+  },
+  "rights": {
+    "description": "Original orbitFarm mascot portrait based on the team's existing AI-generated dog sprite.",
+    "nasaBranding": false,
+    "flags": false,
+    "missionIdentifiers": false,
+    "agencyEndorsement": false
+  },
+  "prompt": "Use case: stylized-concept.\nAsset type: one finished 1024 x 1024 square team/project avatar for orbitFarm, readable when displayed small and cropped to a circle.\nInput image 1 is an identity reference: the existing orbitFarm dog astronaut sprite sheet. Create a NEW portrait; do not change or replace that sprite sheet.\nSubject: the exact same friendly chestnut-and-cream short-legged companion dog, recognizable floppy ears, familiar cream facial markings, warm brown eyes, dark nose and happy smile. Preserve its identity, coat colors and rounded transparent bubble astronaut helmet with dark teal rim and small pale-blue glints. Warm ivory suit, restrained teal trim. A large expressive face and helmet are the dominant subject. Three-quarter portrait, gentle direct eye contact, shoulders only, one dog.\nStyle: polished professional cozy 16-bit pixel-art mascot illustration, deliberate crisp pixel clusters, clean silhouette, selective warm highlights, no photorealism and no smooth 3D rendering. Distinctive and charming, not a generic wolf or a different breed.\nBackdrop: deep navy outer space with a restrained thin green-and-teal Earth limb near the lower sides and only a few small star accents. Quiet, balanced composition with a generous circle-safe margin. Dog face, helmet, shoulders and all important details must fit inside a centered circle of diameter 86% of the canvas; preserve breathing room around helmet and ears.\nText (verbatim): \"AI-generated\". Include this exact visible, tasteful small cream watermark centered BELOW the portrait but INSIDE the circle-safe region, around 78% of image height. Use clean highly legible simple lettering at approximately 30 px in the 1024 px image, with enough clear dark background around it. It must remain readable and uncut in a circular avatar. It is a required disclosure, not an optional decoration.\nConstraints: one square 1024 x 1024 image, opaque dark background. No other text, no orbitFarm lettering, no NASA logo, NASA lettering, real agency insignia, flags, mission identifiers, recognizable agency branding or copied emblems. A completely original orbitFarm mascot portrait. No frame grids, sprite-sheet cells, duplicated dogs, watermark outside the safe circle or extra props. Do not remove or hide the AI-generated disclosure."
+}

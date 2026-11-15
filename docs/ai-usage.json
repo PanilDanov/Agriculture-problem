@@ -2,14 +2,25 @@
   "schemaVersion": "1.0",
   "projectName": "orbitFarm",
   "disclosureDate": "2026-11-15",
-  "legacyNames": ["AgriWise", "AgroWise"],
+  "legacyNames": [
+    "AgriWise",
+    "AgroWise"
+  ],
   "generativeTools": [
     {
       "provider": "OpenAI",
       "tool": "Codex",
       "modelVersion": null,
       "modelVersionNote": "Exact coding-model versions were not recorded in the repository.",
-      "activities": ["implementation assistance", "refactoring", "source research", "documentation", "testing", "browser verification", "deployment preparation"],
+      "activities": [
+        "implementation assistance",
+        "refactoring",
+        "source research",
+        "documentation",
+        "testing",
+        "browser verification",
+        "deployment preparation"
+      ],
       "scope": "Recorded AI-assisted frontend, agronomy API, data-adapter and model-service integration work; not an assertion about every line or the authorship of undocumented earlier contributions."
     },
     {
@@ -17,8 +28,19 @@
       "tool": "image_gen",
       "modelVersion": null,
       "modelVersionNote": "The underlying image-model version was not recorded in the source metadata.",
-      "activities": ["crop illustration generation", "farm scenery generation", "astronaut dog generation", "fictional satellite generation"],
-      "sourceRecords": ["brand/sprites/crops-v1/sources.json", "brand/sprites/farm-v2/sources.json", "brand/sprites/orbit-1-v1/source.json"]
+      "activities": [
+        "crop illustration generation",
+        "farm scenery generation",
+        "astronaut dog generation",
+        "fictional satellite generation",
+        "team avatar generation"
+      ],
+      "sourceRecords": [
+        "brand/sprites/crops-v1/sources.json",
+        "brand/sprites/farm-v2/sources.json",
+        "brand/sprites/orbit-1-v1/source.json",
+        "brand/submission/provenance.json"
+      ]
     }
   ],
   "trainedPredictionModels": {
@@ -29,17 +51,37 @@
   },
   "dataDeclaration": {
     "sourceObservations": "Credited NASA POWER, MAPA, FAOSTAT and other external observations/statistics are retrieved source data, not generated replacements.",
-    "derivedOutputs": ["normalized inputs", "calculated features", "reference-screen scores", "water calculations", "model estimates"],
+    "derivedOutputs": [
+      "normalized inputs",
+      "calculated features",
+      "reference-screen scores",
+      "water calculations",
+      "model estimates"
+    ],
     "syntheticData": "Labelled demo scenarios and test fixtures only; they are not evidence about a real field."
   },
   "artworkMark": {
     "text": "AI-generated artwork",
     "method": "Visible HTML/CSS mark on rendered illustrations and composites",
-    "coverage": ["farm scene including scenery/crops/dog", "scanner scene", "standalone satellite", "rotation crop illustrations", "crop option illustrations", "yield-card crop illustrations", "selected-bed crop illustrations"],
+    "coverage": [
+      "farm scene including scenery/crops/dog",
+      "scanner scene",
+      "standalone satellite",
+      "rotation crop illustrations",
+      "crop option illustrations",
+      "yield-card crop illustrations",
+      "selected-bed crop illustrations"
+    ],
     "sourceRastersModified": false,
     "historicalPromptsModified": false,
     "standalonePresentationNote": "Unmodified source PNGs are provenance masters, not watermarked exports. A separate presentation of a source image must retain a visible generation mark."
   },
   "assetProvenance": "docs/asset-provenance.md",
-  "submissionGuide": "https://www.spaceappschallenge.org/resources/project-submission-guide"
+  "submissionGuide": "https://www.spaceappschallenge.org/resources/project-submission-guide",
+  "standaloneTeamAvatar": {
+    "path": "brand/submission/orbitFarm-team-avatar-v1.png",
+    "mark": "AI-generated",
+    "method": "Embedded generation mark in the original generated output",
+    "provenance": "brand/submission/provenance.json"
+  }
 }

@@ -12,6 +12,7 @@ drawn assets or as NASA imagery. See [AI_USAGE.md](../AI_USAGE.md) and the
 | Ten mature field crop sprites | `public/assets/farm/crops/*-field-v2.png` | [Farm source record](../brand/sprites/farm-v2/sources.json): `image_gen`, ten-crop sheet prompt and 32×32 runtime frames. |
 | Meadow and scene background | `public/assets/farm/orbitFarm-meadow-v2.png` | [Farm source record](../brand/sprites/farm-v2/sources.json): `image_gen`, scenery prompt and 400×280 runtime dimensions. Seasonal terrain and vegetation are code-rendered derivatives of the scene. |
 | Astronaut dog | `public/assets/farm/orbitFarm-dog-astronaut-v1.png` | [Farm source record](../brand/sprites/farm-v2/sources.json): `image_gen`, twelve-frame prompt and 48×34 runtime frames. |
+| NASA team-page dog avatar | `brand/submission/orbitFarm-team-avatar-v1.png` | [Avatar provenance](../brand/submission/provenance.json): built-in `image_gen`, dog identity reference, exact prompt, output dimensions/checksum and embedded **AI-generated** mark. |
 | Fictional Orbit-1 satellite | `public/assets/orbit-1/orbit-1-scanner-v1.png` | [`source.json`](../brand/sprites/orbit-1-v1/source.json) records `image_gen`, date, prompt and project emblem; [component notes](../brand/sprites/orbit-1-v1/README.md) describe code animation. |
 
 The exact image-model version was not recorded. Farm-v2 metadata contains prompts

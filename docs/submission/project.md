@@ -15,7 +15,7 @@ orbitFarm helps farmers turn Earth observations into understandable crop and rot
 ## Public links
 
 - Final project: https://orbitfarm.vercel.app
-- Source code: https://github.com/PanilDanov/Agriculture-problem
+- Complete source branch: https://github.com/PanilDanov/Agriculture-problem/tree/codex/submission-ready
 - Demo: supplied separately by the team when ready.
 
 ## Project details
@@ -43,6 +43,8 @@ Provincial training keeps harvest years in temporal partitions and evaluates aga
 The application uses React, TypeScript and Vite; Python and FastAPI; and separately pinned scikit-learn, CatBoost and XGBoost dependencies. The complete stack runs on Vercel Container Runtime, with reproducible model snapshots, checksums and automated frontend, API and ML checks. The visual farm makes planning approachable while evidence views explain why a result is available or incomplete. We aim to support informed crop planning and farmer discussion; increased farm yield, reduced consumption and field-level agronomic performance have not been demonstrated.
 
 Source code, methodology, validation reports, attribution, generated-art provenance and reuse conditions are available in the public repository. The project uses NASA resources without implying NASA endorsement.
+
+Full source code, model artifacts and reproducible setup: https://github.com/PanilDanov/Agriculture-problem/tree/codex/submission-ready
 
 ## Super Intelligence disclosure
 

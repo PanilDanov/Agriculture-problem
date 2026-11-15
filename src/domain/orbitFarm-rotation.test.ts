@@ -177,6 +177,51 @@ describe('harvest persistence', () => {
     expect(storage.getItem(STORAGE_KEY)).toBe(saved);
   });
 
+  it.each([false, true])('links matching old selected-plan crops while preserving off-plan crops and activity (harvests present: %s)', includesHarvests => {
+    const storage = memoryStorage();
+    let original = createScenarioState('normal');
+    original = farmReducer(original, { type: 'complete_task', taskId: original.tasks[0].id });
+    original.layout.beds[0].name = 'My preserved bed';
+    original.selectedPlanId = 'current';
+    const { harvests: _harvests, ...oldSave } = original;
+    const saved = JSON.stringify(includesHarvests ? { ...oldSave, harvests: [] } : oldSave);
+    storage.setItem(STORAGE_KEY, saved);
+
+    const loaded = loadFarm(storage);
+    expect(loaded.error).toBeNull();
+    expect(loaded.state.layout).toEqual(original.layout);
+    expect(loaded.state.tasks).toEqual(original.tasks);
+    expect(loaded.state.journal).toEqual(original.journal);
+    expect(loaded.state.inputs).toEqual(original.inputs);
+    expect(loaded.state.analysis).toEqual(original.analysis);
+    expect(loaded.state.plots.map(({ rotation: _rotation, ...plot }) => plot)).toEqual(original.plots);
+    expect(loaded.state.plots[0].rotation).toMatchObject({ planId: 'current', seasonIndex: 0 });
+    expect(loaded.state.plots[1].rotation).toBeUndefined();
+    expect(getBedPlanProgress(loaded.state, 0)).toMatchObject({ status: 'growing', completedSeasons: 0 });
+    expect(getBedPlanProgress(loaded.state, 1)?.status).toBe('off-plan');
+    expect(storage.getItem(STORAGE_KEY)).toBe(saved);
+
+    const mature = { ...loaded.state, demoToday: getEstimatedHarvestDate(loaded.state.plots[0]) };
+    const harvested = farmReducer(mature, { type: 'harvest', plotId: mature.plots[0].id });
+    expect(getBedPlanProgress(harvested, 0)).toMatchObject({ completedSeasons: 1, seasonIndex: 1, nextCropId: 'wheat' });
+    expect(saveFarm(harvested, storage)).toBeNull();
+    expect(getBedPlanProgress(loadFarm(storage).state, 0)?.completedSeasons).toBe(1);
+  });
+
+  it('preserves existing rotation and calendar snapshots when reconciling a missing plan link', () => {
+    const storage = memoryStorage();
+    const state = firstPlanting(firstPlanting(), 1);
+    state.plots[0].estimatedHarvestOn = '2027-03-16';
+    delete state.plots[1].rotation;
+    expect(saveFarm(state, storage)).toBeNull();
+    const loaded = loadFarm(storage);
+    expect(loaded.error).toBeNull();
+    expect(loaded.state.plots[0]).toEqual(state.plots[0]);
+    expect(loaded.state.plots[1].rotation).toMatchObject({ planId: 'improve-soil', seasonIndex: 0 });
+    expect(getBedPlanProgress(loaded.state, 0)?.status).toBe('growing');
+    expect(getBedPlanProgress(loaded.state, 1)?.status).toBe('growing');
+  });
+
   it('rejects duplicate or impossible harvest records without overwriting stored data', () => {
     const storage = memoryStorage();
     const state = harvestFirst();

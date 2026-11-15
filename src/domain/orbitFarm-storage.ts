@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import type { FarmState, ProviderSettings, ProviderSettingsLoadResult, ScenarioId, StorageLike } from './orbitFarm-types';
 import { analysisResultSchema, cropIdSchema, dateSchema, farmInputsSchema, isoSchema, polygonSchema, scenarioIdSchema, validateBoundary } from './orbitFarm-validation';
-import { createScenarioState } from './orbitFarm-model';
+import { createScenarioState, farmReducer } from './orbitFarm-model';
 import { createDemoLayout, farmLayoutSchema, MAX_LAYOUT_BEDS } from './orbitFarm-layout';
 
 export const STORAGE_KEY = 'orbitFarm.farm.v1';
@@ -133,7 +133,13 @@ export function loadFarm(storage: StorageLike, initialScenario: ScenarioId = 'dr
     if (legacy && !legacy.success) return { state: createScenarioState('dry-week'), error: 'The saved farm could not be read. A demo farm is shown; your saved data has not been overwritten.' };
     const parsed = farmStateSchema.safeParse(legacy?.success ? migrateLegacyFarm(legacy.data) : value);
     if (!parsed.success) return { state: createScenarioState('dry-week'), error: 'The saved farm could not be read. A demo farm is shown; your saved data has not been overwritten.' };
-    return { state: { ...parsed.data, pendingRequestId: null } as FarmState, error: null };
+    const restored = { ...parsed.data, pendingRequestId: null } as FarmState;
+    if (!restored.selectedPlanId || !restored.plots.some(plot => !plot.rotation)) return { state: restored, error: null };
+    // Older selected plans did not link existing crops. They may already have
+    // been resaved with an empty harvest history by an earlier release.
+    const aligned = farmReducer(restored, { type: 'select_plan', planId: restored.selectedPlanId });
+    return { state: { ...restored, plots: restored.plots.map(plot => plot.rotation
+      ? plot : aligned.plots.find(candidate => candidate.id === plot.id) ?? plot) }, error: null };
   } catch {
     return { state: createScenarioState('dry-week'), error: 'Local storage is unavailable or the saved farm is damaged. Changes may not persist on this device.' };
   }

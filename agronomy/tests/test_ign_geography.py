@@ -63,13 +63,21 @@ class OfficialIGNReleaseTests(unittest.TestCase):
     def test_a_later_download_cannot_be_labelled_with_the_frozen_access_date(self):
         spec = importlib.util.spec_from_file_location("orbitfarm_ign_release", ROOT / "yield_prediction/prepare_ign_geography.py")
         module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-        with patch.object(module, "datetime") as clock, patch.object(module.subprocess, "run") as download:
-            clock.now.return_value = datetime(2027, 1, 1, tzinfo=timezone.utc)
-            with patch("sys.argv", ["prepare_ign_geography.py", "--download"]):
-                with self.assertRaisesRegex(ValueError, "later retrieval requires a newly reviewed release"):
-                    module.main()
-            download.assert_not_called()
+        real_import = __import__
+
+        def without_optional_geography(name, *args, **kwargs):
+            if name == "pyproj" or name.startswith("pyproj."):
+                raise ModuleNotFoundError("Optional source-reproduction dependency pyproj is absent")
+            return real_import(name, *args, **kwargs)
+
+        with patch("builtins.__import__", side_effect=without_optional_geography):
+            spec.loader.exec_module(module)
+            with patch.object(module, "datetime") as clock, patch.object(module.subprocess, "run") as download:
+                clock.now.return_value = datetime(2027, 1, 1, tzinfo=timezone.utc)
+                with patch("sys.argv", ["prepare_ign_geography.py", "--download"]):
+                    with self.assertRaisesRegex(ValueError, "later retrieval requires a newly reviewed release"):
+                        module.main()
+                download.assert_not_called()
 
     def test_real_zaragoza_and_lugo_smoke_fields_match_their_actual_units(self):
         province_field = json.loads((ROOT / "deployment/smoke-province-field.json").read_text())["boundary"]

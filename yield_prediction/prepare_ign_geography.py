@@ -15,12 +15,10 @@ import subprocess
 import urllib.parse
 import xml.etree.ElementTree as ET
 
-from pyproj import Geod, Transformer
 import shapely
 from shapely.geometry import MultiPolygon, Point, Polygon, mapping, shape
 from shapely.geometry.polygon import orient
 from shapely.validation import explain_validity
-import pyproj
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -50,8 +48,6 @@ POINT_PROVENANCE = {
     "current_check": "Containment in independently sourced IGN geometry; no point recomputation"}
 NS = {"au": "http://inspire.ec.europa.eu/schemas/au/4.0", "gml": "http://www.opengis.net/gml/3.2",
       "gn": "http://inspire.ec.europa.eu/schemas/gn/4.0"}
-GEOD = Geod(ellps="WGS84")
-TRANSFORMER = Transformer.from_crs("EPSG:4258", "EPSG:4326", always_xy=True)
 
 
 def encode(value):
@@ -81,7 +77,7 @@ def semantic_hash(features):
     return digest.hexdigest()
 
 
-def ring(element):
+def ring(element, transformer):
     if element is None:
         raise ValueError("Missing GML exterior ring")
     positions = element.findall(".//gml:posList", NS)
@@ -92,18 +88,18 @@ def ring(element):
         raise ValueError("Invalid two-dimensional GML ring")
     # EPSG:4258 GML declares latitude,longitude axis order. always_xy applies
     # only after that declared input order is decoded explicitly.
-    coordinates = [TRANSFORMER.transform(values[i + 1], values[i]) for i in range(0, len(values), 2)]
+    coordinates = [transformer.transform(values[i + 1], values[i]) for i in range(0, len(values), 2)]
     if coordinates[0] != coordinates[-1]:
         raise ValueError("Unclosed GML ring")
     return coordinates
 
 
-def geometry(feature):
+def geometry(feature, transformer):
     geometries = feature.findall("au:geometry/gml:MultiSurface", NS)
     if len(geometries) != 1 or geometries[0].get("srsName") != "http://www.opengis.net/def/crs/EPSG/0/4258":
         raise ValueError("Unexpected IGN geometry or CRS; review source before transforming")
-    polygons = [Polygon(ring(item.find("gml:exterior", NS)),
-                        [ring(hole) for hole in item.findall("gml:interior", NS)])
+    polygons = [Polygon(ring(item.find("gml:exterior", NS), transformer),
+                        [ring(hole, transformer) for hole in item.findall("gml:interior", NS)])
                 for item in geometries[0].findall("gml:surfaceMember/gml:Polygon", NS)]
     result = polygons[0] if len(polygons) == 1 else MultiPolygon(polygons)
     if result.is_empty or not result.is_valid:
@@ -111,9 +107,9 @@ def geometry(feature):
     return result
 
 
-def area(geometry):
+def area(geometry, geod):
     polygons = geometry.geoms if geometry.geom_type == "MultiPolygon" else [geometry]
-    return sum(abs(GEOD.geometry_area_perimeter(orient(item, sign=1.0))[0]) for item in polygons)
+    return sum(abs(geod.geometry_area_perimeter(orient(item, sign=1.0))[0]) for item in polygons)
 
 
 def vertices(value):
@@ -128,13 +124,13 @@ def rounded(value):
     return round(value, 6)
 
 
-def compact(original):
+def compact(original, geod):
     result = original.simplify(0.0001, preserve_topology=True)
     raw = mapping(result)
     result = shape({"type": raw["type"], "coordinates": rounded(raw["coordinates"])})
     if result.is_empty or not result.is_valid:
         raise ValueError("Simplified geometry is invalid; no silent geometry repair is permitted")
-    original_area, result_area = area(original), area(result)
+    original_area, result_area = area(original, geod), area(result, geod)
     relative_change = abs(result_area - original_area) / original_area
     if relative_change > 0.001:
         raise ValueError("Boundary simplification changed geodesic area by more than 0.1%")
@@ -146,6 +142,12 @@ def compact(original):
 
 
 def prepare(input_path):
+    # The CLI date guard and metadata-only import do not require this optional
+    # source-reproduction dependency. Initialize CRS/area tools only for work.
+    import pyproj
+
+    geod = pyproj.Geod(ellps="WGS84")
+    transformer = pyproj.Transformer.from_crs("EPSG:4258", "EPSG:4326", always_xy=True)
     body = input_path.read_bytes()
     if len(body) > 80_000_000:
         raise ValueError("Unexpectedly large source response")
@@ -179,8 +181,8 @@ def prepare(input_path):
                              "reason": "Not one of the 50 provinces in the MAPA/NASA model scope"})
             continue
         source = reference[code]
-        original = geometry(feature)
-        result, audit = compact(original)
+        original = geometry(feature, transformer)
+        result, audit = compact(original, geod)
         point = Point(source["longitude"], source["latitude"])
         if not original.covers(point) or not result.covers(point):
             raise ValueError("Retained NASA sampling point is outside IGN province " + code)

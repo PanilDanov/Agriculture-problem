@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { pathToFileURL } from 'node:url';
 
 const staleEtag = '"c6e39d374b170c1e45c5bd4ec8616573"';
 const futureModifiedSince = 'Fri, 01 Jan 2100 00:00:00 GMT';
@@ -31,11 +32,7 @@ function collectAssets(html, pageUrl, assets) {
   for (const href of stylesheets) assets.set(new URL(href, pageUrl).href, 'stylesheet');
 }
 
-async function main() {
-  assert.equal(process.argv.length, 3, 'Usage: node scripts/orbitFarm-smoke-release.mjs <base-url>');
-  const baseUrl = new URL(process.argv[2]);
-  assert(['http:', 'https:'].includes(baseUrl.protocol), 'The base URL must use HTTP or HTTPS.');
-
+async function verifyRelease(baseUrl) {
   const healthUrl = new URL('/health', baseUrl);
   const healthResponse = await request(healthUrl);
   assert.equal(contentType(healthResponse), 'application/json', `${healthUrl} must return JSON.`);
@@ -71,9 +68,28 @@ async function main() {
   process.stdout.write(`Release smoke check passed for ${baseUrl.origin} (${assets.size} assets).\n`);
 }
 
-try {
-  await main();
-} catch (error) {
-  process.stderr.write(`Release smoke check failed: ${error instanceof Error ? error.message : String(error)}\n`);
-  process.exitCode = 1;
+export async function verifyReleaseWithRetry(baseUrl, { attempts = 6, delayMs = 5_000 } = {}) {
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    try {
+      await verifyRelease(baseUrl);
+      return;
+    } catch (error) {
+      if (attempt === attempts) throw error;
+      const message = error instanceof Error ? error.message : String(error);
+      process.stderr.write(`Release smoke attempt ${attempt}/${attempts} failed: ${message} Retrying in ${delayMs / 1_000}s.\n`);
+      await new Promise(resolve => setTimeout(resolve, delayMs));
+    }
+  }
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  try {
+    assert.equal(process.argv.length, 3, 'Usage: node scripts/orbitFarm-smoke-release.mjs <base-url>');
+    const baseUrl = new URL(process.argv[2]);
+    assert(['http:', 'https:'].includes(baseUrl.protocol), 'The base URL must use HTTP or HTTPS.');
+    await verifyReleaseWithRetry(baseUrl);
+  } catch (error) {
+    process.stderr.write(`Release smoke check failed: ${error instanceof Error ? error.message : String(error)}\n`);
+    process.exitCode = 1;
+  }
 }

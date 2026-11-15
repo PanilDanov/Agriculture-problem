@@ -1,28 +1,47 @@
 import type { CareTask, FarmAction, FarmState, JournalEntry, Plot, ScenarioId, AnalysisRequest } from './orbitFarm-types';
-import { CROP_CATALOG, DEFAULT_INPUTS, DEMO_BOUNDARY, DEMO_TODAY, makeMockAnalysis } from './orbitFarm-fixtures';
+import { CROP_CATALOG, CROP_PROFILES } from './orbitFarm-crop-catalog';
+import { DEFAULT_INPUTS, DEMO_BOUNDARY, DEMO_TODAY, makeMockAnalysis } from './orbitFarm-fixtures';
 import { dateSchema, validateAnalysisRequest, validateBoundary, validateFarmInputs } from './orbitFarm-validation';
 import { createDefaultLayout, farmLayoutSchema } from './orbitFarm-layout';
 
 // Calendar dates are opaque YYYY-MM-DD values; offsets never move a farm day.
+const DAY_MS = 86_400_000;
+const FIRST_FARM_DAY = Date.parse('0000-01-01T00:00:00Z');
+const LAST_FARM_DAY = Date.parse('9999-12-31T00:00:00Z');
+
 export function getFarmDate(value: string): string {
   return dateSchema.parse(value.slice(0, 10));
 }
 
-export function addDemoDay(value: string): string {
-  const next = new Date(`${getFarmDate(value)}T00:00:00Z`);
-  next.setUTCDate(next.getUTCDate() + 1);
-  return next.toISOString().slice(0, 10);
+function farmDateMilliseconds(value: string): number {
+  return Date.parse(`${getFarmDate(value)}T00:00:00Z`);
 }
 
-export function getGrowthStage(plot: Plot, now: string): string {
-  const today = getFarmDate(now);
-  const days = Math.floor((Date.parse(`${today}T12:00Z`) - Date.parse(`${plot.plantedOn}T12:00Z`)) / 86400000);
-  const duration = CROP_CATALOG.find(c => c.id === plot.cropId)?.daysToHarvest ?? 120;
+export function daysBetweenFarmDates(from: string, to: string): number {
+  return (farmDateMilliseconds(to) - farmDateMilliseconds(from)) / DAY_MS;
+}
+
+export function addFarmDays(value: string, days: number): string {
+  const target = farmDateMilliseconds(value) + days * DAY_MS;
+  return new Date(Math.min(LAST_FARM_DAY, Math.max(FIRST_FARM_DAY, target))).toISOString().slice(0, 10);
+}
+
+export function addDemoDay(value: string): string {
+  return addFarmDays(value, 1);
+}
+
+export function getEstimatedHarvestDate(plot: Plot): string {
+  return addFarmDays(plot.plantedOn, CROP_PROFILES[plot.cropId].daysToHarvest);
+}
+
+export type GrowthStage = 'Planned' | 'Seedling' | 'Growing' | 'Ready to harvest';
+
+export function getGrowthStage(plot: Plot, date: string): GrowthStage {
+  const days = daysBetweenFarmDates(plot.plantedOn, date);
   if (days < 0) return 'Planned';
-  if (days < 15) return 'Seedling';
-  if (days < duration * .6) return 'Growing';
-  if (days < duration) return 'Maturing';
-  return 'Ready to harvest';
+  const { daysToGrowing, daysToHarvest } = CROP_PROFILES[plot.cropId];
+  if (days < daysToGrowing) return 'Seedling';
+  return days < daysToHarvest ? 'Growing' : 'Ready to harvest';
 }
 
 export function buildAnalysisRequest(state: FarmState, requestId: string): AnalysisRequest {
@@ -72,6 +91,17 @@ function logAction(state: FarmState, taskId: string, action: JournalEntry['actio
   return { ...state, tasks: state.tasks.map(t => t.id === taskId ? { ...t, status, snoozedUntil: nextUntil } : t), journal: [...state.journal, entry] };
 }
 
+export function getLastWatering(state: FarmState, plotId: string): string | undefined {
+  return state.journal.filter(entry => entry.plotId === plotId && entry.action === 'watered' && !entry.undone).at(-1)?.createdOn;
+}
+
+export function canUndoJournalEntry(state: FarmState, entry: JournalEntry): boolean {
+  if (entry.undone) return false;
+  if (entry.taskId === null) return state.plots.some(plot => plot.id === entry.plotId);
+  return state.tasks.some(task => task.id === entry.taskId)
+    && state.journal.filter(item => item.taskId === entry.taskId && !item.undone).at(-1)?.id === entry.id;
+}
+
 export function farmReducer(state: FarmState, action: FarmAction): FarmState {
   switch (action.type) {
     case 'set_name': return { ...state, name: action.name.trim().slice(0, 70) || 'My farm' };
@@ -111,14 +141,25 @@ export function farmReducer(state: FarmState, action: FarmAction): FarmState {
     }
     case 'remove_plot': return { ...state, plots: state.plots.filter(p => p.id !== action.plotId), tasks: state.tasks.filter(t => t.plotId !== action.plotId) };
     case 'complete_task': return logAction(state, action.taskId, state.tasks.find(t => t.id === action.taskId)?.kind === 'water' ? 'watered' : 'done');
+    case 'record_watering': {
+      if (!state.plots.some(plot => plot.id === action.plotId && plot.plantedOn <= state.demoToday)
+        || getLastWatering(state, action.plotId) === state.demoToday) return state;
+      const reminder = getDueTasks(state).find(task => task.plotId === action.plotId && task.kind === 'water');
+      if (reminder) return logAction(state, reminder.id, 'watered');
+      const entry: JournalEntry = {
+        id: `entry-${state.journal.length + 1}`, taskId: null, plotId: action.plotId,
+        action: 'watered', createdOn: state.demoToday, undone: false,
+      };
+      return { ...state, journal: [...state.journal, entry] };
+    }
     case 'skip_task': return logAction(state, action.taskId, 'skipped');
     case 'snooze_task': return logAction(state, action.taskId, 'snoozed');
     case 'undo_action': {
       const entry = state.journal.find(e => e.id === action.entryId);
-      if (!entry || entry.undone || !state.tasks.some(t => t.id === entry.taskId)) return state;
-      const latest = state.journal.filter(e => e.taskId === entry.taskId && !e.undone).at(-1);
-      if (latest?.id !== entry.id) return state;
-      return { ...state, tasks: state.tasks.map(t => t.id === entry.taskId ? { ...t, status: entry.previousStatus ?? 'open', snoozedUntil: entry.previousSnoozedUntil ?? null } : t), journal: state.journal.map(e => e.id === entry.id ? { ...e, undone: true } : e) };
+      if (!entry || !canUndoJournalEntry(state, entry)) return state;
+      const tasks = entry.taskId === null ? state.tasks : state.tasks.map(task =>
+        task.id === entry.taskId ? { ...task, status: entry.previousStatus ?? 'open', snoozedUntil: entry.previousSnoozedUntil ?? null } : task);
+      return { ...state, tasks, journal: state.journal.map(e => e.id === entry.id ? { ...e, undone: true } : e) };
     }
     case 'advance_day': return { ...state, demoToday: addDemoDay(state.demoToday) };
     default: return state;

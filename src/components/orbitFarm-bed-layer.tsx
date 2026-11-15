@@ -1,7 +1,10 @@
-import { useId, useMemo, type ComponentType, type ReactNode } from 'react';
+import { useId, useMemo, type ReactNode } from 'react';
 import type { CropId, LayoutPoint } from '../domain/orbitFarm-types';
 import { CROP_CATALOG } from '../domain/orbitFarm-crop-catalog';
+import type { GrowthStage } from '../domain/orbitFarm-model';
 import { planBedAnnotations } from './orbitFarm-bed-annotations';
+import { CropSprite } from './orbitFarm-crop-sprite';
+import { FARM_WORLD_VIEW_BOX } from './orbitFarm-world';
 import './orbitFarm-bed-layer.css';
 
 export interface FarmBedVisual {
@@ -9,8 +12,7 @@ export interface FarmBedVisual {
   name: string;
   points: LayoutPoint[];
   label: string;
-  cropId: CropId | null;
-  taskTitle: string | null;
+  crop: { id: CropId; stage: GrowthStage } | null;
 }
 
 export interface FarmBedLayerProps {
@@ -18,31 +20,24 @@ export interface FarmBedLayerProps {
   pixelsPerUnit: number;
   selectedSlotId: number | null;
   onSelectSlot: (slotId: number) => void;
-  CropSpriteComponent: ComponentType<{ cropId: CropId; size?: number }>;
   background?: ReactNode;
 }
 
 function description(bed: FarmBedVisual): string {
-  return `${bed.name} · ${bed.cropId ? (CROP_CATALOG.find(crop => crop.id === bed.cropId)?.name ?? bed.cropId) : 'Empty'}${bed.taskTitle ? ` · ${bed.taskTitle}` : ''}`;
-}
-
-function Drop({ x = 0, y = 0, size = 14 }: { x?: number; y?: number; size?: number }) {
-  return <svg x={x} y={y} width={size} height={size} viewBox="0 0 16 20" aria-hidden="true">
-    <path d="M6 0H10V4H12V7H14V11H16V16H13V19H3V16H0V11H2V7H4V4H6Z" fill="#203D32" />
-    <path d="M6 5H10V9H12V12H13V15H10V17H5V15H3V12H5V9H6Z" fill="#BDE4F0" />
-  </svg>;
+  if (!bed.crop) return `${bed.name} · Empty`;
+  const crop = CROP_CATALOG.find(item => item.id === bed.crop?.id)?.name ?? bed.crop.id;
+  return `${bed.name} · ${crop} · ${bed.crop.stage}`;
 }
 
 /** Farm geometry stays fixed while small-bed labels can use clear surrounding ground. */
-export function FarmBedLayer({ beds, pixelsPerUnit, selectedSlotId, onSelectSlot, CropSpriteComponent, background }: FarmBedLayerProps) {
+export function FarmBedLayer({ beds, pixelsPerUnit, selectedSlotId, onSelectSlot, background }: FarmBedLayerProps) {
   const id = useId().replaceAll(':', '');
   const scale = Number.isFinite(pixelsPerUnit) && pixelsPerUnit > 0 ? pixelsPerUnit : 1;
   const plan = useMemo(() => planBedAnnotations(beds.map(bed => ({
     slotId: bed.slotId,
     points: bed.points,
     label: bed.label,
-    hasTask: Boolean(bed.taskTitle),
-    empty: bed.cropId === null,
+    empty: !bed.crop || bed.crop.stage === 'Planned',
   })), pixelsPerUnit), [beds, pixelsPerUnit]);
   const plannedBeds = new Map(plan.beds.map(bed => [bed.slotId, bed]));
   // Keep an identifier available even if a future planner cannot place a callout.
@@ -51,27 +46,33 @@ export function FarmBedLayer({ beds, pixelsPerUnit, selectedSlotId, onSelectSlot
   return <>
     <div className="of-farm-canvas">
       {background}
-      <svg className="of-bed-layer" viewBox="0 0 800 520" aria-label="Your planting beds">
+      <svg className="of-bed-layer" viewBox={FARM_WORLD_VIEW_BOX} aria-label="Your planting beds">
         <defs>
-          <pattern id={`${id}-soil`} width="18" height="28" patternUnits="userSpaceOnUse">
-            <rect width="18" height="28" fill="#A96545" />
-            <path d="M0 3H18V9H0Z" fill="#CB8A5E" />
-            <path d="M0 22H18V27H0Z" fill="#8E553E" />
+          <pattern id={`${id}-soil`} width="91" height="30" patternUnits="userSpaceOnUse" shapeRendering="crispEdges">
+            <rect width="91" height="30" fill="#AA704D" />
+            <path d="M0 3h22v2h17v2h38V5h14v10H64v-2H37v1H12v-2H0Z" fill="#B98057" />
+            <path d="M0 22h21v-2h22v2h24v-2h15v2h9v4H0Z" fill="#8E583C" />
+            <path d="M6 7h4v2H6zm23-2h5v2h-5zm25 7h3v2h-3zm29-3h4v2h-4zM17 17h3v2h-3zm54-1h4v2h-4zm-26 12h4v2h-4z" fill="#D8A06A" />
+            <path d="M8 15h5v2H8zm28 4h4v2h-4zm28-11h5v2h-5zm13 18h5v2h-5z" fill="#9A6243" />
           </pattern>
           {beds.map(bed => <clipPath key={bed.slotId} id={`${id}-clip-${bed.slotId}`}>
             <polygon points={bed.points.map(point => `${point.x},${point.y}`).join(' ')} />
           </clipPath>)}
         </defs>
+        <g aria-hidden="true" pointerEvents="none" fill="#526448" opacity=".3" transform="translate(2 5)">
+          {beds.map(bed => <polygon key={bed.slotId} points={bed.points.map(point => `${point.x},${point.y}`).join(' ')} />)}
+        </g>
         {beds.map(bed => {
           const content = plannedBeds.get(bed.slotId);
           const annotation = content?.annotation;
           const selected = bed.slotId === selectedSlotId;
-          const cropId = bed.cropId;
+          const cropId = bed.crop?.id;
+          const stage = bed.crop?.stage;
           const points = bed.points.map(point => `${point.x},${point.y}`).join(' ');
-          const mode = annotation ? content?.external ? 'callout' : annotation.mode === 'compact' ? 'compact' : 'id' : 'legend';
+          const mode = annotation ? (content?.external ? 'callout' : 'id') : 'legend';
           return <g
             key={bed.slotId}
-            className={`of-bed-shape${bed.taskTitle ? ' of-bed-needs-care' : ''}${selected ? ' of-bed-shape-selected' : ''}`}
+            className={`of-bed-shape${selected ? ' of-bed-shape-selected' : ''}`}
             role="button"
             tabIndex={0}
             aria-label={description(bed)}
@@ -82,13 +83,14 @@ export function FarmBedLayer({ beds, pixelsPerUnit, selectedSlotId, onSelectSlot
             onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onSelectSlot(bed.slotId); } }}
           >
             <title>{description(bed)}</title>
-            <polygon className="of-bed-ground" points={points} fill={`url(#${id}-soil)`} stroke="#203D32" strokeWidth="5" strokeLinejoin="round" />
+            <polygon className="of-bed-ground" points={points} fill={`url(#${id}-soil)`} stroke="#70472F" strokeWidth="4" strokeLinejoin="round" />
             <g clipPath={`url(#${id}-clip-${bed.slotId})`} pointerEvents="none" aria-hidden="true">
-              {cropId && content?.crops.map((crop, index) => <g key={index} data-testid={`bed-crop-${bed.slotId}-${index}`} data-bed-id={bed.slotId} transform={`translate(${crop.x} ${crop.y})`}>
-                <CropSpriteComponent cropId={cropId} size={crop.width} />
+              <polygon points={points} fill="none" stroke="#C2915C" strokeWidth="4" strokeLinejoin="round" opacity=".65" />
+              {cropId && stage && stage !== 'Planned' && content?.crops.map((crop, index) => <g className="of-bed-crop" key={index} data-testid={`bed-crop-${bed.slotId}-${index}`} data-bed-id={bed.slotId} transform={`translate(${crop.x} ${crop.y})`}>
+                <CropSprite cropId={cropId} stage={stage} size={crop.width} />
               </g>)}
             </g>
-            <polygon className="of-bed-selection" points={points} fill="none" stroke="#FFF8E8" strokeWidth="3" strokeLinejoin="round" pointerEvents="none" />
+            <polygon className="of-bed-selection" points={points} fill="none" stroke="#FFF4CE" strokeWidth="2.5" strokeLinejoin="round" pointerEvents="none" />
           </g>;
         })}
         {beds.map(bed => {
@@ -97,6 +99,8 @@ export function FarmBedLayer({ beds, pixelsPerUnit, selectedSlotId, onSelectSlot
           const badge = content.annotation;
           const external = content.external;
           const selected = bed.slotId === selectedSlotId;
+          const crop = badge.showCrop ? bed.crop : null;
+          const textInset = 26 / scale + badge.fontSize * .55;
           return <g key={bed.slotId} className="of-bed-annotation-layer">
             {content.leader && <line
               className="of-bed-callout-leader"
@@ -118,24 +122,26 @@ export function FarmBedLayer({ beds, pixelsPerUnit, selectedSlotId, onSelectSlot
               onClick={external ? () => onSelectSlot(bed.slotId) : undefined}
               onKeyDown={external ? event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onSelectSlot(bed.slotId); } } : undefined}
             >
+              <rect className="of-bed-stake" x={badge.x + (badge.width - 5 / scale) / 2}
+                y={badge.y + badge.height - 1 / scale} width={5 / scale} height={3 / scale} />
               <rect
+                className="of-bed-badge-face"
                 data-testid={`bed-annotation-box-${bed.slotId}`}
                 x={badge.x} y={badge.y} width={badge.width} height={badge.height}
                 rx={2 / scale}
-                fill={bed.taskTitle ? '#F4C95D' : '#FFF8E8'}
-                stroke={selected && external ? '#286B45' : '#203D32'}
+                stroke={selected && external ? '#286B45' : '#6A502F'}
                 strokeWidth={selected && external ? 2 : 1.2}
                 vectorEffect="non-scaling-stroke"
               />
+              {crop && crop.stage !== 'Planned' && <CropSprite cropId={crop.id} stage={crop.stage} x={badge.x + 3 / scale} y={badge.y + 3 / scale} size={22 / scale} />}
               <text
                 className="of-bed-badge-text"
-                x={badge.showTask ? badge.x + badge.fontSize * .55 : badge.x + badge.width / 2}
+                x={crop ? badge.x + textInset : badge.x + badge.width / 2}
                 y={badge.y + badge.height / 2}
-                textAnchor={badge.showTask ? 'start' : 'middle'}
+                textAnchor={crop ? 'start' : 'middle'}
                 dominantBaseline="central"
                 style={{ fontSize: badge.fontSize }}
               >{bed.label}</text>
-              {badge.showTask && <Drop x={badge.x + badge.width - badge.fontSize * 1.7} y={badge.y + (badge.height - badge.fontSize * 1.15) / 2} size={badge.fontSize * 1.15} />}
             </g>
           </g>;
         })}
@@ -147,13 +153,15 @@ export function FarmBedLayer({ beds, pixelsPerUnit, selectedSlotId, onSelectSlot
         {legend.map(bed => <button
           key={bed.slotId}
           type="button"
-          className={bed.taskTitle ? 'of-bed-legend-needs-care' : undefined}
           data-testid={`bed-legend-${bed.slotId}`}
           aria-label={`Select ${description(bed)}`}
           aria-pressed={bed.slotId === selectedSlotId}
           title={description(bed)}
           onClick={() => onSelectSlot(bed.slotId)}
-        ><span>{bed.label}</span>{bed.taskTitle && <Drop size={14} />}</button>)}
+        >
+          {bed.crop && bed.crop.stage !== 'Planned' && <CropSprite cropId={bed.crop.id} stage={bed.crop.stage} size={24} />}
+          <span>{bed.label}</span>
+        </button>)}
       </div>
     </div>}
   </>;

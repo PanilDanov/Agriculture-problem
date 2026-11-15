@@ -119,7 +119,7 @@ async function inspectScene(page: Page): Promise<SceneCheck> {
       if (!polygon) { issues.push(`${id}: missing bed polygon`); continue; }
       const mode = bed.getAttribute('data-annotation-mode');
       modes[id] = mode;
-      if (!['compact', 'id', 'callout', 'legend'].includes(mode ?? '')) issues.push(`${id}: every bed needs a visible letter representation`);
+      if (!['id', 'callout', 'legend'].includes(mode ?? '')) issues.push(`${id}: every bed needs a visible letter representation`);
       const expectedLetter = String.fromCharCode(65 + Number(id));
       const annotations = scene.querySelectorAll<SVGGElement>(`[data-testid="bed-annotation-${id}"]`);
       const legend = scene.querySelector<HTMLElement>(`[data-testid="bed-legend-${id}"]`);
@@ -177,20 +177,19 @@ async function expectCleanAnnotations(page: Page) {
   expect(scene.badges, 'Readable beds must retain their identifiers.').toBeGreaterThan(0);
   expect(scene.crops, 'Collision avoidance must retain visible crops.').toBeGreaterThan(0);
   await expect(page.getByTestId('plot-slot-0').locator('[data-testid^="bed-crop-0-"]')).not.toHaveCount(0);
-  await expect(page.getByTestId('plot-slot-0')).toHaveAccessibleName(/Plot A.*Wheat.*Check soil moisture/);
+  await expect(page.getByTestId('plot-slot-0')).toHaveAccessibleName(/Plot A.*Wheat.*Seedling/);
   const widths = await page.evaluate(() => ({ viewport: innerWidth, content: Math.max(document.body.scrollWidth, document.documentElement.scrollWidth) }));
   expect(widths.content).toBeLessThanOrEqual(widths.viewport + 1);
 }
 
-test('every bed keeps a letter while callouts and due markers avoid bed contents', async ({ page }, testInfo) => {
+test('every bed keeps a letter while callouts stay clear of crops', async ({ page }, testInfo) => {
   await createDifficultBeds(page);
   await expectCleanAnnotations(page);
   const wide = await inspectScene(page);
   await page.setViewportSize({ width: 320, height: 800 });
   await expectCleanAnnotations(page);
   const narrow = await inspectScene(page);
-  expect(Object.values(narrow.modes).filter(mode => mode === 'compact').length)
-    .toBeLessThanOrEqual(Object.values(wide.modes).filter(mode => mode === 'compact').length);
+  expect(narrow.callouts + narrow.legends).toBeGreaterThanOrEqual(wide.callouts + wide.legends);
   await page.setViewportSize({ width: 1440, height: 1000 });
   await expectCleanAnnotations(page);
   await page.getByTestId('farm-scene').screenshot({ path: testInfo.outputPath('orbitFarm-bed-annotations-desktop.png') });

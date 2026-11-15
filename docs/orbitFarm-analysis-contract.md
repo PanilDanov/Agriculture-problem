@@ -1,6 +1,6 @@
 # orbitFarm · Analysis request proposal v1
 
-Status: proposed frontend/backend agreement, based on the team's input table and ranking flow. No API or scoring engine is implemented by this document. The endpoint is `POST /v1/analysis`. All names, payloads, errors, and interface copy use English.
+The frontend uses `POST /v1/analysis` in API mode. The Agriculture-problem backend implements a two-season comparison using field evidence. The four-factor crop suitability score described below remains a proposal. All names, payloads, errors, and interface copy use English.
 
 ## Responsibility boundary
 
@@ -69,6 +69,8 @@ The initial weighted score ranks individual crop candidates. Rotation comparison
 ## Minimum backend response
 
 Keep the existing response envelope: `schemaVersion`, `analysisId`, `requestId`, `farmId`, `boundaryVersion`, `generatedAt`, `dataMode`, `signals`, `cropOptions`, `rotationPlans`, and `limitations`. Include computed `areaHa` and `assumptions`. Each crop option may include `recommendedPlantingDate`: a valid `YYYY-MM-DD` calendar date chosen by the backend, or `null` when no recommendation is available. Omission remains accepted for existing response compatibility. The broader backend proposal also calls for `modelVersion` and `missingFields`.
+
+A rotation plan may include `planStatus` (`supported` or `provisional`), a nullable historical `waterScreenMm`, and a two-element `seasons` array. Each season includes its `cropId`, nullable `recommendedPlantingDate` and `calendarHarvestDate`, and nullable calendar source and scope. The crop ID must match the slot in `sequence`. A dated second season follows the first calendar harvest. The UI displays provisional status and unavailable dates when the backend reports them.
 
 Each crop option includes its catalog ID, English name, evaluation status (`evaluated`, `excluded`, or `insufficient_data`), nullable `score`, nullable `scoreStatus` (`complete` or `insufficient_data`; null for an excluded candidate), nullable component scores, `knownWeight`, and English reasons referencing evidence. Excluded candidates remain separate from the ranked list.
 

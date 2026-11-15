@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { planBedContent, rectInsidePolygon, rectanglesOverlap, type BedContentOptions, type ContentRectangle } from './orbitFarm-bed-content';
+import { measureBedBadge, planBedContent, rectInsidePolygon, rectanglesOverlap, type BedContentOptions, type ContentRectangle } from './orbitFarm-bed-content';
 import type { LayoutPoint } from '../domain/orbitFarm-types';
 
 const polygon = (...coordinates: [number, number][]): LayoutPoint[] => coordinates.map(([x, y]) => ({ x, y }));
 const rectangle = (x: number, y: number, width: number, height: number) => polygon([x, y], [x + width, y], [x + width, y + height], [x, y + height]);
-const options = (overrides: Partial<BedContentOptions> = {}): BedContentOptions => ({ pixelsPerUnit: 1, label: 'A', hasTask: false, empty: false, ...overrides });
+const options = (overrides: Partial<BedContentOptions> = {}): BedContentOptions => ({ pixelsPerUnit: 1, label: 'A', empty: false, ...overrides });
 
 // This separate ray-cast sampler verifies the visible footprint rather than repeating the planner's rectangle-fit algorithm.
 function strictlyInside(point: LayoutPoint, points: LayoutPoint[]) {
@@ -46,22 +46,15 @@ describe('responsive bed content planning', () => {
   it('uses a plain ID badge for an empty bed', () => {
     const shape = rectangle(100, 100, 130, 80);
     const result = planBedContent(shape, options({ empty: true }));
-    expect(result.annotation).toMatchObject({ mode: 'id', showTask: false });
+    expect(result.annotation).toMatchObject({ width: 24, height: 22, fontSize: 11 });
     expect(result.crops).toEqual([]);
-    expectFootprintInside(result.annotation!, shape);
-  });
-
-  it('keeps a task indicator in the shared badge', () => {
-    const shape = rectangle(100, 100, 130, 80);
-    const result = planBedContent(shape, options({ hasTask: true, empty: true }));
-    expect(result.annotation).toMatchObject({ mode: 'compact', showTask: true });
     expectFootprintInside(result.annotation!, shape);
   });
 
   it('keeps a small ID badge inside a narrow bed', () => {
     const shape = rectangle(100, 100, 36, 36);
     const result = planBedContent(shape, options({ empty: true }));
-    expect(result.annotation).toMatchObject({ mode: 'id', showTask: false });
+    expect(result.annotation).not.toBeNull();
     expectFootprintInside(result.annotation!, shape);
   });
 
@@ -75,17 +68,16 @@ describe('responsive bed content planning', () => {
     ['an L-shaped bed', polygon([100, 100], [250, 100], [250, 155], [165, 155], [165, 290], [100, 290])],
     ['a triangle', polygon([100, 100], [250, 100], [110, 180])],
     ['a skewed quadrilateral', polygon([100, 100], [160, 95], [172, 153], [98, 165])],
-  ])('keeps badges and complete crop sprites inside %s', (_name, shape) => {
-    const result = planBedContent(shape, options({ hasTask: true }));
-    expect(result.annotation).not.toBeNull();
+  ])('keeps complete crop sprites and any interior badge inside %s', (_name, shape) => {
+    const result = planBedContent(shape, options());
     expect(result.crops.length).toBeGreaterThan(0);
-    expectFootprintInside(result.annotation!, shape);
+    if (result.annotation) expectFootprintInside(result.annotation, shape);
     result.crops.forEach(crop => expectFootprintInside(crop, shape));
   });
 
-  it('reserves the badge area so crop sprites cannot appear beneath its ID or task icon', () => {
+  it('reserves the badge area so crop sprites cannot appear beneath an ID', () => {
     const shape = rectangle(100, 100, 200, 110);
-    const result = planBedContent(shape, options({ hasTask: true }));
+    const result = planBedContent(shape, options());
     const badge = result.annotation!;
     expect(result.crops.length).toBeGreaterThan(0);
     for (const crop of result.crops) {
@@ -94,12 +86,12 @@ describe('responsive bed content planning', () => {
     }
   });
 
-  it('keeps a normal rectangular bed visibly planted instead of rejecting both inset crop rows', () => {
+  it('uses large crop clusters in a normal rectangular bed', () => {
     const shape = rectangle(100, 100, 133, 81);
-    const result = planBedContent(shape, options({ hasTask: true }));
-    expect(result.annotation).toMatchObject({ showTask: true });
-    expect(result.crops.length).toBeGreaterThanOrEqual(3);
-    expect(result.crops.every(crop => crop.width === 34 && crop.height === 34)).toBe(true);
+    const result = planBedContent(shape, options());
+    expect(result.annotation).not.toBeNull();
+    expect(result.crops.length).toBeGreaterThanOrEqual(2);
+    expect(result.crops.every(crop => crop.width >= 40 && crop.height >= 40)).toBe(true);
     result.crops.forEach(crop => expectFootprintInside(crop, shape));
   });
 
@@ -117,7 +109,7 @@ describe('responsive bed content planning', () => {
 
   it('never falls back to a polygon vertex when a narrow diagonal has no safe annotation area', () => {
     const shape = polygon([100, 100], [330, 215], [329, 217], [99, 102]);
-    const result = planBedContent(shape, options({ hasTask: true }));
+    const result = planBedContent(shape, options());
     expect(result.annotation).toBeNull();
     expect(result.crops).toEqual([]);
   });
@@ -133,10 +125,10 @@ describe('responsive bed content planning', () => {
 
   it('keeps a planted crop visible when even an ID-only badge would consume its only usable area', () => {
     const shape = rectangle(100, 100, 36, 45);
-    const result = planBedContent(shape, options({ hasTask: true }));
+    const result = planBedContent(shape, options());
     expect(result.annotation).toBeNull();
     expect(result.crops).toHaveLength(1);
-    expect(result.crops[0]).toMatchObject({ width: 24, height: 24 });
+    expect(result.crops[0]).toMatchObject({ width: 28, height: 28 });
     expectFootprintInside(result.crops[0], shape);
   });
 
@@ -147,14 +139,10 @@ describe('responsive bed content planning', () => {
     expect(multiple.annotation!.fontSize).toBe(single.annotation!.fontSize);
   });
 
-  it('reserves enough text space for a wide four-letter ID beside its icon', () => {
-    const result = planBedContent(rectangle(100, 100, 200, 100), options({ hasTask: true, label: 'WWWW' }));
-    const badge = result.annotation!;
-    expect(badge).toMatchObject({ mode: 'compact', showTask: true });
-    expect(badge.width).toBeGreaterThanOrEqual(73);
-    const textRight = badge.fontSize * .55 + badge.fontSize * 4;
-    const iconLeft = badge.width - badge.fontSize * .55 - badge.fontSize * 1.15;
-    expect(iconLeft - textRight).toBeGreaterThanOrEqual(3);
+  it('reserves enough space for a long ID and a crop portrait', () => {
+    const plain = measureBedBadge('WWWW', 1);
+    expect(plain.width).toBeGreaterThanOrEqual(56);
+    expect(measureBedBadge('WWWW', 1, true)).toMatchObject({ width: plain.width + 26, height: 28 });
   });
 
   it('fails safely for missing or non-finite geometry and normalizes invalid render scales', () => {

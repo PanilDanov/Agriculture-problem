@@ -1,10 +1,24 @@
-.of-farm-canvas{position:relative;width:100%;aspect-ratio:20/13;isolation:isolate}
+.of-farm-canvas{position:relative;width:100%;aspect-ratio:800/612;isolation:isolate}
 .of-farm-canvas>.of-bed-layer{position:absolute;inset:0;display:block;width:100%;height:100%;overflow:visible}
+.of-bed-stake { fill: #956736; }
+.of-bed-badge-face { fill: #FFF1CE; }
+.of-bed-crop .of-crop-body {
+  transform-box: view-box;
+  transform-origin: center bottom;
+  animation: of-crop-breeze 6.8s step-end infinite;
+}
+.of-bed-crop:nth-child(2n) .of-crop-body { animation-delay: -180ms; }
+.of-bed-shape:nth-of-type(2n) .of-bed-crop .of-crop-body { animation-delay: -2s; }
+@keyframes of-crop-breeze {
+  0%, 74%, 100% { transform: skewX(0); }
+  56%, 67% { transform: skewX(2deg); }
+  62% { transform: skewX(-1deg); }
+}
 .of-bed-callout-leader{stroke:#61734f;stroke-width:1.3;stroke-linecap:round;opacity:.9}
 .of-bed-callout{cursor:pointer;outline:none;-webkit-tap-highlight-color:transparent}
-.of-bed-callout rect{transition:stroke 120ms ease,fill 120ms ease}
+.of-bed-callout .of-bed-badge-face{transition:stroke 120ms ease,fill 120ms ease}
 .of-bed-callout text,.of-bed-callout svg{pointer-events:none}
-.of-bed-callout:hover rect,.of-bed-callout:focus-visible rect{stroke:#286b45;stroke-width:2}
+.of-bed-callout:hover .of-bed-badge-face,.of-bed-callout:focus-visible .of-bed-badge-face{stroke:#286b45;stroke-width:2}
 .of-bed-legend{padding:13px 19px 15px;background:#f0f4e1;border-top:1px solid #dce5ce;min-width:0}
 .of-bed-legend-heading{display:flex;align-items:baseline;flex-wrap:wrap;gap:5px 12px;margin-bottom:10px;font-size:12px;line-height:1.6}
 .of-bed-legend-heading strong{font-weight:600;color:#3e5c3d}
@@ -15,7 +29,6 @@
 .of-bed-legend-items>button svg{display:block;flex:none}
 .of-bed-legend-items>button:hover{background:#e9f1de;border-color:#779760}
 .of-bed-legend-items>button[aria-pressed=true]{background:#e0edcf;border-color:#286b45;box-shadow:inset 0 0 0 1px #286b45}
-.of-bed-legend-items>.of-bed-legend-needs-care{background:#fbefc6;border-color:#c8aa56}
 .of-bed-legend-items>button:focus-visible{outline:2px solid #286b45;outline-offset:3px}
 @media(max-width:760px){.of-bed-legend{padding:12px}.of-bed-legend-heading{gap:3px 8px}.of-bed-legend-heading>span{font-size:11px}.of-bed-legend-items{gap:7px}.of-bed-legend-items>button{padding:9px 11px}}
-@media(prefers-reduced-motion:reduce){.of-bed-callout rect,.of-bed-legend-items>button{transition:none}}
+@media(prefers-reduced-motion:reduce){.of-bed-callout .of-bed-badge-face,.of-bed-legend-items>button{transition:none}}

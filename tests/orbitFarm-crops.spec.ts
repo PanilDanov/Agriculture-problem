@@ -91,7 +91,8 @@ async function exerciseCropCatalog(page: Page) {
   for (const [index, crop] of ordered.entries()) {
     if (index > 0) await page.getByRole('button', { name: 'Edit planting', exact: true }).click();
     await chooseCrop(page, crop.name);
-    await page.getByLabel('Planting date', { exact: true }).fill('2026-11-01');
+    const dateLabel = crop.id === 'tomato' ? 'Transplant date' : 'Planting date';
+    await page.getByLabel(dateLabel, { exact: true }).fill('2026-11-01');
     await page.getByRole('button', { name: index === 0 ? 'Plant crop' : 'Save planting', exact: true }).click();
     await expect(page.getByTestId('plot-slot-2')).toHaveAccessibleName(new RegExp(`Plot C.*${crop.name}`));
     await expect(page.locator('.plot-summary').getByRole('heading', { name: crop.name, exact: true })).toBeVisible();

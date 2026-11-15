@@ -4,7 +4,7 @@ import type { LayoutPoint } from '../domain/orbitFarm-types';
 
 const polygon = (...coordinates: [number, number][]): LayoutPoint[] => coordinates.map(([x, y]) => ({ x, y }));
 const rectangle = (x: number, y: number, width: number, height: number) => polygon([x, y], [x + width, y], [x + width, y + height], [x, y + height]);
-const bed = (slotId: number, points: LayoutPoint[], overrides: Partial<AnnotatedBedInput> = {}): AnnotatedBedInput => ({ slotId, points, label: String.fromCharCode(65 + slotId), hasTask: false, empty: true, ...overrides });
+const bed = (slotId: number, points: LayoutPoint[], overrides: Partial<AnnotatedBedInput> = {}): AnnotatedBedInput => ({ slotId, points, label: String.fromCharCode(65 + slotId), empty: true, ...overrides });
 
 function expectEveryIdentityOnce(plan: BedAnnotationPlan, inputs: AnnotatedBedInput[]) {
   for (const input of inputs) {
@@ -54,34 +54,42 @@ describe('visible identity for every custom bed', () => {
     expectEveryIdentityOnce(plan, inputs);
     expect(plan.legend).toEqual([]);
     expect(plan.beds.every(item => item.annotation && !item.external && item.leader === null)).toBe(true);
-    expect(plan.beds[0].crops.length).toBeGreaterThanOrEqual(3);
+    expect(plan.beds[0].crops.length).toBeGreaterThanOrEqual(2);
   });
 
   it('gives a thin H-like bed a readable outside label instead of hiding its letter', () => {
     const inputs = [bed(7, rectangle(510, 210, 70, 16))];
     const plan = planBedAnnotations(inputs, 1);
     expectEveryIdentityOnce(plan, inputs);
-    expect(plan.beds[0]).toMatchObject({ external: true, annotation: { mode: 'id', fontSize: 11, showTask: false } });
+    expect(plan.beds[0]).toMatchObject({ external: true, annotation: { fontSize: 11, showCrop: false } });
     expect(plan.beds[0].leader).not.toBeNull();
     expectNoLabelCollisions(plan, inputs);
   });
 
   it('keeps the planted sprite when a small G-like bed needs its ID moved outside', () => {
-    const inputs = [bed(6, rectangle(340, 300, 36, 45), { hasTask: true, empty: false })];
+    const inputs = [bed(6, rectangle(340, 300, 36, 45), { empty: false })];
     const plan = planBedAnnotations(inputs, 1);
     expectEveryIdentityOnce(plan, inputs);
-    expect(plan.beds[0].external).toBe(true);
+    expect(plan.beds[0]).toMatchObject({ external: true, annotation: { showCrop: false } });
     expect(plan.beds[0].crops).toHaveLength(1);
-    expect(plan.beds[0].crops[0]).toMatchObject({ width: 24, height: 24 });
+    expect(plan.beds[0].crops[0]).toMatchObject({ width: 28, height: 28 });
+    expectNoLabelCollisions(plan, inputs);
+  });
+
+  it('reserves a crop portrait beside the label of a planted sliver on mobile', () => {
+    const inputs = [bed(0, polygon([300, 260], [360, 278], [359, 281], [299, 263]), { empty: false })];
+    const plan = planBedAnnotations(inputs, .35);
+    expectEveryIdentityOnce(plan, inputs);
+    expect(plan.beds[0]).toMatchObject({ external: true, crops: [], annotation: { showCrop: true } });
     expectNoLabelCollisions(plan, inputs);
   });
 
   it.each([1, .4875, .4])('separates labels from small, concave, and nearby planted beds at scale %s', scale => {
     const inputs = [
-      bed(0, polygon([180, 210], [325, 210], [325, 265], [240, 265], [240, 410], [180, 410]), { empty: false, hasTask: true }),
+      bed(0, polygon([180, 210], [325, 210], [325, 265], [240, 265], [240, 410], [180, 410]), { empty: false }),
       bed(1, polygon([360, 210], [490, 210], [410, 255], [410, 240], [345, 265]), { empty: false }),
       bed(7, rectangle(510, 210, 60, 16)),
-      bed(6, polygon([280, 300], [325, 295], [335, 340], [280, 350]), { empty: false, hasTask: true }),
+      bed(6, polygon([280, 300], [325, 295], [335, 340], [280, 350]), { empty: false }),
       bed(8, polygon([390, 315], [460, 315], [450, 355], [390, 355])),
     ];
     const plan = planBedAnnotations(inputs, scale);
@@ -102,11 +110,11 @@ describe('visible identity for every custom bed', () => {
   });
 
   it('falls back to visible legend items for 24 dense phone-sized beds rather than losing their IDs', () => {
-    const inputs = Array.from({ length: 24 }, (_, slotId) => bed(slotId, rectangle(160 + slotId % 6 * 89, 194 + Math.floor(slotId / 6) * 61, 89, 61), { hasTask: slotId === 7 }));
+    const inputs = Array.from({ length: 24 }, (_, slotId) => bed(slotId, rectangle(160 + slotId % 6 * 89, 194 + Math.floor(slotId / 6) * 61, 89, 61)));
     const plan = planBedAnnotations(inputs, .35);
     expectEveryIdentityOnce(plan, inputs);
     expect(plan.legend).toHaveLength(24);
-    expect(plan.legend.find(item => item.slotId === 7)).toMatchObject({ label: 'H', hasTask: true });
+    expect(plan.legend).toContainEqual({ slotId: 7, label: 'H' });
     expect(plan.beds.every(item => item.annotation === null && item.leader === null)).toBe(true);
   });
 
@@ -122,7 +130,7 @@ describe('visible identity for every custom bed', () => {
     const inputs = [bed(0, []), bed(1, rectangle(300, 280, 80, 14))];
     const plan = planBedAnnotations(inputs, Number.NaN);
     expectEveryIdentityOnce(plan, inputs);
-    expect(plan.legend).toContainEqual({ slotId: 0, label: 'A', hasTask: false });
+    expect(plan.legend).toContainEqual({ slotId: 0, label: 'A' });
     expect(planBedAnnotations(inputs, Number.NaN)).toEqual(planBedAnnotations(inputs, 1));
   });
 });

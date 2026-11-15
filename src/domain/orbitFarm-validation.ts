@@ -99,7 +99,39 @@ export const environmentalSignalSchema = z.object({
 });
 
 const cropOptionSchema = z.object({ cropId: cropIdSchema, name: z.string().min(1), score: z.number().finite().min(0).max(100).nullable(), scoreStatus: z.enum(['complete', 'insufficient_data']), reasons: z.array(z.string().min(1)).min(1), recommendedPlantingDate: dateSchema.nullable().optional() }).passthrough().refine(option => (option.scoreStatus === 'complete') === (option.score !== null), 'An incomplete score must remain null.');
-const rotationPlanSchema = z.object({ planId: z.enum(['current', 'save-water', 'improve-soil']), name: z.string().min(1), sequence: z.tuple([cropIdSchema, cropIdSchema]), reasons: z.array(z.string().min(1)).min(1), tradeoffs: z.array(z.string().min(1)).min(1), baselineOrigin: z.enum(['example', 'farmer']) }).passthrough();
+const rotationSeasonSchema = z.object({
+  cropId: cropIdSchema,
+  recommendedPlantingDate: dateSchema.nullable(),
+  calendarHarvestDate: dateSchema.nullable(),
+  calendarSource: z.string().min(1).nullable(),
+  calendarScope: z.string().min(1).nullable(),
+}).passthrough();
+
+const rotationPlanSchema = z.object({
+  planId: z.enum(['current', 'save-water', 'improve-soil']),
+  name: z.string().min(1),
+  sequence: z.tuple([cropIdSchema, cropIdSchema]),
+  reasons: z.array(z.string().min(1)).min(1),
+  tradeoffs: z.array(z.string().min(1)).min(1),
+  baselineOrigin: z.enum(['example', 'farmer']),
+  planStatus: z.enum(['supported', 'provisional']).optional(),
+  waterScreenMm: z.number().finite().min(0).nullable().optional(),
+  seasons: z.tuple([rotationSeasonSchema, rotationSeasonSchema]).optional(),
+}).passthrough().superRefine((plan, ctx) => {
+  if (!plan.seasons) return;
+  for (const [index, season] of plan.seasons.entries()) {
+    if (season.cropId !== plan.sequence[index]) {
+      ctx.addIssue({ code: 'custom', path: ['seasons', index, 'cropId'], message: 'Season crop must match the rotation sequence.' });
+    }
+    if (season.calendarHarvestDate && (!season.recommendedPlantingDate || season.calendarHarvestDate <= season.recommendedPlantingDate)) {
+      ctx.addIssue({ code: 'custom', path: ['seasons', index, 'calendarHarvestDate'], message: 'Harvest must be after planting.' });
+    }
+  }
+  const [first, second] = plan.seasons;
+  if (second.recommendedPlantingDate && (!first.calendarHarvestDate || second.recommendedPlantingDate <= first.calendarHarvestDate)) {
+    ctx.addIssue({ code: 'custom', path: ['seasons', 1, 'recommendedPlantingDate'], message: 'Season two must start after the first harvest.' });
+  }
+});
 
 export const analysisResultSchema = z.object({
   schemaVersion: z.literal('1.0'), analysisId: z.string().min(1), requestId: z.string().uuid(), farmId: z.string().min(1), boundaryVersion: z.number().int().min(1),

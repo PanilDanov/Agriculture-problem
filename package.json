@@ -14,7 +14,8 @@
     "preview": "vite preview --host 127.0.0.1 --port 4173 --strictPort",
     "test:e2e": "playwright test",
     "verify": "npm run build && npm run test:e2e",
-    "deploy:prepare": "node scripts/orbitFarm-prepare-vercel.mjs"
+    "deploy:prepare": "node scripts/orbitFarm-prepare-vercel.mjs",
+    "deploy:stage": "node scripts/orbitFarm-stage-vercel.mjs"
   },
   "dependencies": {
     "@fontsource/chakra-petch": "^5.2.5",

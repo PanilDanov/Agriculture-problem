@@ -1,0 +1,55 @@
+{
+  "generator": "built-in image_gen",
+  "useCase": "stylized-concept",
+  "assets": [
+    {
+      "path": "../../../public/assets/farm/orbitFarm-meadow-v2.png",
+      "prompt": "Use case: stylized-concept. Transform the farm in this approved orbitFarm UI mockup into a standalone, transparent game environment layer for the real interactive farm screen. Remove the entire interface, every raised bed, all planted crops, task badges, the satellite and the dog. Preserve the original warm, deliberately chunky 16-bit pixel-art direction and slightly angled top-down camera. Keep small readable groups of hard-edged pixels and a consistent low-resolution game-tile grid. Flat colors in olive and sage greens, clay and oat tan, teal water, dark evergreen outlines. A few extra details, no cinematic or realistic rendering.\n\nFit the whole environment into a 10:7 landscape canvas. Surround the terrain with fully transparent alpha, no cream rectangle. Use uneven stepped terrain edges with tufts, clover, mushrooms and small flowers. All objects fit fully on the canvas. Reserve a large low-contrast grassy clearing from x=19% through 88% and y=34% through 80%. That rectangular space is for editable in-app beds; keep it completely clear of objects, fence, paths, painted fields and strong motifs. A short wooden fence borders the grass only above and below that space, with an open gate in the lower center.\n\nOutside the clearing, add a compact ochre cottage plus barrel and firewood in the upper left, a mill tower with an unobstructed circular axle but absolutely no blades in the upper middle-left, two fruit trees, a wheelbarrow and seedlings by a little gardening shed near the upper right. Put a compact teal pond with stepping stones, reeds and lily pads on the far left of the clearing, no water at y above 36% or below 74%. Leave a sandy, continuous horizontal strolling path across the entire foreground, centered at about 91% of the image height; completely unobstructed so a dog can animate on it. Add daisies, berry shrubs, and two small bee boxes near the perimeter but well clear of the central plot area and path. Be restrained with decoration; use a light, airy sunny farm-sim mood. No text, lettering, grid, UI, animals, humans, sky, gradients or rectangular background.",
+      "runtimeSize": {
+        "width": 400,
+        "height": 280
+      }
+    },
+    {
+      "path": "../../../public/assets/farm/crops/*-field-v2.png",
+      "prompt": "Use case: stylized-concept. Create a production crop sprite sheet for the pixel-art farm in the reference. Make precisely ten transparent sprites in a strict evenly spaced 5 columns × 2 rows layout, across a 5:2 landscape canvas. Every cell is the same size. Leave at least 18% clear transparent padding on each side of each cell and around every sprite. Align each sprite's fully visible base near 74% of its own cell. No cell backgrounds, soil squares, contact shadows, characters or text.\n\nTop row left to right: (1) wheat, fan of three tall golden ears with straw stems and narrow sage leaves; (2) barley, pale straw-colored awned grain cluster with a slight arch and fewer shorter ears; (3) maize, upright fan of wide green corn leaves with a visible golden corn cob; (4) sorghum, upright broad green leaves with two distinctly copper-red round grain heads; (5) chickpea, low round bush with rich green leaves and conspicuous round yellow-green pods.\nBottom row left to right: (6) lentil, low olive-green fern-like shrub with tiny orange pods and lavender flowers; (7) faba bean, upright leafy stalk with three broad pale green bean pods; (8) sunflower, broad deep golden sunflower head with brown disk and green leaves; (9) potato, low vivid green foliage with visible little purple flowers on short stalks; (10) ripe tomato plant, stout green leaves and two clearly visible red tomatoes on the vine.\n\nEach crop has a chunky, broad, readable silhouette that occupies about 60% of the cell, visible even at just 32 screen pixels tall, with simple 16-bit clusters and a slight overhead three-quarter angle. Consistent pixel grid, no skinny outlines instead of solid silhouettes, no smooth shading, no antialiasing. Use the warm olive, forest green, clay, and buttery yellow palette of the reference mockup. This sheet is game art only. No UI, borders, numbers, labels, or logos.",
+      "runtimeFrame": {
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "paths": [
+        "../../../public/assets/farm/crops/*-seedling-v1.png",
+        "../../../public/assets/farm/crops/*-growing-v1.png"
+      ],
+      "source": "../crops-v1/manifest.json",
+      "runtimeFrame": {
+        "width": 32,
+        "height": 32
+      }
+    },
+    {
+      "path": "../../../public/assets/farm/orbitFarm-dog-astronaut-v1.png",
+      "prompt": "Use case: stylized-concept. Create the orbitFarm companion dog's astronaut animation sprite sheet using the exact same little chestnut-and-cream, short-legged dog and pose references. The dog is still a believable happy four-legged dog. Dress it in a snug warm ivory space suit with round padded paws, a small oxygen pack on its back and restrained teal trim. Give it a single round transparent bubble helmet with a dark teal rim and two small pale-blue pixel glints. Its familiar floppy ear, facial markings, dark nose, brown eyes and smile are clearly visible inside the helmet. The brown-and-cream curled tail stays visible. A tiny two-pixel gold accent on the pack is enough. No brand names, NASA lettering or real-world logos.\n\nDraw exactly 12 sprites in a strict 4-column by 3-row grid of equal cells across a landscape canvas. Center each sprite fully inside its cell with 12% fully transparent space on all sides and a common baseline. Identical dog, helmet, suit, palette, scale and body size in all frames. Preserve the original chunky, crisply edged 16-bit cozy pixel-game style.\n\nFirst row, left to right: (1) right-facing side-profile contact pose with all paws on the ground, (2) right-facing walk with near forepaw reaching forward and opposite rear paw forward, (3) right-facing passing pose with paws close underneath, (4) right-facing opposite walk stride with far forepaw forward. In all four frames head and torso stay in the same place, only paws move.\nSecond row, left to right: (5) right-facing neutral stance, curled tail up, (6) exactly the same stance with a slight tail wag, (7) sniffing right with helmet tilted down, nose close to soil, forelegs bent, (8) the same sniff pose with the helmet slightly lifted.\nThird row, left to right: (9) standing angled halfway between right profile and facing the camera, (10) standing looking directly into the camera, symmetrical and centered, (11) seated at a gentle three-quarter angle with tail curled out to the left, (12) identical seated pose, small tail wag and closed eyes for a blink. \n\nTrue transparent background and gutters. Hard pixel edges. No shadows, text, dividing lines, borders, ground, glow or other props.",
+      "runtimeFrame": {
+        "width": 48,
+        "height": 34
+      },
+      "frames": [
+        "contact",
+        "stride-a",
+        "passing",
+        "stride-b",
+        "stand",
+        "tail-wag",
+        "sniff",
+        "lift-head",
+        "quarter-turn",
+        "front",
+        "sit",
+        "sit-blink"
+      ]
+    }
+  ]
+}

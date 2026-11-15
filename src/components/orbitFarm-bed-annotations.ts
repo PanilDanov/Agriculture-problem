@@ -1,11 +1,10 @@
 import type { LayoutPoint } from '../domain/orbitFarm-types';
-import { planBedContent, rectanglesOverlap, type BedAnnotation, type ContentRectangle } from './orbitFarm-bed-content';
+import { measureBedBadge, planBedContent, rectanglesOverlap, type BedAnnotation, type ContentRectangle } from './orbitFarm-bed-content';
 
 export interface AnnotatedBedInput {
   slotId: number;
   points: LayoutPoint[];
   label: string;
-  hasTask: boolean;
   empty: boolean;
 }
 
@@ -24,7 +23,7 @@ export interface AnnotatedBedPlan {
 
 export interface BedAnnotationPlan {
   beds: AnnotatedBedPlan[];
-  legend: Array<{ slotId: number; label: string; hasTask: boolean }>;
+  legend: Array<{ slotId: number; label: string }>;
 }
 
 const EPSILON = 1e-7;
@@ -171,10 +170,10 @@ function calloutCandidates(points: LayoutPoint[], width: number, height: number,
   return result;
 }
 
-function findCallout(source: AnnotatedBedInput, beds: AnnotatedBedInput[], occupied: ContentRectangle[], scale: number): { annotation: BedAnnotation; leader: BedLeader } | null {
+function findCallout(source: AnnotatedBedInput, beds: AnnotatedBedInput[], occupied: ContentRectangle[], scale: number, showCrop: boolean): { annotation: BedAnnotation; leader: BedLeader } | null {
   if (source.points.length < 3 || !source.points.every(point => Number.isFinite(point.x) && Number.isFinite(point.y))) return null;
   const text = source.label.trim() || String(source.slotId);
-  const width = Math.max(22, Math.ceil(text.length * 11 + 2 * 11 * .55)) / scale, height = 22 / scale;
+  const { width, height, fontSize } = measureBedBadge(text, scale, showCrop);
   const margin = Math.max(4, 2 / scale);
   for (const region of [INNER_FIELD, NEAR_FIELD]) {
     const available = calloutCandidates(source.points, width, height, margin, region).filter(rect =>
@@ -192,7 +191,10 @@ function findCallout(source: AnnotatedBedInput, beds: AnnotatedBedInput[], occup
       if (crossings === 0) break;
     }
     if (fallback) {
-      return { annotation: { ...fallback.rect, fontSize: 11 / scale, mode: 'id', showTask: false }, leader: fallback.leader };
+      return {
+        annotation: { ...fallback.rect, fontSize, showCrop },
+        leader: fallback.leader,
+      };
     }
   }
   return null;
@@ -202,18 +204,23 @@ function findCallout(source: AnnotatedBedInput, beds: AnnotatedBedInput[], occup
 export function planBedAnnotations(beds: AnnotatedBedInput[], pixelsPerUnit: number): BedAnnotationPlan {
   const scale = Number.isFinite(pixelsPerUnit) && pixelsPerUnit > 0 ? clamp(pixelsPerUnit, .1, 3) : 1;
   const result: BedAnnotationPlan = {
-    beds: beds.map(bed => ({ slotId: bed.slotId, ...planBedContent(bed.points, { pixelsPerUnit: scale, label: bed.label, hasTask: bed.hasTask, empty: bed.empty }), external: false, leader: null })),
+    beds: beds.map(bed => ({ slotId: bed.slotId, ...planBedContent(bed.points, { pixelsPerUnit: scale, label: bed.label, empty: bed.empty }), external: false, leader: null })),
     legend: [],
   };
   const occupied = result.beds.flatMap(bed => bed.annotation ? [bed.annotation] : []);
   for (let index = 0; index < beds.length; index++) {
     const input = beds[index], planned = result.beds[index];
-    if (planned.annotation) continue;
-    const callout = findCallout(input, beds, occupied, scale);
+    const showCrop = !input.empty && !planned.crops.some(crop => crop.width * scale >= 17);
+    if (planned.annotation) {
+      if (!showCrop) continue;
+      occupied.splice(occupied.indexOf(planned.annotation), 1);
+      planned.annotation = null;
+    }
+    const callout = findCallout(input, beds, occupied, scale, showCrop);
     if (callout) {
       planned.annotation = callout.annotation; planned.external = true; planned.leader = callout.leader;
       occupied.push(callout.annotation);
-    } else result.legend.push({ slotId: input.slotId, label: input.label, hasTask: input.hasTask });
+    } else result.legend.push({ slotId: input.slotId, label: input.label });
   }
   return result;
 }

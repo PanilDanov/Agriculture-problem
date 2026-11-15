@@ -1,0 +1,105 @@
+.of-season-terrain {
+  position: absolute;
+  inset: calc(100% * 12 / 612) 0 0;
+  isolation: isolate;
+  pointer-events: none;
+}
+.of-season-terrain > :is(img, canvas) {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+.of-season-terrain > canvas[data-season] { mix-blend-mode: plus-lighter; }
+.of-season-terrain:not([data-terrain-ready]) > canvas,
+.of-season-terrain[data-terrain-ready] > img { visibility: hidden; }
+.of-season-detail {
+  transition: opacity 780ms cubic-bezier(.2, .68, .31, 1);
+}
+.of-farm-world {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  image-rendering: pixelated;
+}
+.of-mill-rotor { animation: of-mill-turn 13s steps(36) infinite; }
+.of-chimney-smoke {
+  opacity: 0;
+  animation: of-chimney-drift 4.4s steps(6) infinite;
+}
+.of-chimney-smoke-delayed { animation-delay: -2.2s; }
+.of-pond-ripple {
+  opacity: 0;
+  animation: of-pond-ripple 5.6s steps(3) infinite;
+}
+.of-pond-ripple-delayed { animation-delay: -2.8s; }
+.of-bee-flight { animation: of-bee-flight 7.2s steps(9) infinite; }
+.of-bee-delayed { animation-delay: -3.5s; }
+.of-bee-wings { animation: of-bee-wings 170ms steps(2) infinite; }
+.of-spring-petal {
+  opacity: .8;
+  animation: of-petal-drift 9.4s linear infinite;
+}
+.of-summer-glint {
+  opacity: .36;
+  animation: of-solar-glint 8.8s ease-in-out infinite;
+}
+.of-autumn-leaf {
+  opacity: .75;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: of-leaf-drift 12.2s linear infinite;
+}
+.of-pond-mist {
+  opacity: .44;
+  animation: of-mist-drift 17s ease-in-out infinite;
+}
+
+@keyframes of-mill-turn { to { transform: rotate(360deg); } }
+@keyframes of-chimney-drift {
+  0%, 100% { opacity: 0; transform: translate(0, 0); }
+  16% { opacity: .82; }
+  80% { opacity: 0; transform: translate(12px, -24px); }
+}
+@keyframes of-pond-ripple {
+  0%, 48%, 100% { opacity: 0; }
+  64% { opacity: .64; }
+  81% { opacity: .37; transform: translate(3px, 2px); }
+}
+@keyframes of-bee-flight {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(16px, 7px); }
+  44% { transform: translate(10px, 27px); }
+  63% { transform: translate(-13px, 15px); }
+  80% { transform: translate(-8px, -3px); }
+}
+@keyframes of-bee-wings { to { transform: translateY(2px); } }
+@keyframes of-petal-drift {
+  0%, 100% { opacity: 0; }
+  16%, 67% { opacity: .88; }
+  45% { transform: translate(18px, 12px); }
+  100% { transform: translate(27px, 36px); }
+}
+@keyframes of-solar-glint {
+  0%, 32%, 68%, 100% { opacity: 0; }
+  50% { opacity: .73; }
+}
+@keyframes of-leaf-drift {
+  0% { opacity: 0; transform: translate(0, 0); }
+  15%, 67% { opacity: .9; }
+  42% { transform: translate(-15px, 16px) rotate(-17deg); }
+  76% { transform: translate(8px, 32px) rotate(22deg); }
+  100% { opacity: 0; transform: translate(-5px, 44px) rotate(-10deg); }
+}
+@keyframes of-mist-drift {
+  0%, 100% { opacity: .36; transform: translate(-8px, 0); }
+  50% { opacity: .64; transform: translate(12px, -4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .of-season-detail { transition: none; }
+  .of-spring-petal, .of-summer-glint, .of-autumn-leaf, .of-pond-mist { animation: none; }
+}

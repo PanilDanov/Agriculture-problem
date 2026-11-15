@@ -9,6 +9,7 @@ export type Priority = 'balanced' | 'save_water' | 'improve_soil';
 export interface Crop {
   id: CropId;
   name: string;
+  daysToGrowing: number;
   daysToHarvest: number;
   color: string;
   description: string;
@@ -75,6 +76,17 @@ export interface RotationPlan {
   reasons: string[];
   tradeoffs: string[];
   baselineOrigin: 'example' | 'farmer';
+  planStatus?: 'supported' | 'provisional';
+  waterScreenMm?: number | null;
+  seasons?: [RotationSeason, RotationSeason];
+}
+
+export interface RotationSeason {
+  cropId: CropId;
+  recommendedPlantingDate: string | null;
+  calendarHarvestDate: string | null;
+  calendarSource: string | null;
+  calendarScope: string | null;
 }
 
 export interface AnalysisResult {
@@ -130,7 +142,7 @@ export interface CareTask {
 
 export interface JournalEntry {
   id: string;
-  taskId: string;
+  taskId: string | null;
   plotId: string;
   action: 'watered' | 'done' | 'skipped' | 'snoozed';
   createdOn: string;
@@ -171,6 +183,7 @@ export type FarmAction =
   | { type: 'edit_plot'; plotId: string; cropId: CropId; plantedOn: string }
   | { type: 'remove_plot'; plotId: string }
   | { type: 'complete_task'; taskId: string }
+  | { type: 'record_watering'; plotId: string }
   | { type: 'skip_task'; taskId: string }
   | { type: 'snooze_task'; taskId: string }
   | { type: 'undo_action'; entryId: string }

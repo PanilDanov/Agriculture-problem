@@ -9,8 +9,7 @@ export interface ContentRectangle {
 
 export interface BedAnnotation extends ContentRectangle {
   fontSize: number;
-  mode: 'full' | 'compact' | 'id';
-  showTask: boolean;
+  showCrop?: boolean;
 }
 
 export interface BedContentPlan {
@@ -21,7 +20,6 @@ export interface BedContentPlan {
 export interface BedContentOptions {
   pixelsPerUnit: number;
   label: string;
-  hasTask: boolean;
   empty: boolean;
 }
 
@@ -123,6 +121,41 @@ function findRectangle(points: LayoutPoint[], width: number, height: number, mar
   return best;
 }
 
+export function measureBedBadge(label: string, scale: number, showCrop = false) {
+  const fontSize = 11 / scale;
+  const textWidth = Math.max(22, Math.ceil(label.length * 11 + 12.1));
+  return {
+    fontSize,
+    width: (textWidth + (showCrop ? 26 : 0)) / scale,
+    height: (showCrop ? 28 : 22) / scale,
+  };
+}
+
+function placeCrops(points: LayoutPoint[], size: number, margin: number, annotation: BedAnnotation | null): ContentRectangle[] {
+  const reserved = annotation ? inflated(annotation, margin) : undefined;
+  const box = bounds(points);
+  const width = box.width - 2 * margin, height = box.height - 2 * margin;
+  const crops: ContentRectangle[] = [];
+
+  if (size >= 36) {
+    const stride = size + 6;
+    const columns = Math.max(1, Math.min(64, Math.floor((width + 6) / stride)));
+    const rows = Math.max(1, Math.min(64, Math.floor((height + 6) / stride)));
+    const top = box.minY + margin + (annotation ? 0 : (height - rows * stride + 6) / 2);
+    for (let row = 0; row < rows; row++) {
+      for (let column = 0; column < columns; column++) {
+        const x = box.minX + margin + width * (column + .5) / columns - size / 2;
+        const rect = { x, y: top + row * stride, width: size, height: size };
+        if (rectInsidePolygon(rect, points, margin) && (!reserved || !rectanglesOverlap(rect, reserved))) crops.push(rect);
+      }
+    }
+  }
+
+  if (crops.length) return crops;
+  const single = findRectangle(points, size, size, margin, reserved);
+  return single ? [single] : [];
+}
+
 /** Content uses world coordinates; text retains an eleven-pixel screen size as the scene resizes. */
 export function planBedContent(points: LayoutPoint[], options: BedContentOptions): BedContentPlan {
   const emptyPlan = { annotation: null, crops: [] } satisfies BedContentPlan;
@@ -135,43 +168,27 @@ export function planBedContent(points: LayoutPoint[], options: BedContentOptions
 
   const scale = Number.isFinite(options.pixelsPerUnit) && options.pixelsPerUnit > 0 ? Math.max(.1, Math.min(3, options.pixelsPerUnit)) : 1;
   const margin = Math.max(4, 2 / scale);
-  const text = options.label.trim() || '?';
-  const fontSize = 11 / scale, height = 22 / scale;
-  const textWidth = Math.max(22, Math.ceil(text.length * 11 + 2 * 11 * .55));
-  const wantsIcon = options.hasTask;
-  const modes: Array<'compact' | 'id'> = wantsIcon ? ['compact', 'id'] : ['id'];
-  const annotations: BedAnnotation[] = [];
-  for (const mode of modes) {
-    const width = (textWidth + (mode === 'compact' ? 17 : 0)) / scale;
-    const rect = findRectangle(points, width, height, margin);
-    if (rect) {
-      annotations.push({ ...rect, fontSize, mode, showTask: mode === 'compact' && options.hasTask });
-    }
-  }
-  if (options.empty) return { annotation: annotations[0] ?? null, crops: [] };
+  const { width, height, fontSize } = measureBedBadge(options.label.trim() || '?', scale);
+  const badge = findRectangle(points, width, height, margin);
+  const annotation: BedAnnotation | null = badge
+    ? { ...badge, fontSize }
+    : null;
+  if (options.empty) return { annotation, crops: [] };
 
   const box = bounds(points);
-  const availableWidth = Math.max(0, box.width - margin * 2), availableHeight = Math.max(0, box.height - margin * 2);
-  const cols = Math.min(64, Math.max(1, Math.floor(availableWidth / 40))), rows = Math.min(64, Math.max(1, Math.floor(availableHeight / 34)));
-  function planCrops(annotation: BedAnnotation | null): ContentRectangle[] {
-    const reserved = annotation ? inflated(annotation, margin) : undefined;
-    const crops: ContentRectangle[] = [];
-    for (let row = 0; row < rows; row++) for (let col = 0; col < cols; col++) {
-      const rect = { x: box.minX + margin + availableWidth * (col + .5) / cols - 17, y: box.minY + margin + availableHeight * (row + .5) / rows - 17, width: 34, height: 34 };
-      if (rectInsidePolygon(rect, points, margin) && (!reserved || !rectanglesOverlap(rect, reserved))) crops.push(rect);
+  const preferred = Math.min(56, Math.max(42, Math.ceil(24 / scale)));
+  const maxSize = Math.floor(Math.min(preferred, box.width - 2 * margin, box.height - 2 * margin));
+  const sizes = new Set([maxSize, 42, 36, 30, 24, 16].filter(size => size >= 16 && size <= maxSize));
+  let unmarked: ContentRectangle[] = [];
+  for (const size of sizes) {
+    if (!unmarked.length) unmarked = placeCrops(points, size, margin, null);
+    if (!annotation) {
+      if (unmarked.length) return { annotation: null, crops: unmarked };
+      continue;
     }
-    if (!crops.length) {
-      for (const size of [24, 16]) {
-        const rect = findRectangle(points, size, size, margin, reserved);
-        if (rect) { crops.push(rect); break; }
-      }
-    }
-    return crops;
-  }
-  // A badge must not erase the only visible indication that a bed is planted.
-  for (const annotation of [...annotations, null]) {
-    const crops = planCrops(annotation);
+    if (unmarked.length && size < unmarked[0].width - 10) break;
+    const crops = placeCrops(points, size, margin, annotation);
     if (crops.length) return { annotation, crops };
   }
-  return { annotation: annotations[0] ?? null, crops: [] };
+  return { annotation: unmarked.length ? null : annotation, crops: unmarked };
 }

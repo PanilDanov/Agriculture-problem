@@ -12,6 +12,7 @@ Frontend work continues on the `frontend` branch. All project content, code, com
 - [Product specification](docs/orbitFarm-product.md)
 - [24-hour delivery plan](docs/orbitFarm-delivery-plan.md)
 - [Local development and test benches](docs/orbitFarm-development.md)
+- [Restore both branches and their data on another computer](https://github.com/PanilDanov/Agriculture-problem/blob/feature/yield-prediction/DATA_RECOVERY.md)
 - [Vercel deployment and updates](docs/orbitFarm-deployment.md)
 - [Proposed analysis request contract](docs/orbitFarm-analysis-contract.md)
 - [Backend request guide: current fields, allowed values, and examples](docs/orbitFarm-backend-request-guide.md)
@@ -23,7 +24,7 @@ Frontend work continues on the `frontend` branch. All project content, code, com
 
 The analysis request sends no planting date, season end, or timezone. The backend chooses recommended crop planting dates and the planning horizon. Planting, care, reminder, and journal dates use `YYYY-MM-DD` without timezone conversion.
 
-Development now prioritizes the working website and reproducible test benches. PWA installation and home-screen behavior are deferred. Mock data remains visibly labeled; the local backend and authentic NASA data are separate integrations.
+The public site calls the Vercel field API on the same origin. The API retrieves NASA POWER weather, soil data, and planting calendars for the selected field. Test benches provide labeled demo scenarios for local development.
 
 ## Run the website
 

@@ -93,7 +93,6 @@
 .demo-controls>button:focus-visible{outline:2px solid #286b45;outline-offset:3px}
 .page-heading h1{margin:0;font-size:34px;line-height:1.2}
 .page-heading p{margin-top:8px}
-.care-empty{margin:0 0 20px;color:#75806f;font-size:12px;line-height:1.6}
 .journal-layout{grid-template-columns:minmax(0,1fr)}
 .plan-details{margin:20px 0;font-size:12px;line-height:1.6}
 .plan-details>summary,.crop-details>summary{width:fit-content;color:#60794f;cursor:pointer;font-size:11px;font-weight:500}
@@ -111,4 +110,235 @@
   .demo-controls>button{min-height:40px;padding:8px;font-size:10px}
   .page-heading h1{font-size:30px;margin:0}
   .journal-layout{grid-template-columns:minmax(0,1fr)}
+}
+.task-card[data-care-kind="water"] .task-symbol {
+  background: #D9EFF8;
+  color: #306487;
+}
+.task-card[data-care-kind="soil"] .task-symbol {
+  background: #F9E9B4;
+  color: #526D36;
+}
+
+.farm-window--scene {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+}
+.farm-window--scene .farm-window-toolbar {
+  border-top: 1px solid #DFE5D3;
+  background: transparent;
+  padding-inline: 0;
+}
+.farm-window--scene .farm-window-toolbar strong { font-size: 14px; }
+.farm-window--scene .farm-bed-controls {
+  border-top-color: #DFE5D3;
+  background: transparent;
+  padding-inline: 0;
+}
+.farm-window--scene .farm-window-footer {
+  background: transparent;
+  padding-inline: 0;
+  padding-block: 0 8px;
+}
+.farm-window--scene .of-bed-legend {
+  padding-inline: 0;
+  background: transparent;
+}
+@media (min-width: 941px) and (max-width: 1180px) {
+  .farm-layout { grid-template-columns: minmax(0, 1fr) 228px; }
+}
+@media (max-width: 420px) {
+  .farm-window--scene .farm-view-actions { gap: 7px; }
+}
+
+.farm-season-preview {
+  --flight-handle: 48px;
+  --flight-height: 30px;
+  --station-height: 28px;
+  margin: 3px 0 8px;
+  color: #39573C;
+}
+@media (pointer: coarse) {
+  .farm-season-preview {
+    --flight-height: 44px;
+    --station-height: 44px;
+  }
+}
+.season-preview-heading {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  column-gap: 12px;
+  row-gap: 4px;
+}
+.season-preview-heading label {
+  color: #53694B;
+  font-size: 11px;
+  font-weight: 600;
+}
+.season-preview-heading time {
+  color: #203D32;
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.season-preview-heading .text-button {
+  min-height: 26px;
+  margin-left: auto;
+  font-size: 11px;
+}
+.season-preview-heading .text-button:disabled { visibility: hidden; }
+.season-flight {
+  isolation: isolate;
+}
+.season-flight-rail { position: relative; }
+.season-flight-input {
+  position: relative;
+  z-index: 1;
+  display: block;
+  appearance: none;
+  height: var(--flight-height);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  box-shadow: none;
+  cursor: grab;
+}
+.season-flight-input:active { cursor: grabbing; }
+.season-flight-input::-webkit-slider-runnable-track { background: transparent; }
+.season-flight-input::-moz-range-track { background: transparent; }
+.season-flight-input::-webkit-slider-thumb {
+  appearance: none;
+  width: var(--flight-handle);
+  height: var(--flight-height);
+  background: transparent;
+  border: 0;
+}
+.season-flight-input::-moz-range-thumb {
+  width: var(--flight-handle);
+  height: var(--flight-height);
+  background: transparent;
+  border: 0;
+}
+.season-flight-path {
+  position: absolute;
+  inset: 0 calc(var(--flight-handle) / 2);
+  display: grid;
+  align-items: center;
+  pointer-events: none;
+}
+.season-flight-line {
+  position: relative;
+  height: 2px;
+  border-radius: 2px;
+  background: #C8D2BA;
+}
+.season-flight-tick {
+  position: absolute;
+  top: 50%;
+  z-index: 1;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--station-accent);
+}
+.season-flight-progress {
+  position: relative;
+  height: 100%;
+  border-radius: inherit;
+  background: #729267;
+}
+.season-flight-satellite {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  z-index: 2;
+  transform: translate(50%, -50%) rotate(-6deg);
+  display: block;
+  filter: drop-shadow(0 2px #263F3040);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .season-flight-jump .season-flight-progress { transition: width 360ms cubic-bezier(.2, .7, .3, 1); }
+}
+.season-stations {
+  display: flex;
+  justify-content: space-around;
+  min-height: var(--station-height);
+}
+.season-stations-aligned {
+  position: relative;
+  margin-inline: calc(var(--flight-handle) / 2);
+}
+.season-stations-aligned .season-station {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+}
+.season-station {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 2px;
+  min-width: 44px;
+  min-height: var(--station-height);
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  color: #39573C;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.season-station::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--station-accent);
+}
+.season-flight [data-season="winter"] { --station-accent: #6E8890; }
+.season-flight [data-season="spring"] { --station-accent: #6B8F58; }
+.season-flight [data-season="summer"] { --station-accent: #A5833E; }
+.season-flight [data-season="autumn"] { --station-accent: #AB734C; }
+.season-station:hover, .season-station[aria-current="date"] {
+  color: #203D32;
+}
+.season-station:hover { text-decoration: underline; text-underline-offset: 2px; }
+.season-station[aria-current="date"]::before {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--station-accent), transparent 74%);
+}
+@media (forced-colors: active) {
+  .season-flight-path { display: none; }
+  .season-flight-input { appearance: auto; }
+  .season-flight-input::-webkit-slider-thumb { appearance: auto; }
+}
+.farm-layout > .care-sidebar > :is(.plot-summary, .plot-editor) { margin-top: 0; }
+.farm-conditions { min-width: 0; }
+.farm-conditions .conditions-heading { margin-top: 0; }
+.plot-summary .plot-care-task {
+  margin-top: 13px;
+  padding: 13px 0 0;
+  border: 0;
+  border-top: 1px solid #E8EBDC;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.plot-care-task h4 { margin: 0 0 6px; font-size: 14px; }
+.plot-care-task .task-why { margin-top: 8px; }
+.plot-summary .plot-water-button { margin-top: 12px; }
+.plot-preview-label { margin: 12px 0 0; font-size: 11px; color: #53694B; }
+@media (min-width: 941px) {
+  .farm-layout > .care-sidebar { display: block; grid-column: 2; grid-row: 1 / span 2; }
+  .farm-conditions { grid-column: 1; }
+}
+@media (max-width: 420px) {
+  .season-preview-heading { column-gap: 6px; }
+  .season-preview-heading :is(label, time) { font-size: 11px; }
 }

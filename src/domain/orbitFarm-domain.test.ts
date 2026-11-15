@@ -1,8 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Polygon } from 'geojson';
 import {
-  DEMO_BOUNDARY, PROVIDER_SETTINGS_KEY, STORAGE_KEY, addDemoDay, buildAnalysisRequest, createApiProvider, createMockProvider, createScenarioState,
-  farmReducer, getDueTasks, getFarmDate, getGrowthStage, loadFarm, loadProviderSettings, makeMockAnalysis, saveFarm, saveProviderSettings,
+  CROP_CATALOG, DEMO_BOUNDARY, PROVIDER_SETTINGS_KEY, STORAGE_KEY, addDemoDay, addFarmDays,
+  buildAnalysisRequest, createApiProvider, createMockProvider, createScenarioState,
+  farmReducer, getDueTasks, getEstimatedHarvestDate, getFarmDate, getGrowthStage, getLastWatering,
+  loadFarm, loadProviderSettings, makeMockAnalysis, saveFarm, saveProviderSettings,
   validateAnalysisRequest, validateAnalysisResult, validateBoundary,
 } from './orbitFarm-domain';
 import type { StorageLike } from './orbitFarm-types';
@@ -114,6 +116,24 @@ describe('request and response meaning', () => {
     const payload = request();
     payload.localInputs.currentPlan = [{ seasonIndex: 2, cropId: 'wheat' }, { seasonIndex: 1, cropId: 'chickpea' }];
     expect(makeMockAnalysis(payload, 'normal').rotationPlans[0]).toMatchObject({ sequence: ['chickpea', 'wheat'], baselineOrigin: 'farmer' });
+  });
+  it('validates backend dates for each season and keeps provisional dates nullable', () => {
+    const response = makeMockAnalysis(request(), 'normal');
+    response.rotationPlans[1] = {
+      ...response.rotationPlans[1], planStatus: 'provisional', waterScreenMm: null,
+      seasons: [
+        { cropId: 'sorghum', recommendedPlantingDate: '2027-05-16', calendarHarvestDate: '2027-09-30', calendarSource: 'sacks-crop-calendar', calendarScope: 'sampled_grid_cell' },
+        { cropId: 'chickpea', recommendedPlantingDate: null, calendarHarvestDate: null, calendarSource: null, calendarScope: null },
+      ],
+    };
+    expect(validateAnalysisResult(response).rotationPlans[1].seasons?.[1].recommendedPlantingDate).toBeNull();
+    const second = response.rotationPlans[1].seasons?.[1];
+    if (!second) throw new Error('Missing test season');
+    second.recommendedPlantingDate = '2027-09-25';
+    expect(() => validateAnalysisResult(response)).toThrow(/after the first harvest/);
+    second.recommendedPlantingDate = '2027-10-08';
+    second.cropId = 'wheat';
+    expect(() => validateAnalysisResult(response)).toThrow(/match the rotation sequence/);
   });
   it('preserves server planting recommendations as calendar dates and accepts absent recommendations', () => {
     const response = makeMockAnalysis(request(), 'normal');
@@ -253,11 +273,15 @@ describe('farm state transitions', () => {
     expect(addDemoDay('2028-02-29')).toBe('2028-03-01');
     expect(addDemoDay('2026-12-31')).toBe('2027-01-01');
   });
-  it('separates planned, estimated growing, and harvest-ready stages', () => {
-    const plot = { id: 'a', slotId: 0, cropId: 'wheat' as const, plantedOn: '2026-11-20' };
-    expect(getGrowthStage(plot, '2026-11-14')).toBe('Planned');
-    expect(getGrowthStage(plot, '2026-11-21')).toBe('Seedling');
-    expect(getGrowthStage(plot, '2027-04-30')).toBe('Ready to harvest');
+  it.each(CROP_CATALOG)('shows three stages by planting date for $name', ({ id, daysToGrowing, daysToHarvest }) => {
+    const plot = { id: 'a', slotId: 0, cropId: id, plantedOn: '2026-11-20' };
+    expect(getGrowthStage(plot, addFarmDays(plot.plantedOn, -1))).toBe('Planned');
+    expect(getGrowthStage(plot, plot.plantedOn)).toBe('Seedling');
+    expect(getGrowthStage(plot, addFarmDays(plot.plantedOn, daysToGrowing - 1))).toBe('Seedling');
+    expect(getGrowthStage(plot, addFarmDays(plot.plantedOn, daysToGrowing))).toBe('Growing');
+    expect(getGrowthStage(plot, addFarmDays(plot.plantedOn, daysToHarvest - 1))).toBe('Growing');
+    expect(getEstimatedHarvestDate(plot)).toBe(addFarmDays(plot.plantedOn, daysToHarvest));
+    expect(getGrowthStage(plot, getEstimatedHarvestDate(plot))).toBe('Ready to harvest');
   });
 });
 
@@ -266,6 +290,22 @@ describe('persistent state', () => {
     const values = new Map<string, string>();
     return { getItem: key => values.get(key) ?? null, setItem: (key, value) => { values.set(key, value); } };
   }
+  it('persists manual watering on an active planting without adding a task', () => {
+    const storage = memoryStorage();
+    const initial = createScenarioState('dry-week');
+    const plot = initial.plots[1];
+    const action = { type: 'record_watering', plotId: plot.id } as const;
+    const watered = farmReducer(initial, action);
+
+    expect(watered.tasks).toBe(initial.tasks);
+    expect(watered.journal[0]).toMatchObject({ taskId: null, plotId: plot.id, action: 'watered' });
+    expect(farmReducer(watered, action)).toBe(watered);
+    expect(saveFarm(watered, storage)).toBeNull();
+    const restored = loadFarm(storage).state;
+    expect(getLastWatering(restored, plot.id)).toBe(initial.demoToday);
+    const undone = farmReducer(restored, { type: 'undo_action', entryId: restored.journal[0].id });
+    expect(getLastWatering(undone, plot.id)).toBeUndefined();
+  });
   it('round-trips the completed care state without resurrecting the task', () => {
     const storage = memoryStorage();
     const initial = createScenarioState('dry-week');

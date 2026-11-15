@@ -79,8 +79,8 @@ The GitHub Actions workflow runs locked dependency installation, the English-con
 
 ## Data and deployment limits
 
-Mock scenarios are development fixtures, not NASA evidence. Authentic NASA data and the team's local backend are separate integration work. API mode must expose failures instead of replacing them with synthetic analysis. Exact request fields remain documented in the [analysis contract](orbitFarm-analysis-contract.md).
+Local development uses labeled demo fixtures by default. To use live field data, start the FastAPI service and select **Use API** in Test benches. The hosted site uses its own origin for live field analysis. API mode reports service failures in the interface. [Analysis contract](orbitFarm-analysis-contract.md) · [Local setup and data recovery](https://github.com/PanilDanov/Agriculture-problem/blob/feature/yield-prediction/DATA_RECOVERY.md)
 
-Browser state is stored on the current device; there are no accounts or cross-device synchronization. Deployed sites need an HTTPS-reachable backend. A laptop's `localhost` URL cannot be used by a visitor's browser on another device.
+Farm state is stored in browser local storage for each origin and profile.
 
-Vercel and GitHub Pages can host `dist/`. Configure a release to deploy the same artifact/commit that passed verification. The initial workflow verifies the website and does not configure hosting credentials or publish a site.
+Run the checks above before building the frontend and API release. [Vercel deployment guide](orbitFarm-deployment.md)

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { FarmState, ProviderSettings, ProviderSettingsLoadResult, StorageLike } from './orbitFarm-types';
+import type { FarmState, ProviderSettings, ProviderSettingsLoadResult, ScenarioId, StorageLike } from './orbitFarm-types';
 import { analysisResultSchema, cropIdSchema, dateSchema, farmInputsSchema, isoSchema, polygonSchema, scenarioIdSchema, validateBoundary } from './orbitFarm-validation';
 import { createScenarioState } from './orbitFarm-model';
 import { createDefaultLayout, farmLayoutSchema, MAX_LAYOUT_BEDS } from './orbitFarm-layout';
@@ -50,7 +50,7 @@ export function saveProviderSettings(settings: ProviderSettings, storage: Storag
 const taskStatusSchema = z.enum(['open', 'done', 'skipped', 'snoozed']);
 const plotSchema = z.object({ id: z.string().min(1), slotId: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER - 1), cropId: cropIdSchema, plantedOn: dateSchema }).strict();
 const taskFields = { id: z.string().min(1), plotId: z.string().min(1), kind: z.enum(['water', 'soil']), title: z.string().min(1), reason: z.string().min(1), status: taskStatusSchema };
-const journalFields = { id: z.string().min(1), taskId: z.string().min(1), plotId: z.string().min(1), action: z.enum(['watered', 'done', 'skipped', 'snoozed']), undone: z.boolean(), previousStatus: taskStatusSchema.optional() };
+const journalFields = { id: z.string().min(1), taskId: z.string().min(1).nullable(), plotId: z.string().min(1), action: z.enum(['watered', 'done', 'skipped', 'snoozed']), undone: z.boolean(), previousStatus: taskStatusSchema.optional() };
 const commonFarmFields = {
   farmId: z.string().min(1), name: z.string().min(1).max(70), boundary: polygonSchema.nullable(), boundaryVersion: z.number().int().min(1),
   analysis: analysisResultSchema.nullable(), scenarioId: scenarioIdSchema, selectedPlanId: z.string().nullable(), pendingRequestId: z.string().nullable(), analysisError: z.string().nullable(),
@@ -69,6 +69,7 @@ function validateStateRelations(state: Pick<FarmState, 'boundary' | 'boundaryVer
   if (state.tasks.some(t => !state.plots.some(p => p.id === t.plotId)) || new Set(state.tasks.map(t => t.id)).size !== state.tasks.length) ctx.addIssue({ code: 'custom', path: ['tasks'], message: 'Saved tasks do not match their planting areas.' });
   if (state.tasks.some(t => (t.status === 'snoozed') !== (t.snoozedUntil !== null))) ctx.addIssue({ code: 'custom', path: ['tasks'], message: 'A snoozed task needs its reminder date.' });
   if (new Set(state.journal.map(e => e.id)).size !== state.journal.length) ctx.addIssue({ code: 'custom', path: ['journal'], message: 'Journal entry identifiers must be unique.' });
+  if (state.journal.some(e => e.taskId === null && (e.action !== 'watered' || e.previousStatus !== undefined || e.previousSnoozedUntil !== undefined))) ctx.addIssue({ code: 'custom', path: ['journal'], message: 'Only a manual watering entry can be saved without a task.' });
   if (state.journal.some(e => (e.previousStatus === 'snoozed') !== (typeof e.previousSnoozedUntil === 'string'))) ctx.addIssue({ code: 'custom', path: ['journal'], message: 'A saved reminder snapshot needs a matching reminder date.' });
   if (state.analysis && (state.analysis.farmId !== state.farmId || state.analysis.boundaryVersion !== state.boundaryVersion)) ctx.addIssue({ code: 'custom', path: ['analysis'], message: 'Saved analysis belongs to an older field.' });
 }
@@ -107,10 +108,10 @@ export const farmStateSchema = z.object({
   if (state.plots.some(plot => !bedIds.has(plot.slotId))) ctx.addIssue({ code: 'custom', path: ['plots'], message: 'Saved plantings need a matching bed in the farm layout.' });
 });
 
-export function loadFarm(storage: StorageLike): { state: FarmState; error: string | null } {
+export function loadFarm(storage: StorageLike, initialScenario: ScenarioId = 'dry-week'): { state: FarmState; error: string | null } {
   try {
     const saved = storage.getItem(STORAGE_KEY);
-    if (!saved) return { state: createScenarioState('dry-week'), error: null };
+    if (!saved) return { state: createScenarioState(initialScenario), error: null };
     const value: unknown = JSON.parse(saved);
     const legacy = value && typeof value === 'object' && 'version' in value && (value.version === 1 || value.version === 2) ? legacyFarmStateSchema.safeParse(value) : null;
     if (legacy && !legacy.success) return { state: createScenarioState('dry-week'), error: 'The saved farm could not be read. A demo farm is shown; your saved data has not been overwritten.' };

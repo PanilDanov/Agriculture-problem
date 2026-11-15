@@ -134,13 +134,13 @@ def normalize_unit(unit):
     return str(unit).lower().replace(" ", "").replace("³", "3").replace("²", "2")
 
 
-def parse_power_year(payload, year):
+def parse_power_daily(payload, start_date, end_date, requested_parameters=POWER_PARAMETERS):
     try:
         parameters = payload["properties"]["parameter"]
         parameter_metadata = payload["parameters"]
     except (KeyError, TypeError) as exc:
         raise ValueError("The POWER response is missing parameter data or metadata.") from exc
-    missing = set(POWER_PARAMETERS) - set(parameters)
+    missing = set(requested_parameters) - set(parameters)
     if missing:
         raise ValueError(f"POWER did not return the following parameters: {sorted(missing)}")
     expected_units = {
@@ -150,34 +150,45 @@ def parse_power_year(payload, year):
         "SFMC": {"m3m-3", "m3/m3", "m^3/m^3"},
         "RZMC": {"m3m-3", "m3/m3", "m^3/m^3"},
         "ALLSKY_SFC_SW_DWN": {"mj/m^2/day", "mj/m2/day"},
+        "WS2M": {"m/s"},
+        "PS": {"kpa"},
+        "T2MDEW": {"c", "°c"},
     }
-    for parameter, accepted in expected_units.items():
+    for parameter in requested_parameters:
         unit = parameter_metadata.get(parameter, {}).get("units")
-        if normalize_unit(unit) not in accepted:
+        if normalize_unit(unit) not in expected_units[parameter]:
             raise ValueError(f"Unexpected units for {parameter}: {unit!r}.")
-    frame = pd.DataFrame({p: parameters[p] for p in POWER_PARAMETERS})
+    frame = pd.DataFrame({p: parameters[p] for p in requested_parameters})
     frame.index = pd.to_datetime(frame.index, format="%Y%m%d", errors="raise")
     if frame.index.has_duplicates:
         raise ValueError("POWER returned duplicate dates.")
     frame = frame.apply(pd.to_numeric, errors="coerce")
     fill_value = payload.get("header", {}).get("fill_value", -999)
     frame = frame.replace([fill_value, -999, np.inf, -np.inf], np.nan)
-    calendar_index = pd.date_range(f"{year}-01-01", f"{year}-12-31", name="date")
+    calendar_index = pd.date_range(start_date, end_date, name="date")
     frame = frame.reindex(calendar_index)
     limits = {
         "RH2M": (0, 100), "SFMC": (0, 1), "RZMC": (0, 1),
         "PRECTOTCORR": (0, np.inf), "ALLSKY_SFC_SW_DWN": (0, np.inf),
+        "WS2M": (0, np.inf), "PS": (0, np.inf),
     }
     for parameter, (lower, upper) in limits.items():
+        if parameter not in frame:
+            continue
         invalid = frame[parameter].notna() & ~frame[parameter].between(lower, upper)
         if invalid.any():
-            warnings.warn(f"{year}: {parameter}, out-of-range values on {int(invalid.sum())} days.")
+            warnings.warn(f"{start_date}: {parameter}, out-of-range values on {int(invalid.sum())} days.")
             frame.loc[invalid, parameter] = np.nan
-    invalid = frame["T2M_MIN"] > frame["T2M_MAX"]
-    if invalid.any():
-        warnings.warn(f"{year}: Tmin > Tmax; excluded {int(invalid.sum())} days.")
-        frame.loc[invalid, ["T2M_MIN", "T2M_MAX"]] = np.nan
+    if {"T2M_MIN", "T2M_MAX"} <= set(frame.columns):
+        invalid = frame["T2M_MIN"] > frame["T2M_MAX"]
+        if invalid.any():
+            warnings.warn(f"{start_date}: Tmin > Tmax; excluded {int(invalid.sum())} days.")
+            frame.loc[invalid, ["T2M_MIN", "T2M_MAX"]] = np.nan
     return frame
+
+
+def parse_power_year(payload, year):
+    return parse_power_daily(payload, date(year, 1, 1), date(year, 12, 31))
 
 
 def fetch_power_daily(session, latitude, longitude, years, cache_dir,
@@ -250,6 +261,10 @@ def fetch_soil_pixel(session, property_name, depth, x, y, cache_dir,
         ("SUBSETTINGCRS", SOIL_WCS_CRS), ("OUTPUTCRS", SOIL_WCS_CRS),
     ]
     content = fetch_bytes(session, SOIL_WCS_URL, params, cache_dir, use_cache, ttl_days)
+    return sample_soil_pixel(content, property_name, depth, x, y)
+
+
+def sample_soil_pixel(content, property_name, depth, x, y):
     try:
         with MemoryFile(content) as memory_file:
             with memory_file.open() as raster:

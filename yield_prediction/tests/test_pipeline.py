@@ -1,6 +1,7 @@
 """Synthetic boundary tests and real CY-Bench training/inference checks."""
 
 import json
+from io import StringIO
 from pathlib import Path
 
 import numpy as np
@@ -9,7 +10,7 @@ import pytest
 from threadpoolctl import threadpool_limits
 
 from yield_prediction import predict_yield
-from yield_prediction.data import prepare
+from yield_prediction.data import prepare, prepare_group
 from yield_prediction.experiment import run
 from yield_prediction.features import CLIMATE, MID, TARGET, WEATHER, feature_table, seasons
 from yield_prediction.inference import load_bundle
@@ -42,6 +43,24 @@ def test_season_and_units_without_future_weather():
     assert changed.loc[3, "climate_temperature_c"] != before.loc[3, "climate_temperature_c"]
 
 
+def test_mid_season_features_stay_with_region_when_a_calendar_is_dropped():
+    windows = seasons(pd.DataFrame({
+        "adm_id": ["A", "invalid", "C"], "harvest_year": 2021,
+        "sos": [30, 0, 30], "eos": 200,
+    }))
+    dates = pd.date_range("2021-01-01", "2021-12-31").strftime("%Y%m%d")
+    weather = pd.concat([
+        pd.DataFrame({"adm_id": region, "date": dates,
+                      **dict(zip(WEATHER, [value - 2, value + 2, value, 1, 12_000_000, 4, 15, -2]))})
+        for region, value in (("A", 12), ("C", 22))
+    ])
+    result = feature_table(windows, [weather])
+    assert result.adm_id.tolist() == ["A", "C"]
+    assert result.mid_temperature_c.tolist() == [12, 22]
+    assert result.mid_weather_coverage.tolist() == [1, 1]
+    pd.testing.assert_series_equal(result.mid_weather_through, result.mid_weather_cutoff, check_names=False)
+
+
 def test_label_history_publication_and_country_boundary():
     """Synthetic only: labels at and after July's proxy timestamp cannot leak backwards."""
     observations = pd.DataFrame({"crop": "maize", "country_code": "ES", "adm_id": "ES1",
@@ -52,6 +71,24 @@ def test_label_history_publication_and_country_boundary():
     assert history.at("maize", "NL", "ES1", pd.Timestamp("2018-08-01"))[-1] == 0
     snapshot = history.snapshot(pd.Timestamp("2018-06-30"), "maize")
     assert snapshot.at("maize", "ES", "ES1", pd.Timestamp("2019-12-01")) == [8.5, 8.5, 2]
+
+
+def test_brazil_labels_accept_alpha_three_without_importing_other_countries():
+    weather = pd.DataFrame({
+        "adm_id": "123", "date": pd.date_range("2018-01-01", "2022-12-31").strftime("%Y%m%d"),
+        **dict(zip(WEATHER, [10, 24, 17, 2, 12_000_000, 4, 15, -2])),
+    })
+    files = {
+        "yield": "country_code,adm_id,harvest_year,yield\nBRA,123,2021,4\nBR,123,2022,5\nUSA,123,2022,90\n",
+        "crop_calendar": "adm_id,sos,eos\n123,60,150\n",
+        "soil": "adm_id,awc,bulk_density\n123,13,1.3\n",
+        "location": "adm_id,latitude,longitude\n123,-23,-47\n",
+        "meteo": weather.to_csv(index=False),
+    }
+    table, audit = prepare_group(lambda kind: StringIO(files[kind]), "maize", "BR")
+    assert table.country_code.tolist() == ["BR", "BR"]
+    assert table[TARGET].tolist() == [4, 5]
+    assert audit["invalid_or_duplicate_rows"] == 1
 
 
 @pytest.fixture(scope="module")

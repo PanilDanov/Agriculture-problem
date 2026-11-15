@@ -5,6 +5,7 @@ import io
 import re
 import shutil
 import struct
+import tempfile
 import time
 import zlib
 from pathlib import Path
@@ -23,6 +24,8 @@ GROUPS = {
     "wheat": "ES NL FR IT DE RO HU CN PL PT BE CZ BG AU DK FI SE",
 }
 KINDS = {"yield", "crop_calendar", "meteo", "soil", "location"}
+RANGE_CHUNK_BYTES = 32 * 1024**2
+BUFFERED_GROUP_BYTES = 150 * 1024**2
 
 
 def request_range(start, end):
@@ -59,29 +62,60 @@ def central_directory():
         return archive.infolist()
 
 
+def stream_member(member, archive):
+    offset = member.header_offset
+    header = request_range(offset, offset + 29)
+    signature, name_length, extra_length = struct.unpack("<4s22xHH", header)
+    if signature != b"PK\x03\x04":
+        raise ValueError(f"Invalid ZIP member {member.filename}")
+    if member.compress_type not in (0, 8):
+        raise ValueError(f"Unsupported compression for {member.filename}")
+    decoder = zlib.decompressobj(-15) if member.compress_type == 8 else None
+    start = offset + 30 + name_length + extra_length
+    stop = start + member.compress_size
+    size = checksum = 0
+    with archive.open(member.filename, "w", force_zip64=True) as output:
+        for chunk_start in range(start, stop, RANGE_CHUNK_BYTES):
+            data = request_range(chunk_start, min(chunk_start + RANGE_CHUNK_BYTES, stop) - 1)
+            payload = decoder.decompress(data) if decoder else data
+            output.write(payload)
+            size += len(payload)
+            checksum = zlib.crc32(payload, checksum)
+    if size != member.file_size or checksum != member.CRC or (decoder and not decoder.eof):
+        raise ValueError(f"CRC or size mismatch for {member.filename}")
+
+
 def fetch_group(members, output):
     first = min(member.header_offset for member in members)
     # A ZIP local file header, its name and local extra fields precede each payload.
     last_member = max(members, key=lambda member: member.header_offset)
     last = last_member.header_offset + last_member.compress_size + 131_101
-    data = request_range(first, min(last, ARCHIVE_BYTES - 1))
-    temp = output.with_suffix(".tmp")
-    with ZipFile(temp, "w", compression=8, compresslevel=1) as archive:
-        for member in members:
-            header = member.header_offset - first
-            signature, name_length, extra_length = struct.unpack_from("<4s22xHH", data, header)
-            if signature != b"PK\x03\x04":
-                raise ValueError(f"Invalid ZIP member {member.filename}")
-            offset = header + 30 + name_length + extra_length
-            payload = data[offset : offset + member.compress_size]
-            if member.compress_type == 8:
-                payload = zlib.decompress(payload, -15)
-            elif member.compress_type != 0:
-                raise ValueError(f"Unsupported compression for {member.filename}")
-            if len(payload) != member.file_size or zlib.crc32(payload) != member.CRC:
-                raise ValueError(f"CRC or size mismatch for {member.filename}")
-            archive.writestr(member.filename, payload)
-    temp.replace(output)
+    with tempfile.NamedTemporaryFile(dir=output.parent, suffix=".tmp", delete=False) as handle:
+        temp = Path(handle.name)
+    try:
+        with ZipFile(temp, "w", compression=8, compresslevel=1) as archive:
+            if last - first > BUFFERED_GROUP_BYTES:
+                for member in members:
+                    stream_member(member, archive)
+            else:
+                data = request_range(first, min(last, ARCHIVE_BYTES - 1))
+                for member in members:
+                    header = member.header_offset - first
+                    signature, name_length, extra_length = struct.unpack_from("<4s22xHH", data, header)
+                    if signature != b"PK\x03\x04":
+                        raise ValueError(f"Invalid ZIP member {member.filename}")
+                    offset = header + 30 + name_length + extra_length
+                    payload = data[offset : offset + member.compress_size]
+                    if member.compress_type == 8:
+                        payload = zlib.decompress(payload, -15)
+                    elif member.compress_type != 0:
+                        raise ValueError(f"Unsupported compression for {member.filename}")
+                    if len(payload) != member.file_size or zlib.crc32(payload) != member.CRC:
+                        raise ValueError(f"CRC or size mismatch for {member.filename}")
+                    archive.writestr(member.filename, payload)
+        temp.replace(output)
+    finally:
+        temp.unlink(missing_ok=True)
 
 
 def download_sample(directory):
@@ -103,13 +137,14 @@ def main():
     parser.add_argument("--countries", nargs="+")
     parser.add_argument("--crop", choices=GROUPS)
     parser.add_argument("--max-span-mib", type=int, default=150)
+    parser.add_argument("--output-dir", type=Path)
     args = parser.parse_args()
+    folder = args.output_dir or ROOT / "data/raw" / args.source
     if args.source == "sample":
-        download_sample(ROOT / "data/raw/sample")
+        download_sample(folder)
         return
     from concurrent.futures import ThreadPoolExecutor
 
-    folder = ROOT / "data/raw/zenodo"
     folder.mkdir(parents=True, exist_ok=True)
     groups = {}
     for info in central_directory():

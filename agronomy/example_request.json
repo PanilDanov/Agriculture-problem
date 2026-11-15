@@ -1,0 +1,38 @@
+{
+  "crop_id": "tomato",
+  "irrigation": {
+    "local_date": "2026-01-14",
+    "variant": "processing",
+    "stage": "mid_season",
+    "et0_mm_day": 5,
+    "root_zone_layers": [
+      {
+        "thickness_m": 0.3,
+        "theta_fc": 0.3,
+        "theta_wp": 0.15,
+        "theta_now": 0.2
+      },
+      {
+        "thickness_m": 0.3,
+        "theta_fc": 0.29,
+        "theta_wp": 0.15,
+        "theta_now": 0.21
+      }
+    ],
+    "application_efficiency": 0.8
+  },
+  "rotation": {
+    "planting_date": "2025-11-15",
+    "history_complete_since": "2022-01-01",
+    "history": [
+      {
+        "crop_id": "potato",
+        "harvest_date": "2024-04-12"
+      },
+      {
+        "crop_id": "barley",
+        "harvest_date": "2025-05-15"
+      }
+    ]
+  }
+}

@@ -107,6 +107,8 @@ def feature_table(windows, chunks):
     index = ["adm_id", "harvest_year"]
     full = windows.merge(summaries["full"], on=index, how="left", validate="one_to_one")
     mid = windows.merge(summaries["mid"], on=index, how="left", validate="one_to_one")
+    # A left merge preserves row order but resets indices after invalid seasons are dropped.
+    mid.index = windows.index
     mid_days = (mid.mid_weather_cutoff - mid.season_start).dt.days + 1
     mid_valid = mid.days.between(np.ceil(0.95 * mid_days), mid_days) & mid_days.ge(10)
     for col in SEASON_STATS:

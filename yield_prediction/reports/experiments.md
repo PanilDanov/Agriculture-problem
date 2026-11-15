@@ -1,28 +1,28 @@
-# Эксперименты
+# Experiments
 
-Обучение и настройка проводились отдельно для каждого режима. Для каждой пары «культура–режим» проверены медиана культуры, медиана региона, Ridge, HistGradientBoosting, CatBoost, XGBoost и LightGBM. Для пяти семейств также обучены общие модели на двух культурах с one-hot-кодированием культуры. Сравнивались модели без координат, без истории урожайности и модели остатков относительно исторической медианы. [Все метрики теста](../artifacts/metrics/test_comparison.csv) · [все запуски валидации и Optuna](../artifacts/metrics/validation_comparison.csv).
+Training and tuning were separate for each mode. For each crop and mode combination, the experiment evaluated the crop median, regional median, Ridge, HistGradientBoosting, CatBoost, XGBoost, and LightGBM. Five model families were also trained jointly on both crops with one-hot encoding for crop. The comparisons included models without coordinates, models without yield history, and models trained on residuals from the historical median. [All test metrics](../artifacts/metrics/test_comparison.csv) · [All validation and Optuna runs](../artifacts/metrics/validation_comparison.csv)
 
-Три расширяющихся временных окна тестировали 2013, 2015 и 2017 годы. Использовался фиксированный seed 42 и четыре пробных конфигурации Optuna для каждого из двух наиболее точных семейств на валидации. При подборе сравнивали MAE по объединённым прогнозам трёх окон. Ансамбль участвовал в выборе при улучшении не менее 0,5% и выигрыше как минимум в двух окнах. Модели с переменным числом итераций обходились без случайного раннего останова. Все параметры, времена, размеры выборок и число признаков записаны по окнам.
+Three expanding temporal validation windows evaluated 2013, 2015, and 2017. The runs used seed 42 and four Optuna configurations for each of the two most accurate model families on validation. Tuning compared MAE across the pooled predictions from all three windows. An ensemble qualified for selection after improving by at least 0.5% and winning in at least two windows. Models with variable iteration counts ran with stochastic early stopping disabled. The results record parameters, runtimes, sample sizes, and feature counts for every window.
 
-Для итоговой оценки годы сбора 2021–2024 были выделены до выбора модели. Из-за предполагаемой даты публикации 1 июля следующего года и раннего начала отдельных сезонов последние доступные обучающие метки во всех четырёх запусках относятся к 2019 году. Значения истории региона в обучающей строке учитывают собственную дату прогноза, в валидации и тесте их источник ограничен соответствующей обучающей частью. Страны и идентификаторы не входят в матрицу признаков. Координаты проверены отдельной абляцией, а история урожайности региона отражает доступную оперативную статистику.
+Harvest years 2021–2024 were reserved for final evaluation before model selection. Given the assumed publication date of July 1 in the following year and the early starts of some seasons, the most recent training labels available in all four runs were from 2019. The regional history available to each training row respects its own issue date. In validation and testing, that history is restricted to the corresponding training split. The feature matrix excludes country and region identifiers. A separate ablation evaluated coordinates. Regional yield history represents the statistics available at issue time.
 
-| Культура | Режим | Выбранная модель | MAE валидации | Строк в итоговом обучении |
+| Crop | Mode | Selected model | Validation MAE | Final training rows |
 | --- | --- | --- | ---: | ---: |
-| Кукуруза | До сезона | HistGradientBoosting после Optuna | 0,898 | 11 810 |
-| Кукуруза | Середина | 50% HistGradientBoosting остатков + 50% Ridge | 0,961 | 11 798 |
-| Пшеница | До сезона | 75% Ridge + 25% HistGradientBoosting | 0,606 | 12 012 |
-| Пшеница | Середина | 50% HistGradientBoosting без координат + 50% общий LightGBM | 0,604 | 23 804 для общего компонента |
+| Maize | Pre-season | Optuna-tuned HistGradientBoosting | 0.898 | 11,810 |
+| Maize | Mid-season | 50% residual HistGradientBoosting and 50% Ridge | 0.961 | 11,798 |
+| Wheat | Pre-season | 75% Ridge and 25% HistGradientBoosting | 0.606 | 12,012 |
+| Wheat | Mid-season | 50% HistGradientBoosting without coordinates and 50% shared LightGBM | 0.604 | 23,804 for the shared component |
 
-Общая модель оказалась полезным компонентом финального прогноза пшеницы в середине сезона. На позднем тесте общая HistGradientBoosting для предсезонной пшеницы показала MAE 0,582 против 0,589 у отдельной версии. Для предсезонной кукурузы отдельный Ridge дал 0,850 против 0,874 у общего. У кукурузы в середине сезона обучение остатков улучшило MAE HistGradientBoosting на валидации и вошло в ансамбль. На позднем тесте отдельный Ridge сравнялся с ансамблем по округлённой MAE. История климата и почва без меток региона дали у предсезонной HistGradientBoosting MAE 1,384 для кукурузы и 0,766 для пшеницы, а с координатами 1,206 и 0,661.
+The shared model contributed to the selected wheat mid-season ensemble. On the late holdout, shared HistGradientBoosting gave a pre-season wheat MAE of 0.582 versus 0.589 for the crop-specific version. For pre-season maize, the crop-specific Ridge gave 0.850 versus 0.874 for the shared model. For mid-season maize, residual learning improved HistGradientBoosting validation MAE and qualified for the ensemble. The crop-specific Ridge tied that ensemble at the rounded MAE on the late holdout. Pre-season HistGradientBoosting with climate history and soil alone, without historical regional yields, gave MAEs of 1.384 for maize and 0.766 for wheat. Adding coordinates gave 1.206 and 0.661, respectively.
 
-### Кукуруза Испании, 2018–2020
+## Maize in Spain, 2018–2020
 
-| Испанский тест, 144 записи | MAE, т/га | RMSE, т/га | R² |
+| Spanish holdout, 144 observations | MAE, t/ha | RMSE, t/ha | R² |
 | --- | ---: | ---: | ---: |
-| Воспроизведённая исходная HistGradientBoosting | 1,863 | 2,334 | 0,622 |
-| Воспроизведённая исходная медиана региона | 1,523 | 1,985 | 0,727 |
-| Новая многострановая предсезонная HistGradientBoosting | 1,048 | 1,343 | 0,875 |
-| Новый многострановой ансамбль середины сезона | 1,231 | 1,604 | 0,821 |
-| Медиана региона при новом ограничении на доступность меток | 1,745 | 2,249 | 0,649 |
+| Reproduced original HistGradientBoosting | 1.863 | 2.334 | 0.622 |
+| Reproduced original regional median | 1.523 | 1.985 | 0.727 |
+| New multi-country pre-season HistGradientBoosting | 1.048 | 1.343 | 0.875 |
+| New multi-country mid-season ensemble | 1.231 | 1.604 | 0.821 |
+| Regional median with the new label availability restriction | 1.745 | 2.249 | 0.649 |
 
-Первый запуск использовал 806 обучающих записей 2001–2017 годов и 144 тестовые. Новые модели используют другое множество обучающих стран, новые признаки и ограничение на время выхода статистики. Испанские метки 2018–2020 не использовались при настройке. Прежний бустинг недооценивал урожайность в среднем на 1,54 т/га, а медиана — на 1,31 т/га. Модель без истории хуже сохранила устойчивые различия между регионами. Проверка абляций и важности поддерживает роль предшествующей урожайности, но не диагностирует влияние орошения. [Результат воспроизведения](../artifacts/metrics/legacy_spain_maize.json) · [метрики нового запуска](../artifacts/metrics).
+The first run used 806 training observations from 2001–2017 and 144 holdout observations. The new models use a different set of training countries, new features, and a restriction based on when the official statistics become available. Spanish labels for 2018–2020 were reserved from tuning. The original boosting model underestimated yield by an average of 1.54 t/ha, and the median by 1.31 t/ha. The model without history captured persistent differences between regions less well. Ablation and feature importance provide evidence for the role of prior yield. Estimating the effect of irrigation requires a separate analysis. [Reproduction results](../artifacts/metrics/legacy_spain_maize.json) · [New run metrics](../artifacts/metrics)

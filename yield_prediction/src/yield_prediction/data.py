@@ -12,6 +12,8 @@ import pandas as pd
 from .features import GEO, KEY, SOIL, TARGET, WEATHER, feature_table, seasons
 
 GROUP_FILES = re.compile(r"(yield|crop_calendar|meteo|soil|location)_(maize|wheat)_([A-Z]{2})\.csv")
+# CY-Bench v1.10 files for BR use the ISO alpha-3 code in their yield tables.
+LABEL_COUNTRY_CODES = {"BR": ("BR", "BRA")}
 
 
 def read_csv(path, **kwargs):
@@ -33,7 +35,8 @@ def prepare_group(open_csv, crop, country):
     soil = distinct_metadata(load("soil"), SOIL)
     location = distinct_metadata(load("location"), GEO)
     calendar = calendar.merge(soil, how="left", on="adm_id").merge(location, how="left", on="adm_id")
-    labels = raw.loc[raw.country_code.eq(country), ["adm_id", "harvest_year", "yield"]].copy()
+    country_codes = LABEL_COUNTRY_CODES.get(country, (country,))
+    labels = raw.loc[raw.country_code.isin(country_codes), ["adm_id", "harvest_year", "yield"]].copy()
     years = pd.to_numeric(labels.harvest_year, errors="coerce")
     values = pd.to_numeric(labels["yield"], errors="coerce")
     valid = years.between(1900, 2100) & years.mod(1).eq(0) & np.isfinite(values) & values.ge(0)

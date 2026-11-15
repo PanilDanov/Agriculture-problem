@@ -1,0 +1,6 @@
+numpy>=1.26,<2
+netCDF4>=1.7,<2
+pandas>=2.2,<4
+rasterio>=1.4,<2
+requests>=2.32,<3
+Shapely>=2,<3

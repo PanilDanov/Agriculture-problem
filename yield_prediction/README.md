@@ -1,10 +1,10 @@
-# AgroWise · прогноз урожайности
+# AgroWise yield prediction
 
-Модуль прогнозирует урожайность кукурузы (`maize`) и пшеницы (`wheat`) в т/га на уровне административного региона. Для каждой культуры включены две обученные модели. `pre_season` рассчитывает прогноз на день перед началом сезона. `mid_season` прогнозирует на середину календарного сезона по погоде, доступной к этой дате с учётом задержки AgERA5.
+This module forecasts maize (`maize`) and wheat (`wheat`) yield in t/ha at the administrative-region level. Each crop has two trained models. `pre_season` forecasts on the day before the season starts. `mid_season` forecasts at the calendar midpoint using weather available by then after the AgERA5 publication lag.
 
-## Прогноз
+## Run a forecast
 
-Рекомендуем Python 3.11. Из корня репозитория установите модуль и запустите пример на отложенной записи CY-Bench.
+Use Python 3.11. Install the module from the repository root and run an example on a held-out CY-Bench record.
 
 ```bash
 python -m pip install ./yield_prediction
@@ -25,28 +25,28 @@ result = predict_yield(record["features"], crop="maize", mode="pre_season")
 print(result["predicted_yield_t_ha"])
 ```
 
-Модели, преобразования входов и замороженные сводки истории урожайности поставляются в пакете. Функция проверяет схему, календарь, единицы, диапазоны и принадлежность к обучающей географии. Она возвращает JSON-совместимый словарь с оценкой, версией, уровнем агрегации и предупреждениями. При ошибке входа возвращается исключение `ValueError` или `TypeError`. Значение `prediction_interval_t_ha` равно `null`. Загрузка выполняется из локального пакета, обычный вызов не требует сети или обучения.
+The package includes the models, input transformations, and frozen yield-history summaries. The function validates the schema, calendar, units, and ranges and checks geographic coverage. It returns a JSON-compatible dictionary with the estimate, model version, level of aggregation, and warnings. Invalid inputs raise `ValueError` or `TypeError`. The value of `prediction_interval_t_ha` is `null`. A normal prediction uses the installed package without network access or training.
 
-## Входные данные
+## Input data
 
-- Укажите двухбуквенный `country_code` CY-Bench, строковый `adm_id`, год сбора `harvest_year` и даты сезона `season_start`, `season_end` в формате ISO. `season_days` включает обе границы.
-- Передайте сезонные агрегаты с префиксом `climate_`, число использованных сезонов `climate_seasons` от 2 до 5 и дату последнего принятого наблюдения `climate_through`. Используйте до пяти последних завершённых сезонов той же культуры и региона в пределах предыдущих семи лет сбора. Исторический сезон должен закончиться как минимум за 14 дней до даты прогноза. Для исторического и текущего окна требуется не менее 95% полных дневных записей.
-- Для `mid_season` добавьте агрегаты с префиксом `mid_`, дату `mid_weather_through` и долю полных дней `mid_weather_coverage`. Окно начинается в `season_start` и заканчивается за 14 дней до середины сезона. Середина равна `season_start + (season_days - 1) // 2` суток.
-- `awc` и `bulk_density` в шкале CY-Bench, а также `latitude` и `longitude` в градусах допускают `null`. Импутация использует обучающие статистики. `adm_id` используется для поиска разрешённой истории и географических предупреждений.
+- Provide a two-letter CY-Bench `country_code`, string `adm_id`, `harvest_year`, and ISO dates `season_start` and `season_end`. `season_days` counts both boundary dates.
+- Provide `climate_` aggregates, `climate_seasons` from two to five, and the last observation date as `climate_through`. Use up to five of the most recent completed seasons for the same crop and region within the preceding seven harvest years. The historical season must end at least 14 days before the forecast date. Historical and current windows require at least 95% complete daily records.
+- For `mid_season`, add the `mid_` aggregates, `mid_weather_through`, and `mid_weather_coverage`. The window begins at `season_start` and ends 14 days before the midpoint. The midpoint is `season_start + (season_days - 1) // 2` days.
+- `awc` and `bulk_density` in CY-Bench units, and `latitude` and `longitude` in degrees, may be `null`. Imputation uses training statistics. `adm_id` is used to look up eligible yield history and produce geographic warnings.
 
-| Суффикс | Агрегат и единица |
+| Suffix | Aggregate and unit |
 | --- | --- |
-| `temperature_c`, `min_temperature_c`, `max_temperature_c`, `temperature_sd_c` | Среднее и стандартное отклонение дневной средней температуры, минимум дневных минимумов, максимум дневных максимумов, °C |
-| `precipitation_mm`, `precipitation_mm_day` | Сумма и среднее за наблюдавшиеся дни, мм и мм/сут |
-| `radiation_mj_m2_day` | Средняя суточная радиация, МДж/м²/сут |
-| `et0_mm`, `water_balance_mm` | Суммарные ET₀ и климатический водный баланс, мм |
-| `vpd_kpa` | Средний дефицит давления водяного пара при дневном максимуме температуры, кПа |
-| `hot_days`, `frost_days`, `dry_days` | Число дней с Tmax ≥ 35 °C, Tmin < 0 °C и осадками < 1 мм соответственно |
-| `climate_precipitation_sd_mm`, `climate_temperature_interannual_sd_c` | Выборочное стандартное отклонение сезонных сумм осадков и средних температур, мм и °C |
+| `temperature_c`, `min_temperature_c`, `max_temperature_c`, `temperature_sd_c` | Mean and standard deviation of daily mean temperature, minimum of daily minima, and maximum of daily maxima, in °C |
+| `precipitation_mm`, `precipitation_mm_day` | Total and mean over observed days, in mm and mm/day |
+| `radiation_mj_m2_day` | Mean daily radiation, in MJ/m²/day |
+| `et0_mm`, `water_balance_mm` | Total reference ET and climatic water balance, in mm |
+| `vpd_kpa` | Mean vapour pressure deficit at the daily maximum temperature, in kPa |
+| `hot_days`, `frost_days`, `dry_days` | Counts of days with Tmax ≥ 35 °C, Tmin < 0 °C, and precipitation < 1 mm, respectively |
+| `climate_precipitation_sd_mm`, `climate_temperature_interannual_sd_c` | Sample standard deviations of seasonal precipitation totals and mean temperatures, in mm and °C |
 
-Каждый `climate_`-агрегат усредняется по выбранным сезонам. Контракт проверяет указанные даты и значения. Источник должен обеспечить пространственное соответствие и фактическую доступность погодных наблюдений. Четыре полных запроса находятся в [artifacts/examples](artifacts/examples). Сведения о шкалах AgERA5 приведены в [документации Copernicus](https://cds.climate.copernicus.eu/datasets/sis-agrometeorological-indicators?tab=overview).
+The `climate_` aggregates use the selected historical seasons. The request validates the supplied dates and values. Data providers must ensure spatial alignment and verify when the observations became available. Four complete requests are in [the examples directory](artifacts/examples). AgERA5 units are documented by [Copernicus](https://cds.climate.copernicus.eu/datasets/sis-agrometeorological-indicators?tab=overview).
 
-## Воспроизведение экспериментов
+## Reproduce the experiments
 
 ```bash
 cd yield_prediction
@@ -62,21 +62,22 @@ python train.py
 python evaluate.py
 ```
 
-Для быстрой повторной проверки используйте sample, отдельную конфигурацию и отдельные пути вывода.
+For a quick check, use the sample, its own configuration, and separate output paths.
 
 ```bash
 python train.py --dataset data/processed/sample.csv --config configs/sample.json --mode pre_season --crop maize --family ridge --output data/processed/quick_run --models data/processed/quick_models --skip-diagnostics
 ```
 
-Для настройки одного режима доступны параметры `--mode`, `--crop`, `--trials` и `--family`. Optuna выбирает параметры на нескольких прошлых временных разбиениях. При обновлении модели подайте новую выборку, задайте новый период независимой проверки и перерассчитайте отчёты. Пакет фиксирует версии библиотек, нужные выпущенным моделям, включая LightGBM. Если после переобучения выбрана модель CatBoost или XGBoost, проверьте её версию в метаданных и установите соответствующую библиотеку из `requirements-train.txt`.
+Use `--mode`, `--crop`, `--trials`, and `--family` to configure a run. Optuna selects parameters across historical time splits. To update a model, supply the new data, define a new independent test period, and regenerate the reports. The package pins the dependencies used by the released models, including LightGBM. If retraining selects CatBoost or XGBoost, check the versions in the metadata and install the corresponding dependency from `requirements-train.txt`.
 
-`download_data.py zenodo` получает только нужные CSV из закреплённого релиза 1.10. Для отдельных стран укажите `--countries FR IT DE` и при необходимости `--crop wheat`. Для крупных стран или полной копии вручную скачайте `cybench-data.zip` и передайте архив через `python prepare_data.py --input /path/to/cybench-data.zip --output data/processed/full.csv`. Допускается также путь к распакованной структуре. Новый набор должен содержать по одному файлу `yield`, `crop_calendar`, `meteo`, `soil` и `location` для пары «культура–страна» с совместимыми идентификаторами регионов. При добавлении страны проверьте целевой регион, качество меток, календарь и LOCO, затем обновите артефакты. [CY-Bench v1.10](https://zenodo.org/records/17279151) · [официальный sample](https://github.com/WUR-AI/sample_data/tree/b55e6918de1e1fa1b998966f6014b578cd36b83b).
+`download_data.py zenodo` retrieves the necessary CSV files from pinned release 1.10. For selected countries, use `--countries FR IT DE` and optionally `--crop wheat`. For large countries or a full local copy, download `cybench-data.zip` and run `python prepare_data.py --input /path/to/cybench-data.zip --output data/processed/full.csv`. An extracted directory is also accepted. The new data must provide one `yield`, `crop_calendar`, `meteo`, `soil`, and `location` file per crop–country pair with compatible region IDs. For an added country, verify the target region, label quality, calendar, and leave-one-country-out performance before updating the artifacts. [CY-Bench v1.10](https://zenodo.org/records/17279151) · [Official sample](https://github.com/WUR-AI/sample_data/tree/b55e6918de1e1fa1b998966f6014b578cd36b83b)
 
-## Результаты и ограничения
+## Results and limitations
 
-- [Анализ данных](reports/data_analysis.md).
-- [Эксперименты](reports/experiments.md) и [оценка моделей](reports/model_evaluation.md).
-- [Сравнение на независимом тесте](artifacts/metrics/test_comparison.csv), [все запуски настройки](artifacts/metrics/validation_comparison.csv), [графики](artifacts/figures).
-- [Ограничения модели](reports/limitations.md), [артефакты моделей и схемы](src/yield_prediction/models).
+- [Data analysis](reports/data_analysis.md)
+- [Experiments](reports/experiments.md) and [model evaluation](reports/model_evaluation.md)
+- [Independent validation in new countries and on IBGE data](reports/external_validation.md)
+- [Held-out test comparison](artifacts/metrics/test_comparison.csv), [tuning runs](artifacts/metrics/validation_comparison.csv), and [figures](artifacts/figures)
+- [Model limitations](reports/limitations.md) and [trained models and schemas](src/yield_prediction/models)
 
-Цитируйте Kallenberg et al., *CY-Bench: a comprehensive benchmark dataset for sub-national crop yield forecasting* и источник соответствующей национальной статистики. Релиз Zenodo указывает EUPL-1.2 и условия цитирования включённых источников. [Статья](https://doi.org/10.5194/essd-18-3997-2026) · [Релиз и лицензия](https://zenodo.org/records/17279151).
+Cite Kallenberg et al., *CY-Bench: a comprehensive benchmark dataset for sub-national crop yield forecasting*, and the source of the corresponding national statistics. The Zenodo release lists EUPL-1.2 and the citation requirements for the included sources. [Paper](https://doi.org/10.5194/essd-18-3997-2026) · [Release and licence](https://zenodo.org/records/17279151)

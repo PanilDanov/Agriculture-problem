@@ -100,9 +100,11 @@ jobs:
           fi
           cd "$RELEASE_DIR"
           vercel_args=(--scope lu1dgys-projects --token "$VERCEL_TOKEN")
-          deployment=$(vercel deploy --prod --skip-domain --yes "${vercel_args[@]}" \
-            --meta "orbitFarmFrontendSha=$GITHUB_SHA" --meta "orbitFarmBackendSha=$BACKEND_REVISION")
-          vercel curl /health --deployment "$deployment" --yes "${vercel_args[@]}" -- \
-            --fail --silent --show-error --max-time 30 | jq -e '.status == "ok"'
+          vercel deploy --prod --skip-domain --yes "${vercel_args[@]}" \
+            --meta "orbitFarmFrontendSha=$GITHUB_SHA" --meta "orbitFarmBackendSha=$BACKEND_REVISION" \
+            2>&1 | tee "$RUNNER_TEMP/orbitfarm-vercel.log"
+          deployment=$(grep -oE 'https://orbitfarm-[a-z0-9-]+-lu1dgys-projects\.vercel\.app' "$RUNNER_TEMP/orbitfarm-vercel.log" | tail -n 1)
           vercel promote "$deployment" --yes "${vercel_args[@]}"
+          curl --fail --silent --show-error --retry 3 --retry-all-errors --max-time 20 \
+            https://orbitfarm.vercel.app/health | jq -e '.status == "ok"'
           printf 'Published %s to https://orbitfarm.vercel.app/\n' "$deployment" >> "$GITHUB_STEP_SUMMARY"

@@ -80,7 +80,11 @@ test('@mobile custom menus stay inside narrow viewports and remain usable after 
   await expectMenuInViewport(page);
   await page.screenshot({ path: testInfo.outputPath('orbitFarm-select-mobile.png'), animations: 'disabled' });
   // Exercise a real touch pan, rather than scrolling the element from JavaScript.
-  const bounds = (await page.getByRole('listbox').boundingBox())!;
+  const menu = page.getByRole('listbox');
+  await menu.evaluate(element => {
+    element.addEventListener('scrollend', () => element.setAttribute('data-pan-ended', 'true'), { once: true });
+  });
+  const bounds = (await menu.boundingBox())!;
   const session = await page.context().newCDPSession(page);
   const x = bounds.x + bounds.width / 2;
   const y = bounds.y + bounds.height - 25;
@@ -90,8 +94,9 @@ test('@mobile custom menus stay inside narrow viewports and remain usable after 
     await page.waitForTimeout(20);
   }
   await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
-  await expect.poll(() => page.getByRole('listbox').evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
+  await expect.poll(() => menu.evaluate(element => element.scrollTop)).toBeGreaterThan(0);
   await session.detach();
+  await expect(menu).toHaveAttribute('data-pan-ended', 'true');
   await page.getByRole('option', { name: 'silty clay loam', exact: true }).tap();
   await expect(texture).toHaveText('silty clay loam');
 

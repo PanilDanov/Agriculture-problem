@@ -129,6 +129,42 @@ async function capture(page: Page, path: string) {
   await page.screenshot({ path, fullPage: true });
 }
 
+test('whole-field and classic presets save distinct layouts and preserve the retained planting', async ({ page, dialogs }) => {
+  await page.goto('/#/farm');
+  await page.getByRole('button', { name: 'Watered', exact: true }).click();
+  const before = await readFarm(page);
+  const retainedPlot = before.plots.find(plot => plot.slotId === before.layout.beds[0].slotId)!;
+  await page.getByRole('button', { name: 'Edit layout', exact: true }).click();
+  await page.getByRole('button', { name: 'Whole field', exact: true }).click();
+  await expect(page.locator('[data-testid^="layout-shape-"]')).toHaveCount(1);
+  await expect.poll(() => editorPoints(page, retainedPlot.slotId)).toEqual([
+    { x: 0, y: 0 }, { x: 24, y: 0 }, { x: 24, y: 12 }, { x: 0, y: 12 },
+  ]);
+  await page.getByRole('button', { name: 'Save layout', exact: true }).click();
+  await expect(page).toHaveURL(/#\/farm$/);
+  expect(dialogs.messages.some(message => /planted.*beds/i.test(message))).toBe(true);
+  await page.reload();
+  const wholeField = await readFarm(page);
+  expect(wholeField.layout.beds).toEqual([{
+    slotId: retainedPlot.slotId, name: 'Whole field',
+    points: [{ x: 0, y: 0 }, { x: 24, y: 0 }, { x: 24, y: 12 }, { x: 0, y: 12 }],
+  }]);
+  expect(wholeField.plots).toEqual([retainedPlot]);
+
+  await page.getByRole('button', { name: 'Edit layout', exact: true }).click();
+  await page.getByRole('button', { name: 'Classic 3 × 2', exact: true }).click();
+  await expect(page.locator('[data-testid^="layout-shape-"]')).toHaveCount(6);
+  await expect.poll(() => editorPoints(page, retainedPlot.slotId)).toEqual([
+    { x: 1, y: 1 }, { x: 7, y: 1 }, { x: 7, y: 5 }, { x: 1, y: 5 },
+  ]);
+  await page.getByRole('button', { name: 'Save layout', exact: true }).click();
+  await expect(page).toHaveURL(/#\/farm$/);
+  await page.reload();
+  const classic = await readFarm(page);
+  expect(classic.layout.beds).toHaveLength(6);
+  expect(classic.plots).toEqual([retainedPlot]);
+});
+
 test('draw a seventh L-shaped bed, plant it, and preserve its exact shape after reload', async ({ page }, testInfo) => {
   await openEditor(page);
   await addPoints(page, L_SHAPE);

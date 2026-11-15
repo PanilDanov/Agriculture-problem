@@ -315,17 +315,20 @@ test('create a farm, analyze, plant, log care, and preserve it after reload', as
   await expect(page.getByRole('heading', { name: 'Rotation plans', exact: true })).toBeVisible();
   await expect(page.getByRole('article').filter({ has: page.getByRole('heading', { name: 'Example current plan', exact: true }) })).toBeVisible();
   await expect(page.getByRole('article', { name: 'Improve soil plan' })).toBeVisible();
-  await page.getByRole('article', { name: 'Save water plan' })
+  await page.getByRole('article', { name: 'Improve soil plan' })
     .getByRole('button', { name: 'Use this plan', exact: true }).click();
 
   await expect(page).toHaveURL(/#\/farm$/);
   await expect(page.getByTestId('farm-name')).toContainText('Sunrise Test Farm');
-  await page.getByTestId('plot-slot-3').click();
+  await expect(page.getByTestId('farm-scene').locator('[data-testid^="plot-slot-"]')).toHaveCount(1);
+  const initialLayout = await page.evaluate(() => JSON.parse(localStorage.getItem('orbitFarm.farm.v1')!).layout);
+  expect(initialLayout.beds).toEqual([{ slotId: 0, name: 'Whole field', points: [{ x: 0, y: 0 }, { x: 24, y: 0 }, { x: 24, y: 12 }, { x: 0, y: 12 }] }]);
+  await page.getByTestId('plot-slot-0').click();
   await page.getByRole('combobox', { name: 'Crop', exact: true }).click();
   await page.getByRole('option', { name: 'Chickpea', exact: true }).click();
   await page.getByLabel('Planting date', { exact: true }).fill('2026-11-01');
   await page.getByRole('button', { name: 'Plant crop', exact: true }).click();
-  await expect(page.getByTestId('plot-slot-3')).toHaveAccessibleName(/Chickpea/);
+  await expect(page.getByTestId('plot-slot-0')).toHaveAccessibleName(/Chickpea/);
 
   await page.getByTestId('selected-task').getByRole('button', { name: 'Watered', exact: true }).click();
   await expect(page.getByRole('status').filter({ hasText: 'Irrigation logged' })
@@ -338,16 +341,16 @@ test('create a farm, analyze, plant, log care, and preserve it after reload', as
   await expect(page.getByTestId('journal-entry').filter({ hasText: 'Irrigation logged' })).toHaveCount(1);
   await navigate(page, 'Your farm');
   await expect(page.getByTestId('farm-name')).toContainText('Sunrise Test Farm');
-  await expect(page.getByTestId('plot-slot-3')).toHaveAccessibleName(/Chickpea/);
+  await expect(page.getByTestId('plot-slot-0')).toHaveAccessibleName(/Chickpea/);
 
   await page.getByRole('button', { name: 'Edit field information', exact: true }).click();
   await expect(page.getByLabel('Farm name', { exact: true })).toHaveValue('Sunrise Test Farm');
   await page.getByLabel('Farm name', { exact: true }).fill('Sunrise Updated Farm');
   await page.getByRole('button', { name: 'Analyze my farm', exact: true }).click();
-  await page.getByRole('article', { name: 'Save water plan' })
+  await page.getByRole('article', { name: 'Improve soil plan' })
     .getByRole('button', { name: 'Use this plan', exact: true }).click();
   await expect(page.getByTestId('farm-name')).toContainText('Sunrise Updated Farm');
-  await expect(page.getByTestId('plot-slot-3')).toHaveAccessibleName(/Chickpea/);
+  await expect(page.getByTestId('plot-slot-0')).toHaveAccessibleName(/Chickpea/);
   await navigate(page, 'Journal');
   await expect(page.getByTestId('journal-entry').filter({ hasText: 'Irrigation logged' })).toHaveCount(1);
 });
@@ -441,6 +444,8 @@ for (const timezoneId of ['Pacific/Honolulu', 'Pacific/Kiritimati']) {
       await page.getByRole('combobox', { name: 'Crop', exact: true }).click();
       await page.getByRole('option', { name: 'Chickpea', exact: true }).click();
       await expect(page.getByLabel('Planting date', { exact: true })).toHaveValue('2028-03-01');
+      const acknowledgement = page.getByRole('checkbox', { name: 'Plant outside the selected plan', exact: true });
+      if (await acknowledgement.isVisible()) await acknowledgement.check();
       await page.getByRole('button', { name: 'Plant crop', exact: true }).click();
       await expect(page.locator('.plot-summary')).toContainText('Mar 1, 2028');
       await page.reload();

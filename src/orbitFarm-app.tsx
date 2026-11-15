@@ -10,7 +10,7 @@ import {
   CROP_CATALOG, SCENARIOS, buildAnalysisRequest, createApiProvider,
   createMockProvider, createScenarioState, createDefaultLayout, dateSchema, farmReducer, getDueTasks,
   addFarmDays, canUndoJournalEntry, daysBetweenFarmDates, getEstimatedHarvestDate,
-  getFarmDate, getGrowthStage, getLastWatering, getBedName, loadFarm, loadProviderSettings,
+  getFarmDate, getGrowthStage, getLastWatering, getBedName, getBedPlanProgress, loadFarm, loadProviderSettings,
   saveFarm, saveProviderSettings, validateBoundary, validateFarmLayout,
 } from './domain/orbitFarm-domain';
 import type {
@@ -25,6 +25,7 @@ import { getFarmSeasonStops } from './components/orbitFarm-seasons';
 import { Select } from './components/orbitFarm-select';
 import { AnalysisDetails } from './components/orbitFarm-analysis-details';
 import { FieldEvidenceFields } from './components/orbitFarm-evidence-fields';
+import { RotationGuide } from './components/orbitFarm-rotation-guide';
 
 type Route = 'farm' | 'plans' | 'tasks' | 'journal' | 'lab' | 'setup' | 'layout';
 type TaskAction = 'complete_task' | 'skip_task' | 'snooze_task';
@@ -322,6 +323,10 @@ export function OrbitFarmApp() {
         {route === 'farm' && <>
           <div className="page-heading"><div><h1>Your farm</h1></div><div className="heading-actions"><button className="button secondary" disabled={Boolean(state.pendingRequestId)} onClick={() => state.boundary ? void analyze() : createFarm()}><ScanLine size={17} />Analyze field</button><button className="button primary" onClick={createFarm}><Plus size={17} />Create farm</button></div></div>
           {state.pendingRequestId && <OrbitScanner key={state.pendingRequestId} mode={analysisMode} compact />}
+          {state.boundary && state.analysis && <div className="plan-choice-intro">
+            <div><strong>{selectedPlan ? `Active plan · ${selectedPlan.name}` : 'Your field, one season at a time'}</strong><p>{selectedPlan ? `${selectedPlan.sequence.map(cropName).join(' → ')} · planting and harvest progress is tracked for each bed.` : 'Choose a rotation plan to guide each planting and the crop that follows its harvest.'}</p></div>
+            <button className="button secondary compact" onClick={() => navigate('plans')}>{selectedPlan ? 'Compare plans' : 'Choose a rotation'}<ArrowRight size={15} /></button>
+          </div>}
           <div className="farm-layout"><section className="farm-main">
             <div className={`farm-window${mapView ? '' : ' farm-window--scene'}`}>
               <div className="farm-window-toolbar">
@@ -367,12 +372,12 @@ export function OrbitFarmApp() {
           </section>
           <aside className="care-sidebar" aria-label="Bed details">
             {selectedSlotId !== null && state.boundary && state.layout.beds.some(bed => bed.slotId === selectedSlotId) && <PlotEditor
-              key={`${state.farmId}-${selectedSlotId}-${selectedPlot?.id ?? 'empty'}`}
+              key={`${state.farmId}-${selectedSlotId}-${selectedPlot?.id ?? 'empty'}-${state.selectedPlanId ?? ''}-${state.analysis?.analysisId ?? ''}`}
               state={state}
               slotId={selectedSlotId}
               viewDate={viewDate}
               onAction={dispatch}
-              selectedCrop={selectedPlan?.sequence[0]}
+              onComparePlans={() => navigate('plans')}
               dueWatering={dueWatering}
               onTaskAction={taskAction}
             />}
@@ -381,7 +386,6 @@ export function OrbitFarmApp() {
           <section className="farm-conditions">
             <div className="conditions-heading"><div><h2>Conditions</h2></div><button className="text-button" onClick={() => navigate('plans')}>View analysis <ArrowRight size={15} /></button></div>
             <ConditionCards analysis={state.analysis} />
-            {selectedPlan && <div className="season-strip"><div className="season-strip-icon"><Leaf size={24} /></div><div><h3>{selectedPlan.sequence.map(cropName).join(' → ')}</h3></div><button className="button secondary" onClick={() => navigate('plans')}>Compare plans <ArrowRight size={16} /></button></div>}
           </section></div>
         </>}
 
@@ -413,8 +417,9 @@ export function OrbitFarmApp() {
           <div className="page-heading"><div><h1>Rotation plans</h1></div><button className="button secondary" disabled={Boolean(state.pendingRequestId)} onClick={() => state.boundary ? void analyze() : createFarm()}><RefreshCw size={16} />Analyze field</button></div>
           {state.pendingRequestId ? <OrbitScanner key={state.pendingRequestId} mode={analysisMode} /> : state.analysisError ? <div className="analysis-error" role="alert"><span className="error-icon"><CloudSun size={30} /></span><h2>Analysis unavailable</h2><p>{state.analysisError}</p><div className="heading-actions"><button className="button primary" onClick={() => void analyze()}><RefreshCw size={16} />Try again</button><button className="button secondary" onClick={() => navigate('farm')}>Back to farm</button></div>{state.analysis && <p className="small muted">Your last available analysis and saved farm are preserved.</p>}</div> : state.analysis ? <>
             <div className="rotation-grid">{state.analysis.rotationPlans.map((plan) => (
-              <article className={`rotation-card ${plan.planId.includes('water') ? 'featured' : ''}`} key={plan.planId} aria-label={`${plan.name} plan`}>
+              <article className={`rotation-card ${plan.planId === state.selectedPlanId ? 'is-selected' : !selectedPlan && plan.planId.includes('water') ? 'featured' : ''}`} key={plan.planId} aria-label={`${plan.name} plan`}>
                 <header className="rotation-card-heading">
+                  {plan.planId === state.selectedPlanId && <span className="active-plan-badge"><Check size={12} />Active plan</span>}
                   <h2>{plan.name}</h2>
                   {plan.planStatus === 'provisional' && <p className="small muted">Provisional plan</p>}
                 </header>
@@ -439,21 +444,30 @@ export function OrbitFarmApp() {
                   <ul className="plan-reasons">{plan.reasons.map((reason) => <li key={reason}><Check size={15} />{reason}</li>)}</ul>
                   <div className="plan-tradeoffs">{plan.tradeoffs.map((tradeoff) => <p key={tradeoff}>{tradeoff}</p>)}</div>
                 </details>
-                <button className={`button ${plan.planId.includes('water') ? 'primary' : 'secondary'} full-width`} onClick={() => {
+                <button className={`button ${plan.planId === state.selectedPlanId || !selectedPlan && plan.planId.includes('water') ? 'primary' : 'secondary'} full-width`} onClick={() => {
                   dispatch({ type: 'select_plan', planId: plan.planId }, `${plan.name} selected.`);
                   navigate('farm');
-                }}>Use this plan <ArrowRight size={16} /></button>
+                }}>{plan.planId === state.selectedPlanId ? 'Continue with plan' : 'Use this plan'} <ArrowRight size={16} /></button>
               </article>
             ))}</div>
             <AnalysisDetails analysis={state.analysis} />
-            <div className="conditions-heading"><div><h2>Crop suitability</h2></div></div><div className="crop-options">{state.analysis.cropOptions.map((option) => <article key={option.cropId} className="crop-option"><CropSprite cropId={option.cropId} size={48} /><div><h3>{option.name}</h3><p>{option.recommendedPlantingDate ? `Recommended planting: ${displayDate(option.recommendedPlantingDate)}` : 'Planting date unavailable'}</p><details className="crop-details"><summary>Details</summary>{option.reasons.map(reason => <p key={reason}>{reason}</p>)}</details></div><span className="score">{option.evaluationStatus === 'excluded' ? <span className="small">Outside crop requirements</span> : option.score === null ? <span className="small">Needs more data</span> : <><strong>{Math.round(option.score)}</strong><span>/100</span></>}</span></article>)}</div>
+            <div className="conditions-heading"><div><h2>Crop suitability</h2><p>Scores compare crop suitability for your field.</p></div></div><div className="crop-options">{state.analysis.cropOptions.map((option) => {
+              const planSeason = selectedPlan?.sequence.indexOf(option.cropId) ?? -1;
+              return <article key={option.cropId} className={`crop-option${planSeason >= 0 ? ' in-active-plan' : ''}`}><CropSprite cropId={option.cropId} size={48} /><div><h3>{option.name}</h3><p>{option.recommendedPlantingDate ? `Recommended planting: ${displayDate(option.recommendedPlantingDate)}` : 'Planting date unavailable'}</p>{planSeason >= 0 && <span className="crop-plan-badge"><Leaf size={11} />In your active plan</span>}<details className="crop-details"><summary>Details</summary>{option.reasons.map(reason => <p key={reason}>{reason}</p>)}</details></div><span className="score">{option.evaluationStatus === 'excluded' ? <span className="small">Outside crop requirements</span> : option.score === null ? <span className="small">Needs more data</span> : <><strong>{Math.round(option.score)}</strong><span>/100</span></>}</span></article>;
+            })}</div>
             <details className="evidence-details"><summary><Database size={17} />Sources & details<ChevronRight size={16} /></summary><ConditionCards analysis={state.analysis} /><SourceEvidence analysis={state.analysis} /><div className="evidence-notes"><h3>Assumptions & limitations</h3><p>Suitability scores compare crops; they do not predict harvests.</p>{[...state.analysis.assumptions, ...state.analysis.limitations].map((note) => <p key={note}>• {note}</p>)}</div></details>
           </> : <div className="empty-state"><SatelliteIcon /><h2>No analysis yet</h2><button className="button primary" onClick={() => state.boundary ? void analyze() : createFarm()}><ScanLine size={17} />{state.boundary ? 'Analyze field' : 'Draw my farm'}</button></div>}
         </>}
 
         {route === 'tasks' && <><div className="page-heading"><div><h1>Tasks</h1></div><span className="summary-pill"><ListChecks size={16} />{dueTasks.length} due today</span></div><div className="task-list">{state.tasks.length ? state.tasks.map((task) => <TaskCard task={task} state={state} onAction={taskAction} key={task.id} />) : <div className="empty-state"><Sprout size={40} /><h2>No tasks yet</h2><p>Plant a crop to add care reminders.</p><button className="button primary" onClick={() => { navigate('farm'); plantShortcut(); }}>Go to your farm</button></div>}</div></>}
 
-        {route === 'journal' && <><div className="page-heading"><div><h1>Journal</h1><p>Saved on this device</p></div><span className="summary-pill"><BookOpen size={16} />{state.journal.filter((entry) => !entry.undone).length} recorded actions</span></div><div className="journal-layout"><section className="journal-list">{state.journal.length ? [...state.journal].reverse().map((entry) => <JournalRow key={entry.id} entry={entry} state={state} onUndo={() => dispatch({ type: 'undo_action', entryId: entry.id }, 'Action undone.')} />) : <div className="empty-state"><BookOpen size={40} /><h2>No activity yet</h2><button className="button primary" onClick={() => navigate('tasks')}>See your tasks <ArrowRight size={16} /></button></div>}</section></div></>}
+        {route === 'journal' && <><div className="page-heading"><div><h1>Journal</h1><p>Saved on this device</p></div><span className="summary-pill"><BookOpen size={16} />{state.journal.filter((entry) => !entry.undone).length + state.harvests.length} recorded actions</span></div><div className="journal-layout"><section className="journal-list">
+          {state.harvests.length > 0 && <><h2 className="harvest-history-heading">Harvests</h2>{[...state.harvests].reverse().map(harvest => <article className="journal-row harvest-history-row" data-testid="harvest-entry" key={harvest.id}>
+            <span className="journal-row-icon"><Wheat size={22} /></span><div><span className="small muted">{displayDate(harvest.harvestedOn)} · {harvest.bedName}</span><h3>{cropName(harvest.cropId)} harvested</h3><p>Planted {displayDate(harvest.plantedOn)}{harvest.rotation ? ` · ${harvest.rotation.planName}, season ${harvest.rotation.seasonIndex + 1}` : ''}</p></div>
+          </article>)}</>}
+          {state.journal.length > 0 && <>{state.harvests.length > 0 && <h2 className="harvest-history-heading">Care activity</h2>}{[...state.journal].reverse().map((entry) => <JournalRow key={entry.id} entry={entry} state={state} onUndo={() => dispatch({ type: 'undo_action', entryId: entry.id }, 'Action undone.')} />)}</>}
+          {state.journal.length === 0 && state.harvests.length === 0 && <div className="empty-state"><BookOpen size={40} /><h2>No activity yet</h2><button className="button primary" onClick={() => navigate('tasks')}>See your tasks <ArrowRight size={16} /></button></div>}
+        </section></div></>}
 
         {route === 'lab' && <><div className="page-heading"><div><h1>Test benches</h1></div></div><div className="lab-explainer"><ShieldCheck size={21} /><p>Loading a scenario replaces the saved farm with demo data.</p></div><section className="panel scanner-preview-panel"><div className="panel-heading"><span className="step-number"><ScanLine size={18} /></span><div><h2>Scanner preview</h2></div></div><OrbitScanner key={scannerPreviewRun} state={scannerPreview} mode="demo" /><div className="heading-actions"><button className="button primary" onClick={() => { setScannerPreview('scanning'); setScannerPreviewRun((current) => current + 1); }}><RefreshCw size={16} />Replay arrival</button><button className="button secondary" disabled={scannerPreview === 'complete'} onClick={() => setScannerPreview('complete')}><CheckCheck size={16} />Show completion</button></div></section><div className="lab-grid">{SCENARIOS.map((scenario, index) => <article className="bench-card" key={scenario.id}><span className={`bench-icon bench-${index}`}><FlaskConical size={23} /></span><span className="bench-id">BENCH 0{index + 1}</span><h2>{scenario.name}</h2><p>{scenario.description}</p><button className="button secondary full-width" onClick={() => loadScenario(scenario.id)}>Load {scenario.id}<ArrowRight size={15} /></button></article>)}</div><section className="panel api-panel"><div><h2>Analysis service</h2><span className="small muted">Active provider: {providerMode === 'mock' ? 'Demo fixtures' : 'Connected API'}</span></div><div className="api-controls"><label>API base URL<input type="url" value={apiBaseUrl} onChange={(e) => setApiBaseUrl(e.target.value)} placeholder="https://your-analysis-service.example" /></label><div className="heading-actions"><button className="button secondary" onClick={() => selectProvider('mock')}>Use demo fixtures</button><button className="button primary" onClick={() => selectProvider('api')}>Use API</button></div></div></section></>}
       </main>
@@ -623,24 +637,46 @@ function TaskCard({ task, state, onAction, selected = false }: { task: CareTask;
   );
 }
 
-function PlotEditor({ state, slotId, selectedCrop, viewDate, dueWatering, onAction, onTaskAction }: {
+function PlotEditor({ state, slotId, viewDate, dueWatering, onAction, onTaskAction, onComparePlans }: {
   state: FarmState;
   slotId: number;
-  selectedCrop?: CropId;
   viewDate: string;
   dueWatering?: CareTask;
   onAction: (action: FarmAction, message?: string) => void;
   onTaskAction: (task: CareTask, type: TaskAction) => void;
+  onComparePlans: () => void;
 }) {
   const plot = state.plots.find((item) => item.slotId === slotId);
-  const [cropId, setCropId] = useState<CropId>(plot?.cropId ?? selectedCrop ?? 'wheat');
-  const [plantedOn, setPlantedOn] = useState(plot?.plantedOn ?? state.analysis?.cropOptions.find((option) => option.cropId === (selectedCrop ?? 'wheat'))?.recommendedPlantingDate ?? state.demoToday);
-  const recommendedDate = state.analysis?.cropOptions.find((option) => option.cropId === cropId)?.recommendedPlantingDate;
+  const progress = getBedPlanProgress(state, slotId);
+  const suggestedOptions = [...(state.analysis?.cropOptions ?? [])]
+    .filter(option => option.score !== null && option.evaluationStatus !== 'excluded' && option.scoreStatus === 'complete')
+    .sort((a, b) => (b.score ?? 0) - (a.score ?? 0)).slice(0, 3);
+  const nextCrop = progress?.nextCropId ?? null;
+  const initialCrop = plot?.cropId ?? nextCrop ?? suggestedOptions[0]?.cropId ?? 'wheat';
+  const lastHarvest = state.harvests.filter(harvest => harvest.slotId === slotId).at(-1);
+  const dateForCrop = (id: CropId) => {
+    const recommendation = (id === nextCrop ? progress?.recommendedPlantingDate : null)
+      ?? state.analysis?.cropOptions.find(option => option.cropId === id)?.recommendedPlantingDate;
+    return [recommendation ?? state.demoToday, lastHarvest?.harvestedOn ?? ''].sort().at(-1)!;
+  };
+  const [cropId, setCropId] = useState<CropId>(initialCrop);
+  const [plantedOn, setPlantedOn] = useState(plot?.plantedOn ?? dateForCrop(initialCrop));
+  const recommendedDate = cropId === nextCrop ? progress?.recommendedPlantingDate
+    ?? state.analysis?.cropOptions.find(option => option.cropId === cropId)?.recommendedPlantingDate
+    : state.analysis?.cropOptions.find(option => option.cropId === cropId)?.recommendedPlantingDate;
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState(!plot);
+  const [outsidePlanAccepted, setOutsidePlanAccepted] = useState(false);
   const previewing = viewDate !== state.demoToday;
   const bedName = getBedName(state.layout, slotId);
-  if (!plot && previewing) return <section className="plot-summary"><span className="eyebrow">{bedName}</span><h3>Empty bed</h3></section>;
+  const outsidePlan = nextCrop !== null && cropId !== nextCrop;
+  const chooseCrop = (id: CropId) => {
+    setCropId(id);
+    setOutsidePlanAccepted(false);
+    setError(null);
+    if (!plot) setPlantedOn(dateForCrop(id));
+  };
+  if (!plot && previewing) return <section className="plot-summary"><span className="eyebrow">{bedName}</span><h3>Empty bed</h3><p className="plot-preview-label">Season preview · return to the current day to plant.</p></section>;
   if (plot && (!editing || previewing)) {
     const stage = getGrowthStage(plot, viewDate);
     const lastWatering = getLastWatering(state, plot.id);
@@ -654,12 +690,19 @@ function PlotEditor({ state, slotId, selectedCrop, viewDate, dueWatering, onActi
           <div><span className="eyebrow">{bedName}</span><h3>{cropName(plot.cropId)}</h3></div>
           <span className="growth-dot" />
         </div>
+        <RotationGuide state={state} slotId={slotId} onCompare={previewing ? undefined : onComparePlans} />
         <div className="plot-detail"><span>Estimated stage</span><strong>{stage}</strong></div>
         <div className="plot-detail"><span>{plot.cropId === 'tomato' ? 'Transplant date' : stage === 'Planned' ? 'Planting date' : 'Planted'}</span><strong>{displayDate(plot.plantedOn)}</strong></div>
-        {previewing ? <p className="plot-preview-label">Season preview</p> : <>
+        <div className="plot-detail"><span>Estimated harvest</span><strong>{displayDate(getEstimatedHarvestDate(plot))}</strong></div>
+        {previewing ? <p className="plot-preview-label">Season preview · actions use the current day.</p> : <>
+          {stage === 'Ready to harvest' && <div className="harvest-panel">
+            <strong><Wheat size={18} />Ready for harvest</strong>
+            <p>Check your crop in the field. Recording the harvest saves this season and frees the bed{progress?.status === 'growing' && progress.seasonIndex === 0 ? ` for ${cropName(progress.plan.sequence[1])}` : ''}.</p>
+            <button type="button" className="button primary full-width" onClick={() => onAction({ type: 'harvest', plotId: plot.id }, `${cropName(plot.cropId)} harvest recorded. ${bedName} is ready for its next planting.`)}><CheckCheck size={17} />Harvest crop</button>
+          </div>}
           {lastWatering && <div className="plot-detail"><span>Last watered</span><strong>{wateredToday ? 'Today' : displayDate(lastWatering)}</strong></div>}
           <button className="text-button" onClick={() => setEditing(true)}>Edit planting <Settings2 size={14} /></button>
-          {stage !== 'Planned' && !wateredToday && (dueWatering
+          {stage !== 'Planned' && stage !== 'Ready to harvest' && !wateredToday && (dueWatering
             ? <TaskCard task={dueWatering} state={state} onAction={onTaskAction} selected />
             : <button type="button" className="button secondary full-width plot-water-button"
                 onClick={() => onAction({ type: 'record_watering', plotId: plot.id }, 'Irrigation logged.')}>
@@ -672,17 +715,36 @@ function PlotEditor({ state, slotId, selectedCrop, viewDate, dueWatering, onActi
   return <form className="plot-editor" onSubmit={(event) => {
     event.preventDefault();
     if (!dateSchema.safeParse(plantedOn).success) { setError('Choose a valid date.'); return; }
-    onAction(plot ? { type: 'edit_plot', plotId: plot.id, cropId, plantedOn } : { type: 'plant', slotId, cropId, plantedOn }, `${cropName(cropId)} ${plot ? 'updated' : 'planted'} in ${getBedName(state.layout, slotId)}.`);
+    if (lastHarvest && plantedOn < lastHarvest.harvestedOn) { setError('Choose a planting date on or after the last harvest.'); return; }
+    if (outsidePlan && !outsidePlanAccepted) { setError('Confirm that you want to plant outside the selected plan.'); return; }
+    onAction(plot ? { type: 'edit_plot', plotId: plot.id, cropId, plantedOn } : { type: 'plant', slotId, cropId, plantedOn }, `${cropName(cropId)} ${plot ? 'updated' : 'planted'} in ${bedName}${!outsidePlan && nextCrop ? ' · following your selected plan' : ''}.`);
     setError(null);
     setEditing(false);
   }}>
     <div className="plot-editor-heading"><span className="eyebrow">{bedName}</span><h3>{plot ? 'Edit planting' : 'Plant crop'}</h3></div>
-    <Select label="Crop" value={cropId} onChange={(value) => {
-      setCropId(value as CropId);
-      if (!plot) setPlantedOn(state.analysis?.cropOptions.find((option) => option.cropId === value)?.recommendedPlantingDate ?? state.demoToday);
-    }} options={CROP_CATALOG.map((crop) => ({ value: crop.id, label: crop.name }))} />
+    <RotationGuide state={state} slotId={slotId} onCompare={onComparePlans} />
+    {!progress && suggestedOptions.length > 0 && <>
+      <span className="eyebrow">Recommended for your field</span>
+      <div className="crop-suggestion-list" aria-label="Recommended crops">{suggestedOptions.map(option => <button type="button" key={option.cropId} className="crop-suggestion" aria-pressed={cropId === option.cropId} onClick={() => chooseCrop(option.cropId)}>{option.name}<small>{Math.round(option.score!)}/100</small></button>)}</div>
+      <p className="field-hint">{state.analysis?.dataMode === 'mock' ? 'Demo suitability scores' : 'Suitability scores from your field analysis'}</p>
+    </>}
+    <Select label="Crop" value={cropId} onChange={value => chooseCrop(value as CropId)} options={CROP_CATALOG.map(crop => ({
+      value: crop.id, label: crop.name,
+      badge: crop.id === nextCrop ? 'Next in plan'
+        : progress && progress.status !== 'complete' && progress.plan.sequence.includes(crop.id) ? 'In your plan'
+        : !progress && suggestedOptions.some(option => option.cropId === crop.id) ? 'Recommended' : undefined,
+    }))} />
+    {progress && nextCrop && <div className={`plant-recommendation${outsidePlan ? ' is-deviation' : ''}`} data-testid="planting-plan-context" role="status">
+      {outsidePlan ? <Leaf size={17} /> : <Check size={17} />}
+      <div><strong>{outsidePlan ? `Outside your plan · ${cropName(nextCrop)} is next` : `Season ${(progress.seasonIndex ?? 0) + 1} · Matches your plan`}</strong>
+        <p>{outsidePlan ? `Planting ${cropName(cropId)} will keep the planned ${cropName(nextCrop)} season pending.` : `Plant ${cropName(cropId)}, then record its harvest to ${progress.seasonIndex === 1 ? 'complete this plan' : `continue with ${cropName(progress.plan.sequence[1])}`}.`}</p>
+        {outsidePlan && <button className="text-button" type="button" onClick={() => chooseCrop(nextCrop)}>Use {cropName(nextCrop)} <ArrowRight size={13} /></button>}
+      </div>
+    </div>}
     {recommendedDate && <p className="field-hint">{state.analysis?.dataMode === 'mock' ? 'Demo planting recommendation' : 'Recommended planting'}: {displayDate(recommendedDate)}</p>}
-    <label>{cropId === 'tomato' ? 'Transplant date' : 'Planting date'}<input type="date" value={plantedOn} onChange={(event) => setPlantedOn(event.target.value)} /></label>
+    {recommendedDate && recommendedDate < state.demoToday && <p className="field-hint">This recommended date has passed. Check current conditions or analyze the field again before planting.</p>}
+    <label>{cropId === 'tomato' ? 'Transplant date' : 'Planting date'}<input type="date" min={lastHarvest?.harvestedOn} value={plantedOn} onChange={(event) => setPlantedOn(event.target.value)} /></label>
+    {outsidePlan && <label className="planting-acknowledgment"><input type="checkbox" checked={outsidePlanAccepted} onChange={event => setOutsidePlanAccepted(event.target.checked)} />Plant outside the selected plan</label>}
     {error && <p className="form-error" role="alert">{error}</p>}
     <button className="button primary full-width" type="submit"><Sprout size={16} />{plot ? 'Save planting' : 'Plant crop'}</button>
     {plot && <div className="task-alternatives">
@@ -696,6 +758,7 @@ function PlotEditor({ state, slotId, selectedCrop, viewDate, dueWatering, onActi
 
 function JournalRow({ entry, state, onUndo }: { entry: JournalEntry; state: FarmState; onUndo: () => void }) {
   const plot = state.plots.find((item) => item.id === entry.plotId);
+  const harvested = state.harvests.find(item => item.plotId === entry.plotId);
   const label = entry.action === 'watered' ? 'Irrigation logged' : entry.action === 'skipped' ? 'Task skipped' : entry.action === 'snoozed' ? 'Reminder moved to tomorrow' : 'Care task completed';
-  return <article className={`journal-row ${entry.undone ? 'undone' : ''}`} data-testid="journal-entry"><span className="journal-row-icon">{entry.action === 'watered' ? <Droplets size={22} /> : entry.action === 'snoozed' ? <CalendarDays size={22} /> : <Check size={22} />}</span><div><span className="small muted">{displayDate(entry.createdOn)}{plot ? ` · ${getBedName(state.layout, plot.slotId)} · ${cropName(plot.cropId)}` : ' · Past planting'}</span><h3>{label}</h3></div>{canUndoJournalEntry(state, entry) && <button className="button secondary compact" onClick={onUndo}><Undo2 size={15} />Undo</button>}{entry.undone && <span className="muted small">Undone</span>}</article>;
+  return <article className={`journal-row ${entry.undone ? 'undone' : ''}`} data-testid="journal-entry"><span className="journal-row-icon">{entry.action === 'watered' ? <Droplets size={22} /> : entry.action === 'snoozed' ? <CalendarDays size={22} /> : <Check size={22} />}</span><div><span className="small muted">{displayDate(entry.createdOn)}{plot ? ` · ${getBedName(state.layout, plot.slotId)} · ${cropName(plot.cropId)}` : harvested ? ` · ${harvested.bedName} · ${cropName(harvested.cropId)}` : ' · Past planting'}</span><h3>{label}</h3></div>{canUndoJournalEntry(state, entry) && <button className="button secondary compact" onClick={onUndo}><Undo2 size={15} />Undo</button>}{entry.undone && <span className="muted small">Undone</span>}</article>;
 }

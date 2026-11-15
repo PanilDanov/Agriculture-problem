@@ -2,7 +2,7 @@ import { z } from 'zod';
 import type { FarmState, ProviderSettings, ProviderSettingsLoadResult, ScenarioId, StorageLike } from './orbitFarm-types';
 import { analysisResultSchema, cropIdSchema, dateSchema, farmInputsSchema, isoSchema, polygonSchema, scenarioIdSchema, validateBoundary } from './orbitFarm-validation';
 import { createScenarioState } from './orbitFarm-model';
-import { createDefaultLayout, farmLayoutSchema, MAX_LAYOUT_BEDS } from './orbitFarm-layout';
+import { createDemoLayout, farmLayoutSchema, MAX_LAYOUT_BEDS } from './orbitFarm-layout';
 
 export const STORAGE_KEY = 'orbitFarm.farm.v1';
 export const PROVIDER_SETTINGS_KEY = 'orbitFarm.provider.v1';
@@ -48,7 +48,13 @@ export function saveProviderSettings(settings: ProviderSettings, storage: Storag
 }
 
 const taskStatusSchema = z.enum(['open', 'done', 'skipped', 'snoozed']);
-const plotSchema = z.object({ id: z.string().min(1), slotId: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER - 1), cropId: cropIdSchema, plantedOn: dateSchema }).strict();
+const rotationSchema = z.object({ analysisId: z.string().min(1), planId: z.string().min(1), planName: z.string().min(1), seasonIndex: z.union([z.literal(0), z.literal(1)]) }).strict();
+const slotIdSchema = z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER - 1);
+const plotSchema = z.object({ id: z.string().min(1), slotId: slotIdSchema, cropId: cropIdSchema, plantedOn: dateSchema,
+  estimatedHarvestOn: dateSchema.optional(), rotation: rotationSchema.optional() }).strict();
+const harvestSchema = z.object({ id: z.string().min(1), plotId: z.string().min(1), slotId: slotIdSchema, bedName: z.string().min(1).max(40),
+  cropId: cropIdSchema, plantedOn: dateSchema, harvestedOn: dateSchema, rotation: rotationSchema.optional() }).strict()
+  .refine(harvest => harvest.harvestedOn >= harvest.plantedOn, { message: 'A harvest cannot precede its planting.' });
 const taskFields = { id: z.string().min(1), plotId: z.string().min(1), kind: z.enum(['water', 'soil']), title: z.string().min(1), reason: z.string().min(1), status: taskStatusSchema };
 const journalFields = { id: z.string().min(1), taskId: z.string().min(1).nullable(), plotId: z.string().min(1), action: z.enum(['watered', 'done', 'skipped', 'snoozed']), undone: z.boolean(), previousStatus: taskStatusSchema.optional() };
 const commonFarmFields = {
@@ -92,7 +98,7 @@ const legacyFarmStateSchema = z.discriminatedUnion('version', [
 function migrateLegacyFarm(state: z.infer<typeof legacyFarmStateSchema>) {
   const { demoNow, tasks, journal, ...rest } = state;
   return {
-    ...rest, version: 3, layout: state.version === 1 ? createDefaultLayout() : state.layout,
+    ...rest, version: 3, layout: state.version === 1 ? createDemoLayout() : state.layout,
     demoToday: demoNow.slice(0, 10),
     tasks: tasks.map(({ dueAtISO, snoozedUntilISO, ...task }) => ({ ...task, dueOn: dueAtISO.slice(0, 10), snoozedUntil: snoozedUntilISO?.slice(0, 10) ?? null })),
     journal: journal.map(({ createdAtISO, previousSnoozedUntilISO, ...entry }) => ({ ...entry, createdOn: createdAtISO.slice(0, 10), ...(previousSnoozedUntilISO === undefined ? {} : { previousSnoozedUntil: previousSnoozedUntilISO?.slice(0, 10) ?? null }) })),
@@ -102,10 +108,20 @@ function migrateLegacyFarm(state: z.infer<typeof legacyFarmStateSchema>) {
 export const farmStateSchema = z.object({
   version: z.literal(3), ...farmFields, layout: farmLayoutSchema,
   plots: z.array(plotSchema).max(MAX_LAYOUT_BEDS),
+  harvests: z.array(harvestSchema).default([]),
 }).strict().superRefine((state, ctx) => {
   validateStateRelations(state, ctx);
   const bedIds = new Set(state.layout.beds.map(bed => bed.slotId));
   if (state.plots.some(plot => !bedIds.has(plot.slotId))) ctx.addIssue({ code: 'custom', path: ['plots'], message: 'Saved plantings need a matching bed in the farm layout.' });
+  if (state.plots.some(plot => plot.estimatedHarvestOn !== undefined && plot.estimatedHarvestOn < plot.plantedOn)) ctx.addIssue({ code: 'custom', path: ['plots'], message: 'An estimated harvest cannot precede planting.' });
+  if (new Set(state.harvests.map(harvest => harvest.id)).size !== state.harvests.length || new Set(state.harvests.map(harvest => harvest.plotId)).size !== state.harvests.length) ctx.addIssue({ code: 'custom', path: ['harvests'], message: 'Each planting can only be harvested once.' });
+  if (state.plots.some(plot => state.harvests.some(harvest => harvest.plotId === plot.id || harvest.slotId === plot.slotId && harvest.harvestedOn > plot.plantedOn))) ctx.addIssue({ code: 'custom', path: ['plots'], message: 'A new planting cannot overlap an earlier harvest.' });
+  if (state.harvests.some(harvest => harvest.harvestedOn > state.demoToday)) ctx.addIssue({ code: 'custom', path: ['harvests'], message: 'A recorded harvest cannot be in the future.' });
+  if ([...state.plots, ...state.harvests].some(item => {
+    if (!item.rotation || item.rotation.analysisId !== state.analysis?.analysisId) return false;
+    const plan = state.analysis.rotationPlans.find(candidate => candidate.planId === item.rotation!.planId);
+    return !plan || plan.sequence[item.rotation.seasonIndex] !== item.cropId;
+  })) ctx.addIssue({ code: 'custom', path: ['plots'], message: 'A planting must match its recorded rotation season.' });
 });
 
 export function loadFarm(storage: StorageLike, initialScenario: ScenarioId = 'dry-week'): { state: FarmState; error: string | null } {

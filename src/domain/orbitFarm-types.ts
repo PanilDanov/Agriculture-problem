@@ -169,6 +169,26 @@ export interface Plot {
   slotId: number;
   cropId: CropId;
   plantedOn: string;
+  estimatedHarvestOn?: string;
+  rotation?: PlotRotation;
+}
+
+export interface PlotRotation {
+  analysisId: string;
+  planId: string;
+  planName: string;
+  seasonIndex: 0 | 1;
+}
+
+export interface HarvestRecord {
+  id: string;
+  plotId: string;
+  slotId: number;
+  bedName: string;
+  cropId: CropId;
+  plantedOn: string;
+  harvestedOn: string;
+  rotation?: PlotRotation;
 }
 
 export interface LayoutPoint {
@@ -222,6 +242,7 @@ export interface FarmState {
   plots: Plot[];
   tasks: CareTask[];
   journal: JournalEntry[];
+  harvests: HarvestRecord[];
   demoToday: string;
   scenarioId: ScenarioId;
   selectedPlanId: string | null;
@@ -241,6 +262,7 @@ export type FarmAction =
   | { type: 'plant'; slotId: number; cropId: CropId; plantedOn: string }
   | { type: 'edit_plot'; plotId: string; cropId: CropId; plantedOn: string }
   | { type: 'remove_plot'; plotId: string }
+  | { type: 'harvest'; plotId: string }
   | { type: 'complete_task'; taskId: string }
   | { type: 'record_watering'; plotId: string }
   | { type: 'skip_task'; taskId: string }

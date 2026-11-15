@@ -33,6 +33,15 @@ export function createDefaultLayout(): FarmLayout {
   return {
     width: LAYOUT_WIDTH,
     height: LAYOUT_HEIGHT,
+    beds: [{ slotId: 0, name: 'Whole field', points: [{ x: 0, y: 0 }, { x: LAYOUT_WIDTH, y: 0 }, { x: LAYOUT_WIDTH, y: LAYOUT_HEIGHT }, { x: 0, y: LAYOUT_HEIGHT }] }],
+  };
+}
+
+// Existing demonstration farms and version-one saves use these six stable slots.
+export function createDemoLayout(): FarmLayout {
+  return {
+    width: LAYOUT_WIDTH,
+    height: LAYOUT_HEIGHT,
     beds: Array.from({ length: 6 }, (_, slotId) => {
       const x = 1 + slotId % 3 * 8;
       const y = 1 + Math.floor(slotId / 3) * 6;
@@ -99,6 +108,13 @@ export function validateBedPolygon(points: unknown): BedValidationResult {
   return parsed.success
     ? { valid: true, errors: [], area: Math.abs(signedArea(parsed.data)) }
     : { valid: false, errors: parsed.error.issues.map(issue => issue.message), area: 0 };
+}
+
+/** A partial bed or one bed among several cannot establish whole-field crop history. */
+export function isWholeFieldLayout(layout: FarmLayout): boolean {
+  if (layout.beds.length !== 1) return false;
+  const bed = validateBedPolygon(layout.beds[0].points);
+  return bed.valid && Math.abs(bed.area - LAYOUT_WIDTH * LAYOUT_HEIGHT) <= EPSILON;
 }
 
 function triangulate(points: LayoutPoint[]): LayoutPoint[][] {

@@ -71,7 +71,7 @@ def columns_for(spec, mode):
         columns += HISTORY
     if spec.get("shared", False):
         columns += ["crop"]
-    return columns
+    return [column for column in columns if column not in spec.get("omit", ())]
 
 
 def make_estimator(family, params, seed):

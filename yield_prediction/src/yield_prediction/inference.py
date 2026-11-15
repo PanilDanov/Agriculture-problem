@@ -18,6 +18,8 @@ from .data import file_hash
 from .models import HISTORY, forecast
 
 MODEL_DIR = Path(__file__).resolve().parent / "models"
+CANDIDATE_DIR = MODEL_DIR.with_name("candidate_models")
+CANDIDATE_MODES = {"cold_start_pre_season": "pre_season", "mid_season_v2": "mid_season"}
 TIMING = {"country_code", "adm_id", "harvest_year", "season_start", "season_end",
           "climate_through", "climate_seasons"}
 BOUNDS = {
@@ -35,7 +37,7 @@ BOUNDS = {
 
 @lru_cache(maxsize=4)
 def load_bundle(crop, mode):
-    path = MODEL_DIR / f"{crop}_{mode}.joblib"
+    path = (CANDIDATE_DIR if mode in CANDIDATE_MODES else MODEL_DIR) / f"{crop}_{mode}.joblib"
     try:
         metadata = json.loads(path.with_suffix(".json").read_text(encoding="utf-8"))
     except FileNotFoundError as error:
@@ -47,7 +49,8 @@ def load_bundle(crop, mode):
         if library != "python" and version(library) != expected:
             raise RuntimeError(f"{library}=={expected} is required by this model")
     bundle = joblib.load(path)
-    if (bundle["metadata"]["crop"], bundle["metadata"]["mode"]) != (crop, mode):
+    stored_mode = "mid_season" if mode == "mid_season_v2" else mode
+    if (bundle["metadata"]["crop"], bundle["metadata"]["mode"]) != (crop, stored_mode):
         raise ValueError("Installed model does not match the requested crop and mode")
     return bundle
 
@@ -131,21 +134,36 @@ def predict_yield(features: dict, crop: str, mode: str = "pre_season") -> dict:
     """Predict yield in t/ha for one administrative region and growing season."""
     if not isinstance(crop, str) or crop not in ("maize", "wheat"):
         raise ValueError("Unsupported crop. Supported crops are maize and wheat.")
-    if not isinstance(mode, str) or mode not in MODE_FEATURES:
-        raise ValueError("Unsupported mode. Use pre_season or mid_season.")
+    if not isinstance(mode, str) or mode not in MODE_FEATURES.keys() | CANDIDATE_MODES.keys():
+        raise ValueError("Unsupported mode. Use pre_season, mid_season, cold_start_pre_season, or mid_season_v2.")
     bundle = load_bundle(crop, mode)
-    meta, model, history = (bundle[key] for key in ("metadata", "model", "history"))
-    values, country, region, forecast_date = validate_features(features, mode, meta)
+    meta, model = (bundle[key] for key in ("metadata", "model"))
+    history = bundle.get("history")
+    schema_mode = CANDIDATE_MODES.get(mode, mode)
+    validation_input = features
+    if history is None and isinstance(features, dict) and features.get("adm_id") is None:
+        # The cold-start estimator has no regional key or history input.
+        validation_input = {**features, "adm_id": "unknown"}
+    values, country, region, forecast_date = validate_features(validation_input, schema_mode, meta)
     warnings = ["Accuracy for individual fields has not been validated."]
     if country not in meta["countries"]:
         warnings.append("Country outside training coverage. Cross-country transfer errors may be large.")
-    elif region not in meta["country_regions"][country]:
+    elif history is not None and region not in meta["country_regions"][country]:
         warnings.append("Administrative region absent from training.")
-    season_history = history.at(crop, country, region, forecast_date)
-    if not season_history[-1]:
-        warnings.append("No eligible regional yield history. The model uses its no-history fallback.")
+    if history is None:
+        season_history, medians = [], {}
+        warnings.append("Experimental cold-start country transfer; accuracy at this location is unverified.")
+    else:
+        season_history, medians = history.at(crop, country, region, forecast_date), history.crop_medians
+        if not season_history[-1]:
+            warnings.append("No eligible regional yield history. The model uses its no-history fallback.")
+    if mode == "mid_season_v2":
+        warnings.append("Corrected mid-season candidate; transfer to new countries is not established.")
     if features["harvest_year"] > meta["last_test_year"]:
-        warnings.append("Harvest year is beyond the evaluated period. The model uses a frozen yield history.")
+        message = "Harvest year is beyond the evaluated period."
+        if history is not None:
+            message += " The model uses a frozen yield history."
+        warnings.append(message)
     outside = [
         col for col, bounds in meta["schema"]["range_min_p01_p99_max"].items()
         if isfinite(values[col]) and not bounds[0] <= values[col] <= bounds[-1]
@@ -156,7 +174,7 @@ def predict_yield(features: dict, crop: str, mode: str = "pre_season") -> dict:
         warnings.append("Some soil or location predictors are missing.")
     payload = pd.DataFrame([{**values, "crop": crop, **dict(zip(HISTORY, season_history))}])
     with threadpool_limits(limits=2):
-        prediction = float(forecast(model, payload, history.crop_medians)[0])
+        prediction = float(forecast(model, payload, medians)[0])
     if not isfinite(prediction):
         raise RuntimeError("The installed model did not produce a finite forecast")
     warnings.append("A calibrated prediction interval is unavailable.")

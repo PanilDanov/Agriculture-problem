@@ -1,5 +1,11 @@
 # AgroWise yield prediction
 
+## Data integration and experimental modes
+
+Use `build_model_features(raw_input, crop, mode)` to convert compatible daily environmental records into seasonal model inputs. [Data Engineer contract](docs/data_engineer_contract.md) · [Feature mapping](docs/feature_mapping.md).
+
+`cold_start_pre_season` and `mid_season_v2` are opt-in candidates. Install them with `python -m pip install ".[candidates]"` from `yield_prediction`. Both use the existing `predict_yield` interface. Cold-start accepts a missing `adm_id` and uses no regional yield history. The two established modes still load their original bundles. [Cold-start evaluation](reports/cold_start_evaluation.md) · [Mid-season revalidation](reports/midseason_revalidation.md).
+
 This module forecasts maize (`maize`) and wheat (`wheat`) yield in t/ha at the administrative-region level. Each crop has two trained models. `pre_season` forecasts on the day before the season starts. `mid_season` forecasts at the calendar midpoint using weather available by then after the AgERA5 publication lag.
 
 ## Run a forecast

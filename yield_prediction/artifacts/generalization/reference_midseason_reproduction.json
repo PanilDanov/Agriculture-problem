@@ -1,0 +1,164 @@
+{
+  "maize": {
+    "original": {
+      "name": "weighted_ensemble",
+      "fit_seconds": 1.1677769999951124,
+      "feature_count": 36,
+      "n_fit": 11798,
+      "n": 215,
+      "mae_t_ha": 0.7873805105337863,
+      "rmse_t_ha": 1.073342087514106,
+      "r2": 0.8023276844350122,
+      "bias_t_ha": -0.4371636922639426,
+      "relative_mae_vs_region_median": 0.48442790103544553
+    },
+    "corrected": {
+      "name": "weighted_ensemble",
+      "fit_seconds": 2.597293099970557,
+      "feature_count": 36,
+      "n_fit": 11810,
+      "n": 215,
+      "mae_t_ha": 0.7718361392396078,
+      "rmse_t_ha": 1.0513992376946775,
+      "r2": 0.8103272909796738,
+      "bias_t_ha": -0.3964960457166394,
+      "relative_mae_vs_region_median": 0.4946062633748829
+    },
+    "original_selection": {
+      "name": "weighted_ensemble",
+      "family": "ensemble",
+      "weights": [
+        0.5,
+        0.5
+      ],
+      "members": [
+        {
+          "name": "hist_history_residual",
+          "family": "hist",
+          "geo": true,
+          "residual": true
+        },
+        {
+          "name": "ridge_trial_1",
+          "family": "ridge",
+          "geo": true,
+          "history": true,
+          "params": {
+            "alpha": 179.4673419126439
+          }
+        }
+      ],
+      "shared": false
+    },
+    "corrected_selection": {
+      "name": "weighted_ensemble",
+      "family": "ensemble",
+      "weights": [
+        0.5,
+        0.5
+      ],
+      "members": [
+        {
+          "name": "ridge_trial_3",
+          "family": "ridge",
+          "geo": true,
+          "history": true,
+          "params": {
+            "alpha": 159.16298629852693
+          }
+        },
+        {
+          "name": "hist_history_residual",
+          "family": "hist",
+          "geo": true,
+          "residual": true
+        }
+      ],
+      "shared": false
+    },
+    "corrected_artifact_sha256": "e169f779414336ad5fd4df43149c105e88423ee506d19e11ba1d34926a2f5317"
+  },
+  "wheat": {
+    "original": {
+      "name": "weighted_ensemble",
+      "fit_seconds": 1.0915134999959264,
+      "feature_count": 37,
+      "n_fit": 23804,
+      "n": 393,
+      "mae_t_ha": 0.5107902941439405,
+      "rmse_t_ha": 0.7054506537106914,
+      "r2": 0.8737531452108502,
+      "bias_t_ha": -0.054847720687483684,
+      "relative_mae_vs_region_median": 0.20234683705826573
+    },
+    "corrected": {
+      "name": "weighted_ensemble",
+      "fit_seconds": 2.0644743000157177,
+      "feature_count": 37,
+      "n_fit": 23822,
+      "n": 393,
+      "mae_t_ha": 0.5328323761523985,
+      "rmse_t_ha": 0.7240294023701934,
+      "r2": 0.8670159078743436,
+      "bias_t_ha": 0.025994945148155944,
+      "relative_mae_vs_region_median": 0.16792579062602275
+    },
+    "original_selection": {
+      "name": "weighted_ensemble",
+      "family": "ensemble",
+      "weights": [
+        0.5,
+        0.5
+      ],
+      "members": [
+        {
+          "name": "hist_no_geo_trial_1",
+          "family": "hist",
+          "history": true,
+          "params": {
+            "learning_rate": 0.031932016156763665,
+            "max_iter": 100,
+            "max_leaf_nodes": 7,
+            "l2_regularization": 14.810758294151743
+          }
+        },
+        {
+          "name": "lgbm_shared",
+          "family": "lgbm",
+          "geo": true,
+          "history": true,
+          "shared": true
+        }
+      ],
+      "shared": true
+    },
+    "corrected_selection": {
+      "name": "weighted_ensemble",
+      "family": "ensemble",
+      "weights": [
+        0.5,
+        0.5
+      ],
+      "members": [
+        {
+          "name": "hist_shared",
+          "family": "hist",
+          "geo": true,
+          "history": true,
+          "shared": true
+        },
+        {
+          "name": "ridge_trial_3",
+          "family": "ridge",
+          "geo": true,
+          "history": true,
+          "params": {
+            "alpha": 0.3123474316207936
+          }
+        }
+      ],
+      "shared": true
+    },
+    "corrected_artifact_sha256": "4989f98949e702f2c59052940be07a63c49217cd1eab413511c5696986a8def4"
+  }
+}

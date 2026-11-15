@@ -1,0 +1,450 @@
+{
+  "mode": "cold_start_pre_season",
+  "crop": "maize",
+  "model_version": "1.1.0-cold+ca8da91570",
+  "spatial_level": "administrative_region",
+  "origin_date": "2020-07-01",
+  "last_test_year": 2020,
+  "schema": {
+    "columns": [
+      "season_days",
+      "awc",
+      "bulk_density",
+      "latitude",
+      "longitude",
+      "climate_temperature_c",
+      "climate_min_temperature_c",
+      "climate_max_temperature_c",
+      "climate_temperature_sd_c",
+      "climate_precipitation_mm",
+      "climate_precipitation_mm_day",
+      "climate_radiation_mj_m2_day",
+      "climate_et0_mm",
+      "climate_vpd_kpa",
+      "climate_water_balance_mm",
+      "climate_hot_days",
+      "climate_frost_days",
+      "climate_dry_days",
+      "climate_precipitation_sd_mm",
+      "climate_temperature_interannual_sd_c"
+    ],
+    "accepted_features": [
+      "season_days",
+      "awc",
+      "bulk_density",
+      "latitude",
+      "longitude",
+      "climate_temperature_c",
+      "climate_min_temperature_c",
+      "climate_max_temperature_c",
+      "climate_temperature_sd_c",
+      "climate_precipitation_mm",
+      "climate_precipitation_mm_day",
+      "climate_radiation_mj_m2_day",
+      "climate_et0_mm",
+      "climate_vpd_kpa",
+      "climate_water_balance_mm",
+      "climate_hot_days",
+      "climate_frost_days",
+      "climate_dry_days",
+      "climate_precipitation_sd_mm",
+      "climate_temperature_interannual_sd_c"
+    ],
+    "range_min_p01_p99_max": {
+      "season_days": [
+        89.0,
+        136.0,
+        223.0,
+        237.0
+      ],
+      "awc": [
+        7.19,
+        9.873,
+        20.44,
+        25.875
+      ],
+      "bulk_density": [
+        0.997,
+        1.18,
+        1.583,
+        1.67
+      ],
+      "latitude": [
+        -33.98736,
+        -26.27822,
+        53.36929,
+        54.07901
+      ],
+      "longitude": [
+        -115.17606,
+        -15.55454,
+        118.79354709999984,
+        127.70629
+      ],
+      "climate_temperature_c": [
+        10.682094086021506,
+        13.644707891994209,
+        25.76087154954954,
+        30.33812608695652
+      ],
+      "climate_min_temperature_c": [
+        -7.630666666666666,
+        -2.618095,
+        18.821528,
+        22.9455
+      ],
+      "climate_max_temperature_c": [
+        19.9202,
+        25.523543999999998,
+        39.001616,
+        46.9
+      ],
+      "climate_temperature_sd_c": [
+        0.6140624069038179,
+        0.8057470361029796,
+        5.34539744856471,
+        5.823755645201577
+      ],
+      "climate_precipitation_mm": [
+        20.592,
+        150.63356199999998,
+        1580.0950379999988,
+        2057.9854
+      ],
+      "climate_precipitation_mm_day": [
+        0.1410410958904109,
+        0.8188889407936416,
+        8.372885540774783,
+        12.305567116543587
+      ],
+      "climate_radiation_mj_m2_day": [
+        13.48367360637626,
+        14.293884722598708,
+        23.259535784674583,
+        25.90742105505587
+      ],
+      "climate_et0_mm": [
+        412.9945,
+        509.213489,
+        1015.1446299999998,
+        1281.7908000000002
+      ],
+      "climate_vpd_kpa": [
+        0.6440869117647059,
+        0.8205759890986245,
+        2.8472435870495847,
+        5.189405869565218
+      ],
+      "climate_water_balance_mm": [
+        -1181.7502,
+        -812.0751139999999,
+        812.5626419999999,
+        1340.9471999999998
+      ],
+      "climate_hot_days": [
+        0.0,
+        0.0,
+        25.563999999999943,
+        129.8
+      ],
+      "climate_frost_days": [
+        0.0,
+        0.0,
+        5.0,
+        19.33333333333333
+      ],
+      "climate_dry_days": [
+        5.0,
+        25.018,
+        166.2,
+        174.8
+      ],
+      "climate_precipitation_sd_mm": [
+        0.1152584053333345,
+        15.007030673477974,
+        265.6289976230768,
+        474.3459420468708
+      ],
+      "climate_temperature_interannual_sd_c": [
+        9.833935367643472e-05,
+        0.06924618607653842,
+        1.0883329984814851,
+        1.4487083073580875
+      ]
+    }
+  },
+  "countries": [
+    "AO",
+    "BE",
+    "BG",
+    "CN",
+    "CZ",
+    "DE",
+    "ES",
+    "ET",
+    "FR",
+    "HU",
+    "IT",
+    "MG",
+    "MX",
+    "NL",
+    "PL",
+    "PT",
+    "RO",
+    "ZA",
+    "ZM"
+  ],
+  "country_regions": {},
+  "runtime": {
+    "python": "3.11.1",
+    "numpy": "1.24.2",
+    "pandas": "2.0.1",
+    "scipy": "1.14.0",
+    "scikit-learn": "1.6.1",
+    "joblib": "1.4.2",
+    "threadpoolctl": "3.5.0",
+    "xgboost": "3.0.2"
+  },
+  "selection": {
+    "name": "xgb_geo_separate_regular",
+    "family": "xgb",
+    "geo": true,
+    "shared": false,
+    "params": {
+      "n_estimators": 200,
+      "max_depth": 5
+    }
+  },
+  "dataset": {
+    "sha256": "ca8da91570a8d42593720cd08ffb40aa5f9e45e0e0d5fd8384f781afcfc06251",
+    "reference_sha256": "ca8da91570a8d42593720cd08ffb40aa5f9e45e0e0d5fd8384f781afcfc06251",
+    "matches_reference": true,
+    "record": "https://zenodo.org/records/17279151",
+    "rows": 40618,
+    "countries": [
+      "AO",
+      "AU",
+      "BE",
+      "BG",
+      "CN",
+      "CZ",
+      "DE",
+      "DK",
+      "ES",
+      "ET",
+      "FI",
+      "FR",
+      "HU",
+      "IT",
+      "MG",
+      "MX",
+      "NL",
+      "PL",
+      "PT",
+      "RO",
+      "SE",
+      "ZA",
+      "ZM"
+    ]
+  },
+  "qualification": "experimental_country_transfer",
+  "fit_max_year": 2019,
+  "fit_rows": 11810,
+  "fit_countries": [
+    "AO",
+    "BE",
+    "BG",
+    "CN",
+    "CZ",
+    "DE",
+    "ES",
+    "ET",
+    "FR",
+    "HU",
+    "IT",
+    "MG",
+    "MX",
+    "NL",
+    "PL",
+    "PT",
+    "RO",
+    "ZA",
+    "ZM"
+  ],
+  "interval_status": "withheld",
+  "nested_evaluation": {
+    "n": 1578,
+    "mae_t_ha": 2.2735373090918602,
+    "rmse_t_ha": 2.844872152162177,
+    "r2": -0.0922250467927177,
+    "bias_t_ha": -0.8100577970592872,
+    "baseline_mae_t_ha": 2.5309638783269963,
+    "country_median_mae_t_ha": 2.072274407421309,
+    "country_mean_mae_t_ha": 2.3926593691582623,
+    "country_mean_baseline_mae_t_ha": 2.5057084920040875,
+    "share_countries_better": 0.5,
+    "by_country": [
+      {
+        "country_code": "BE",
+        "n": 30,
+        "mae_t_ha": 1.5921130241792036,
+        "rmse_t_ha": 1.9780320469853325,
+        "r2": -0.21402404349797366,
+        "bias_t_ha": -0.10042967371854138,
+        "baseline_mae_t_ha": 2.5916333333333332,
+        "gain_t_ha": 0.9995203091541296
+      },
+      {
+        "country_code": "BG",
+        "n": 18,
+        "mae_t_ha": 1.7281115795004864,
+        "rmse_t_ha": 2.159500996108211,
+        "r2": -1.7708105501458138,
+        "bias_t_ha": -1.3088143936968384,
+        "baseline_mae_t_ha": 1.215888888888889,
+        "gain_t_ha": -0.5122226906115974
+      },
+      {
+        "country_code": "CN",
+        "n": 90,
+        "mae_t_ha": 2.331022349397681,
+        "rmse_t_ha": 2.5535643934963383,
+        "r2": -4.583883601680342,
+        "bias_t_ha": -2.331022349397681,
+        "baseline_mae_t_ha": 2.0601666666666665,
+        "gain_t_ha": -0.27085568273101446
+      },
+      {
+        "country_code": "CZ",
+        "n": 42,
+        "mae_t_ha": 1.6409555122131665,
+        "rmse_t_ha": 2.01929506707988,
+        "r2": -1.0651723854947774,
+        "bias_t_ha": -1.0333972672254013,
+        "baseline_mae_t_ha": 1.2802142857142857,
+        "gain_t_ha": -0.36074122649888074
+      },
+      {
+        "country_code": "DE",
+        "n": 338,
+        "mae_t_ha": 2.103250461555797,
+        "rmse_t_ha": 2.5741061630704953,
+        "r2": -0.13707292332972432,
+        "bias_t_ha": 0.59504126667271,
+        "baseline_mae_t_ha": 3.2069733727810648,
+        "gain_t_ha": 1.1037229112252676
+      },
+      {
+        "country_code": "ES",
+        "n": 144,
+        "mae_t_ha": 4.134914585899521,
+        "rmse_t_ha": 4.647025136996441,
+        "r2": -0.49821192134868064,
+        "bias_t_ha": -2.8422682886567148,
+        "baseline_mae_t_ha": 3.983743055555556,
+        "gain_t_ha": -0.1511715303439649
+      },
+      {
+        "country_code": "ET",
+        "n": 63,
+        "mae_t_ha": 1.7225938679074486,
+        "rmse_t_ha": 1.9225241669145003,
+        "r2": -3.526218329046534,
+        "bias_t_ha": -1.4919482899166292,
+        "baseline_mae_t_ha": 4.244119047619048,
+        "gain_t_ha": 2.521525179711599
+      },
+      {
+        "country_code": "FR",
+        "n": 273,
+        "mae_t_ha": 2.1287335108409438,
+        "rmse_t_ha": 2.6225890098453912,
+        "r2": -1.3248823879527243,
+        "bias_t_ha": -1.078407320179364,
+        "baseline_mae_t_ha": 1.8243717948717948,
+        "gain_t_ha": -0.30436171596914896
+      },
+      {
+        "country_code": "HU",
+        "n": 60,
+        "mae_t_ha": 2.999355412769318,
+        "rmse_t_ha": 3.2506186515913784,
+        "r2": -6.266314774714057,
+        "bias_t_ha": -2.999355412769318,
+        "baseline_mae_t_ha": 1.0180500000000001,
+        "gain_t_ha": -1.9813054127693177
+      },
+      {
+        "country_code": "IT",
+        "n": 275,
+        "mae_t_ha": 1.917264332455722,
+        "rmse_t_ha": 2.5516396611825196,
+        "r2": 0.14921817631279843,
+        "bias_t_ha": -0.08343421848643913,
+        "baseline_mae_t_ha": 2.2173509090909094,
+        "gain_t_ha": 0.30008657663518745
+      },
+      {
+        "country_code": "MX",
+        "n": 12,
+        "mae_t_ha": 2.559068740129471,
+        "rmse_t_ha": 3.5635111732788336,
+        "r2": -0.3074221518956739,
+        "bias_t_ha": -1.2343539504210153,
+        "baseline_mae_t_ha": 3.7374999999999994,
+        "gain_t_ha": 1.1784312598705284
+      },
+      {
+        "country_code": "NL",
+        "n": 27,
+        "mae_t_ha": 2.0412983532868205,
+        "rmse_t_ha": 2.643144303073417,
+        "r2": -0.4768504770764954,
+        "bias_t_ha": -1.1442616856930523,
+        "baseline_mae_t_ha": 3.6471666666666662,
+        "gain_t_ha": 1.6058683133798457
+      },
+      {
+        "country_code": "PL",
+        "n": 48,
+        "mae_t_ha": 1.630632278912916,
+        "rmse_t_ha": 1.8818464511914164,
+        "r2": -1.8608089666233818,
+        "bias_t_ha": 1.2372789907521031,
+        "baseline_mae_t_ha": 0.9614375000000001,
+        "gain_t_ha": -0.6691947789129159
+      },
+      {
+        "country_code": "PT",
+        "n": 19,
+        "mae_t_ha": 3.1947836636184053,
+        "rmse_t_ha": 3.7074200360715843,
+        "r2": 0.18666854478410988,
+        "bias_t_ha": -1.9674713805509156,
+        "baseline_mae_t_ha": 3.758763157894737,
+        "gain_t_ha": 0.5639794942763316
+      },
+      {
+        "country_code": "RO",
+        "n": 114,
+        "mae_t_ha": 1.5516951872326596,
+        "rmse_t_ha": 1.921459773951855,
+        "r2": -0.08435870955859137,
+        "bias_t_ha": -0.4400859041966329,
+        "baseline_mae_t_ha": 2.153377192982456,
+        "gain_t_ha": 0.6016820057497965
+      },
+      {
+        "country_code": "ZA",
+        "n": 25,
+        "mae_t_ha": 5.0067570466326385,
+        "rmse_t_ha": 5.4202285756074895,
+        "r2": -6.463387311206177,
+        "bias_t_ha": -5.0067570466326385,
+        "baseline_mae_t_ha": 2.1905799999999997,
+        "gain_t_ha": -2.816177046632639
+      }
+    ]
+  },
+  "artifact_sha256": "bd672bd95f9ed8b4119d26b639259749a970b597ab1eb77f8c48e0cb26acdb79"
+}

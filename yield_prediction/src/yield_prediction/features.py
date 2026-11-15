@@ -55,9 +55,23 @@ def weather_parts(chunks, windows):
     """Summarize bounded daily windows using chunk-combinable statistics."""
     lookup = windows[["adm_id", "harvest_year", "season_start", "season_end", "mid_weather_cutoff"]]
     parts = {"full": [], "mid": []}
+    # Retain one bit per relevant region/date to detect duplicates across CSV chunks.
+    regions = pd.Index(windows.adm_id.unique())
+    first_date, last_date = windows.season_start.min(), windows.season_end.max()
+    days = (last_date - first_date).days + 1
+    bytes_per_region = (days + 7) // 8
+    seen = np.zeros((len(regions), bytes_per_region), dtype=np.uint8)
     for daily in chunks:
         date = pd.to_datetime(daily.pop("date").astype(str), format="%Y%m%d", errors="coerce")
-        daily = daily.assign(date=date).dropna(subset=["date"])
+        daily = daily.assign(date=date)
+        daily = daily.loc[daily.adm_id.isin(regions) & daily.date.between(first_date, last_date)].copy()
+        region_index = regions.get_indexer(daily.adm_id)
+        day_index = (daily.date - first_date).dt.days.to_numpy()
+        offsets, bits = np.divmod(day_index, 8)
+        masks = np.left_shift(np.uint8(1), bits.astype(np.uint8))
+        if daily.duplicated(["adm_id", "date"]).any() or (seen[region_index, offsets] & masks).any():
+            raise ValueError("Duplicate daily weather for a region/date")
+        np.bitwise_or.at(seen, (region_index, offsets), masks)
         values = daily[WEATHER].replace([np.inf, -np.inf], np.nan)
         daily[WEATHER] = values
         # A regional daily record can belong to the current or next harvest year.
@@ -107,14 +121,14 @@ def feature_table(windows, chunks):
     index = ["adm_id", "harvest_year"]
     full = windows.merge(summaries["full"], on=index, how="left", validate="one_to_one")
     mid = windows.merge(summaries["mid"], on=index, how="left", validate="one_to_one")
-    # A left merge preserves row order but resets indices after invalid seasons are dropped.
-    mid.index = windows.index
+    # All weather data stay on the same keyed frame through the completeness mask.
     mid_days = (mid.mid_weather_cutoff - mid.season_start).dt.days + 1
     mid_valid = mid.days.between(np.ceil(0.95 * mid_days), mid_days) & mid_days.ge(10)
     for col in SEASON_STATS:
-        windows[f"mid_{col}"] = mid[col].where(mid_valid)
-    windows["mid_weather_through"] = mid.observed_max_date.where(mid_valid)
-    windows["mid_weather_coverage"] = (mid.days / mid_days.where(mid_days.gt(0))).fillna(0)
+        mid[f"mid_{col}"] = mid[col].where(mid_valid)
+    mid["mid_weather_through"] = mid.observed_max_date.where(mid_valid)
+    mid["mid_weather_coverage"] = (mid.days / mid_days.where(mid_days.gt(0))).fillna(0)
+    windows = windows.join(mid.set_index(index)[[*MID, "mid_weather_through", "mid_weather_coverage"]], on=index)
     full = full.loc[full.days.between(np.ceil(0.95 * full.season_days), full.season_days)]
 
     complete_by_region = dict(tuple(full.groupby("adm_id", sort=False)))

@@ -40,6 +40,7 @@ async function addBed(page: Page, points: Point[], name: string) {
 
 /** Exercise the actual editor: no ready farm is inserted into browser storage. */
 async function createDifficultBeds(page: Page) {
+  await page.clock.setFixedTime(new Date('2026-11-14T12:00:00Z'));
   await page.goto('/#/farm');
   await page.getByRole('button', { name: 'Edit layout', exact: true }).click();
   await page.getByRole('button', { name: 'Patchwork', exact: true }).click();

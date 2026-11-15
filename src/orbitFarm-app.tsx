@@ -42,6 +42,10 @@ const defaultApiBaseUrl = () => import.meta.env.VITE_API_BASE_URL?.trim()
   || (hostedAnalysis ? window.location.origin : 'http://localhost:8000');
 const cropName = (id: CropId) => CROP_CATALOG.find((crop) => crop.id === id)?.name ?? id;
 const human = (value: string) => value.replaceAll('_', ' ');
+const localFarmDate = () => {
+  const now = new Date();
+  return new Date(now.getTime() - now.getTimezoneOffset() * 60_000).toISOString().slice(0, 10);
+};
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const displayDate = (value: string) => {
   const [year, month, day] = getFarmDate(value).split('-');
@@ -71,7 +75,7 @@ function restore() {
 
 export function OrbitFarmApp() {
   const [initial] = useState(restore);
-  const [state, setState] = useState<FarmState>(initial.state);
+  const [state, setState] = useState<FarmState>(() => ({ ...initial.state, demoToday: localFarmDate() }));
   const [route, setRoute] = useState<Route>(readRoute);
   const routeRef = useRef(route);
   const layoutDirtyRef = useRef(false);
@@ -96,11 +100,14 @@ export function OrbitFarmApp() {
   const [pendingBoundary, setPendingBoundary] = useState<Polygon | null>(null);
   const abort = useRef<AbortController | null>(null);
   const lastSaved = useRef(state);
+  const updateFarmDate = useCallback(() => {
+    const today = localFarmDate();
+    setState(current => current.demoToday === today ? current : { ...current, demoToday: today });
+  }, []);
   const dueTasks = useMemo(() => getDueTasks(state), [state]);
   const selectedPlot = state.plots.find((plot) => plot.slotId === selectedSlotId);
   const dueWatering = dueTasks.find(task => task.plotId === selectedPlot?.id && task.kind === 'water');
   const selectedPlan = state.analysis?.rotationPlans.find((plan) => plan.planId === state.selectedPlanId);
-  const sourceLabel = state.analysis?.dataMode === 'nasa-api' ? 'NASA data' : state.analysis?.dataMode === 'nasa-cache' ? 'Cached NASA data' : 'Demo data';
   const noticeEntry = noticeUndo ? [...state.journal].reverse().find(entry => !entry.undone && (
     'taskId' in noticeUndo ? entry.taskId === noticeUndo.taskId
       : entry.plotId === noticeUndo.wateredPlotId && entry.action === 'watered'
@@ -146,7 +153,6 @@ export function OrbitFarmApp() {
   }
   function dispatch(action: FarmAction, message?: string) {
     setState((current) => farmReducer(current, action));
-    if (action.type === 'advance_day') setSeasonDate(null);
     if (message) {
       const undo = 'taskId' in action ? { taskId: action.taskId }
         : action.type === 'record_watering' ? { wateredPlotId: action.plotId } : undefined;
@@ -185,6 +191,14 @@ export function OrbitFarmApp() {
     catch { setStorageError('Your changes could not be saved. Keep this tab open and try again.'); }
   }, [state, recoveryRequired]);
   useEffect(() => () => abort.current?.abort(), []);
+  useEffect(() => {
+    const timer = window.setInterval(updateFarmDate, 60_000);
+    window.addEventListener('focus', updateFarmDate);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener('focus', updateFarmDate);
+    };
+  }, [updateFarmDate]);
   useEffect(() => {
     if (!state.layout.beds.some((bed) => bed.slotId === selectedSlotId)) setSelectedSlotId(state.layout.beds[0]?.slotId ?? null);
   }, [state.layout, selectedSlotId]);
@@ -252,6 +266,7 @@ export function OrbitFarmApp() {
     if (!editingFarm && state.boundary === null) freshFarm.layout = structuredClone(state.layout);
     const next: FarmState = {
       ...(editingFarm ? state : freshFarm),
+      demoToday: localFarmDate(),
       farmId: editingFarm ? state.farmId : crypto.randomUUID(), name: draft.name.trim(), boundary: draft.boundary,
       boundaryVersion: editingFarm ? state.boundaryVersion + 1 : 1, inputs,
       scenarioId: state.scenarioId === 'empty-farm' ? 'dry-week' : state.scenarioId,
@@ -268,7 +283,7 @@ export function OrbitFarmApp() {
   function loadScenario(id: ScenarioId) {
     if ((state.name !== 'Meadow Farm' || state.journal.length > 0 || recoveryRequired || JSON.stringify(state.layout) !== JSON.stringify(createDefaultLayout())) && !window.confirm('Replace the saved demo farm with this test scenario?')) return;
     abort.current?.abort();
-    setState(createScenarioState(id));
+    setState({ ...createScenarioState(id), demoToday: localFarmDate() });
     setRecoveryRequired(false);
     setStorageError(null);
     setSelectedSlotId(0);
@@ -284,7 +299,7 @@ export function OrbitFarmApp() {
     setNotice(empty ? `${empty.name} is ready. Choose a crop in the planting panel.` : 'Select a bed to edit its planting.');
   }
   function taskAction(task: CareTask, type: TaskAction) {
-    dispatch({ type, taskId: task.id }, type === 'complete_task' ? task.kind === 'water' ? 'Irrigation logged.' : 'Care task completed.' : type === 'skip_task' ? 'Task skipped.' : 'Reminder moved to tomorrow in demo time.');
+    dispatch({ type, taskId: task.id }, type === 'complete_task' ? task.kind === 'water' ? 'Irrigation logged.' : 'Care task completed.' : type === 'skip_task' ? 'Task skipped.' : 'Reminder moved to tomorrow.');
   }
 
   return <div className="app-shell">
@@ -298,12 +313,6 @@ export function OrbitFarmApp() {
       <div className="sidebar-bottom"><a href="#/lab" className={`nav-link ${route === 'lab' ? 'active' : ''}`}><FlaskConical size={18} />Test benches</a></div>
     </aside>
     <div className="app-body">
-      <header className="topbar">
-        <div className="topbar-right">
-          <span className={`data-badge ${sourceLabel === 'Demo data' ? 'demo' : 'nasa'}`}><span />{sourceLabel}</span>
-          {route !== 'layout' && <div className="demo-controls"><strong aria-label="Demo date">{displayDate(state.demoToday)}</strong><button onClick={() => dispatch({ type: 'advance_day' }, 'Demo date advanced by one day. Observation values are unchanged.')}><CalendarDays size={14} />Advance 1 day</button></div>}
-        </div>
-      </header>
       {storageError && <div className="storage-alert" role="alert"><Database size={18} /><span>{storageError}</span>{recoveryRequired ? <button onClick={() => loadScenario('dry-week')}>Reset demo safely</button> : <button onClick={() => { try { setStorageError(saveFarm(state, window.localStorage)); } catch { setStorageError('Browser storage is still unavailable.'); } }}>Try saving again</button>}</div>}
       {providerError && <div className="storage-alert" role="alert"><Database size={18} /><span>{providerError}</span><button onClick={() => navigate('lab')}>Open provider settings</button></div>}
       {notice && <div className="notice" role="status"><Check size={17} /><span>{notice}</span>{lastUndoable && <button className="text-button" onClick={() => { dispatch({ type: 'undo_action', entryId: lastUndoable.id }); setNotice('Action undone.'); }}><Undo2 size={15} />Undo</button>}<button className="icon-button" aria-label="Dismiss notification" onClick={() => setNotice(null)}><X size={16} /></button></div>}
@@ -333,7 +342,10 @@ export function OrbitFarmApp() {
                   date={viewDate}
                   currentDate={state.demoToday}
                   onChange={setSeasonDate}
-                  onReset={() => setSeasonDate(null)}
+                  onReset={() => {
+                    updateFarmDate();
+                    setSeasonDate(null);
+                  }}
                 />}
                 <FarmScene
                   layout={state.layout}

@@ -30,13 +30,16 @@ async function navigate(page: Page, name: string) {
 }
 
 test('the season slider previews every growth stage on the same planting', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-11-14T12:00:00Z'));
+  const farm = { ...createScenarioState(), demoToday: '2026-12-17' };
+  await page.addInitScript(({ key, farm }) => localStorage.setItem(key, JSON.stringify(farm)), { key: STORAGE_KEY, farm });
   await visit(page, 'farm');
   const wheat = page.getByTestId('plot-slot-0');
   const artwork = wheat.locator('[data-crop-id="wheat"]').first();
   const card = page.getByTestId('plot-card');
   const slider = page.getByRole('slider', { name: 'Season preview' });
   const satellite = page.locator('.season-flight-satellite');
-  const demoDate = page.getByLabel('Demo date', { exact: true });
+  await expect(page.getByRole('banner')).toHaveCount(0);
   await expect(satellite).toBeVisible();
   await expect(artwork).toHaveAttribute('data-growth-stage', 'Seedling');
   await expect(artwork.locator('image')).toHaveAttribute('href', /wheat-seedling-v1\.png$/);
@@ -67,16 +70,17 @@ test('the season slider previews every growth stage on the same planting', async
   await expect.poll(satelliteProgress).toBeCloseTo(1);
   await expect(artwork).toHaveAttribute('data-growth-stage', 'Ready to harvest');
   await expect(artwork.locator('image')).toHaveAttribute('href', /wheat-field-v2\.png$/);
-  await expect(demoDate).toHaveText('Nov 14, 2026');
   await expect(card.getByRole('button', { name: 'Watered', exact: true })).toHaveCount(0);
 
   await page.getByRole('button', { name: 'Current day', exact: true }).click();
+  await expect(slider).toHaveAttribute('aria-valuetext', 'Nov 14, 2026');
   await expect.poll(satelliteProgress).toBeLessThan(.1);
   await expect(artwork).toHaveAttribute('data-growth-stage', 'Seedling');
   await expect(card.getByRole('button', { name: 'Watered', exact: true })).toBeVisible();
 });
 
 test('the landscape blends across all four seasons in the demo year', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-11-14T12:00:00Z'));
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await visit(page, 'farm');
   const slider = page.getByRole('slider', { name: 'Season preview' });
@@ -215,10 +219,10 @@ test('the landscape blends across all four seasons in the demo year', async ({ p
   await expect(plants).toHaveCSS('opacity', '1');
   expect(await sampleOrchard()).toMatchObject({ gap: 0, translucent: 0 });
   await expect(winter).toHaveCSS('opacity', '1');
-  await expect(page.getByLabel('Demo date', { exact: true })).toHaveText('Nov 14, 2026');
 });
 
 test('the bed card records watering with or without a reminder', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-11-14T12:00:00Z'));
   await visit(page, 'farm');
   const card = page.getByTestId('plot-card');
   const wheat = page.getByTestId('plot-slot-0');
@@ -232,7 +236,8 @@ test('the bed card records watering with or without a reminder', async ({ page }
   await expect(card.getByTestId('selected-task')).toBeVisible();
   await card.getByRole('button', { name: 'Remind me tomorrow', exact: true }).click();
   await expect(card.getByTestId('selected-task')).toHaveCount(0);
-  await page.getByRole('button', { name: 'Advance 1 day', exact: true }).click();
+  await page.clock.setFixedTime(new Date('2026-11-15T12:00:00Z'));
+  await page.reload();
   await expect(card.getByTestId('selected-task')).toBeVisible();
 
   await chickpea.click();
@@ -325,10 +330,6 @@ test('create a farm, analyze, plant, log care, and preserve it after reload', as
   await page.getByTestId('selected-task').getByRole('button', { name: 'Watered', exact: true }).click();
   await expect(page.getByRole('status').filter({ hasText: 'Irrigation logged' })
     .getByRole('button', { name: 'Undo', exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Advance 1 day', exact: true }).click();
-  const clockNotice = page.getByRole('status').filter({ hasText: 'Demo date advanced by one day.' });
-  await expect(clockNotice).toBeVisible();
-  await expect(clockNotice.getByRole('button', { name: 'Undo', exact: true })).toHaveCount(0);
   await navigate(page, 'Journal');
   await expect(page.getByTestId('journal-entry').filter({ hasText: 'Irrigation logged' })).toHaveCount(1);
   await expect(page.getByTestId('journal-entry').filter({ hasText: 'Irrigation logged' })

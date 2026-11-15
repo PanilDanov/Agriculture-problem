@@ -53,8 +53,9 @@ const slotIdSchema = z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER 
 const plotSchema = z.object({ id: z.string().min(1), slotId: slotIdSchema, cropId: cropIdSchema, plantedOn: dateSchema,
   estimatedHarvestOn: dateSchema.optional(), rotation: rotationSchema.optional() }).strict();
 const harvestSchema = z.object({ id: z.string().min(1), plotId: z.string().min(1), slotId: slotIdSchema, bedName: z.string().min(1).max(40),
-  cropId: cropIdSchema, plantedOn: dateSchema, harvestedOn: dateSchema, rotation: rotationSchema.optional() }).strict()
-  .refine(harvest => harvest.harvestedOn >= harvest.plantedOn, { message: 'A harvest cannot precede its planting.' });
+  cropId: cropIdSchema, plantedOn: dateSchema, harvestedOn: dateSchema, estimatedHarvestOn: dateSchema.optional(), rotation: rotationSchema.optional() }).strict()
+  .refine(harvest => harvest.harvestedOn >= harvest.plantedOn, { message: 'A harvest cannot precede its planting.' })
+  .refine(harvest => !harvest.estimatedHarvestOn || harvest.estimatedHarvestOn >= harvest.plantedOn, { message: 'An estimated harvest cannot precede planting.' });
 const taskFields = { id: z.string().min(1), plotId: z.string().min(1), kind: z.enum(['water', 'soil']), title: z.string().min(1), reason: z.string().min(1), status: taskStatusSchema };
 const journalFields = { id: z.string().min(1), taskId: z.string().min(1).nullable(), plotId: z.string().min(1), action: z.enum(['watered', 'done', 'skipped', 'snoozed']), undone: z.boolean(), previousStatus: taskStatusSchema.optional() };
 const commonFarmFields = {
@@ -68,11 +69,11 @@ const farmFields = {
   demoToday: dateSchema,
 };
 
-function validateStateRelations(state: Pick<FarmState, 'boundary' | 'boundaryVersion' | 'farmId' | 'plots' | 'tasks' | 'journal' | 'analysis'>, ctx: z.RefinementCtx) {
+function validateStateRelations(state: Pick<FarmState, 'boundary' | 'boundaryVersion' | 'farmId' | 'plots' | 'tasks' | 'journal' | 'analysis' | 'harvests'>, ctx: z.RefinementCtx) {
   if (state.boundary && !validateBoundary(state.boundary).valid) ctx.addIssue({ code: 'custom', path: ['boundary'], message: 'Invalid saved field boundary.' });
   if (new Set(state.plots.map(p => p.slotId)).size !== state.plots.length || new Set(state.plots.map(p => p.id)).size !== state.plots.length) ctx.addIssue({ code: 'custom', path: ['plots'], message: 'Saved planting areas overlap.' });
   if (!state.boundary && state.plots.length) ctx.addIssue({ code: 'custom', path: ['plots'], message: 'Plantings need a field boundary.' });
-  if (state.tasks.some(t => !state.plots.some(p => p.id === t.plotId)) || new Set(state.tasks.map(t => t.id)).size !== state.tasks.length) ctx.addIssue({ code: 'custom', path: ['tasks'], message: 'Saved tasks do not match their planting areas.' });
+  if (state.tasks.some(t => !state.plots.some(p => p.id === t.plotId) && !state.harvests.some(harvest => harvest.plotId === t.plotId)) || new Set(state.tasks.map(t => t.id)).size !== state.tasks.length) ctx.addIssue({ code: 'custom', path: ['tasks'], message: 'Saved tasks do not match their planting areas.' });
   if (state.tasks.some(t => (t.status === 'snoozed') !== (t.snoozedUntil !== null))) ctx.addIssue({ code: 'custom', path: ['tasks'], message: 'A snoozed task needs its reminder date.' });
   if (new Set(state.journal.map(e => e.id)).size !== state.journal.length) ctx.addIssue({ code: 'custom', path: ['journal'], message: 'Journal entry identifiers must be unique.' });
   if (state.journal.some(e => e.taskId === null && (e.action !== 'watered' || e.previousStatus !== undefined || e.previousSnoozedUntil !== undefined))) ctx.addIssue({ code: 'custom', path: ['journal'], message: 'Only a manual watering entry can be saved without a task.' });
@@ -116,7 +117,6 @@ export const farmStateSchema = z.object({
   if (state.plots.some(plot => plot.estimatedHarvestOn !== undefined && plot.estimatedHarvestOn < plot.plantedOn)) ctx.addIssue({ code: 'custom', path: ['plots'], message: 'An estimated harvest cannot precede planting.' });
   if (new Set(state.harvests.map(harvest => harvest.id)).size !== state.harvests.length || new Set(state.harvests.map(harvest => harvest.plotId)).size !== state.harvests.length) ctx.addIssue({ code: 'custom', path: ['harvests'], message: 'Each planting can only be harvested once.' });
   if (state.plots.some(plot => state.harvests.some(harvest => harvest.plotId === plot.id || harvest.slotId === plot.slotId && harvest.harvestedOn > plot.plantedOn))) ctx.addIssue({ code: 'custom', path: ['plots'], message: 'A new planting cannot overlap an earlier harvest.' });
-  if (state.harvests.some(harvest => harvest.harvestedOn > state.demoToday)) ctx.addIssue({ code: 'custom', path: ['harvests'], message: 'A recorded harvest cannot be in the future.' });
   if ([...state.plots, ...state.harvests].some(item => {
     if (!item.rotation || item.rotation.analysisId !== state.analysis?.analysisId) return false;
     const plan = state.analysis.rotationPlans.find(candidate => candidate.planId === item.rotation!.planId);

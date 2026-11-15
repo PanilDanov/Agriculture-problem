@@ -2,7 +2,7 @@
 .rotation-guide-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:9px;color:#5d7b51}
 .rotation-guide-heading>span:first-child{display:flex;align-items:center;gap:5px;font-weight:600}
 .rotation-guide h4{font-family:var(--display-font);font-size:21px;margin:9px 0 12px;overflow-wrap:anywhere}
-.rotation-guide-steps{display:grid;grid-template-columns:1fr 1fr;gap:15px;padding:0;margin:0;list-style:none}
+.rotation-guide-steps{display:grid;grid-template-columns:1fr;gap:10px;padding:0;margin:0;list-style:none}
 .rotation-guide-steps li{display:flex;align-items:center;gap:6px;min-width:0;position:relative;opacity:.7}
 .rotation-guide-steps li.is-current,.rotation-guide-steps li.is-complete{opacity:1}
 .rotation-step-icon{display:flex;align-items:center;justify-content:center;width:32px;height:35px;flex-shrink:0;border-radius:4px;background:#fffef4;border:1px solid #d0dcbe}
@@ -10,8 +10,8 @@
 .is-complete .rotation-step-icon{background:#dceacc;color:#34784c}
 .rotation-guide-steps li>span:nth-child(2){min-width:0;display:flex;flex-direction:column;gap:3px}
 .rotation-guide-steps small{font-size:8px;line-height:1.4;color:#6b7e5e}
-.rotation-guide-steps strong{font-size:10px;line-height:1.4;overflow-wrap:anywhere}
-.rotation-step-arrow{position:absolute;right:-15px;color:#6b8c55}
+.rotation-guide-steps strong{font-size:11px;line-height:1.4;overflow-wrap:normal}
+.rotation-step-arrow{display:none}
 .rotation-guide p{font-size:10px;line-height:1.7;margin:13px 0 0;color:#64765a}
 .rotation-guide>.text-button{margin-top:11px;font-size:10px}
 .rotation-guide-provisional{display:block;font-size:9px;line-height:1.6;color:#8d7038;margin-top:8px}
@@ -46,3 +46,11 @@
 .harvest-history-row .journal-row-icon{background:#f6eac6;color:#9a783c}
 .harvest-history-row p{font-size:10px;line-height:1.7;color:#7c896d;margin-top:5px}
 @media(max-width:760px){.plan-choice-intro{align-items:flex-start;flex-direction:column}.rotation-guide-steps{gap:20px}.rotation-step-arrow{right:-18px}.planting-acknowledgment{font-size:12px!important}.rotation-guide p,.plant-recommendation p,.harvest-panel p{font-size:11px}}
+
+.harvest-panel label{display:flex;flex-direction:column;gap:7px;margin:12px 0;font-size:10px;font-weight:600;color:#756036;min-width:0}
+.harvest-panel input{width:100%;min-width:0;box-sizing:border-box;background:#fffef6;border:1px solid #cdb77e;border-radius:4px;padding:9px;font:inherit;font-size:12px;color:#4c593b;min-height:40px}
+.harvest-panel .harvest-date-note{display:flex;align-items:flex-start;gap:6px;font-size:10px;line-height:1.65}
+.harvest-date-note>svg{flex-shrink:0;margin-top:2px}
+.plot-recorded-harvest{display:flex;align-items:flex-start;gap:7px;font-size:10px;line-height:1.7;background:#f5f3e4;border:1px solid #ded5b8;border-radius:4px;padding:10px;margin:12px 0;color:#7d6d43}
+.plot-recorded-harvest>svg{flex-shrink:0;margin-top:1px}
+@media(max-width:760px){.harvest-panel input{font-size:16px}.harvest-panel label,.harvest-panel .harvest-date-note,.plot-recorded-harvest{font-size:11px}}

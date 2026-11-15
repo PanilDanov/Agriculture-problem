@@ -1,6 +1,6 @@
 import { expect, test as base, type Page } from '@playwright/test';
 import { DEFAULT_INPUTS, DEMO_BOUNDARY, makeMockAnalysis } from '../src/domain/orbitFarm-fixtures';
-import { buildAnalysisRequest, createScenarioState } from '../src/domain/orbitFarm-model';
+import { buildAnalysisRequest, createScenarioState, daysBetweenFarmDates } from '../src/domain/orbitFarm-model';
 import { STORAGE_KEY } from '../src/domain/orbitFarm-storage';
 
 const test = base.extend<{ runtimeErrors: string[] }>({
@@ -67,10 +67,10 @@ async function completeRotation(page: Page) {
   await expect(page.getByTestId('rotation-guide')).toContainText('Chickpea');
   await expectNoHorizontalOverflow(page);
 
-  // Looking into the future must never turn a preview into a recorded harvest.
+  // Scrubbing alone never records a harvest; the dated action is explicit.
   await page.getByRole('slider', { name: 'Season preview' }).press('End');
   await expect(page.getByTestId('plot-slot-0')).toHaveAccessibleName(/Ready to harvest/);
-  await expect(page.getByRole('button', { name: 'Harvest crop', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Harvest crop', exact: true })).toBeVisible();
   expect((await readFarm(page)).harvests).toHaveLength(0);
   await page.getByRole('button', { name: 'Current day', exact: true }).click();
   await page.getByTestId('selected-task').getByRole('button', { name: 'Watered', exact: true }).click();
@@ -117,6 +117,93 @@ test('a selected rotation survives two harvests, replanting, and reloads without
 
 test('@mobile the plan, harvest, and next planting remain usable through a complete rotation', async ({ page }) => {
   await completeRotation(page);
+});
+
+async function previewDate(page: Page, date: string) {
+  const slider = page.getByRole('slider', { name: 'Season preview' });
+  // The fixture's actual day and first planting are Nov 1; its range starts a day earlier.
+  await slider.evaluate((element, offset) => {
+    const setValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!;
+    setValue.call(element, String(offset));
+    element.dispatchEvent(new Event('input', { bubbles: true }));
+  }, daysBetweenFarmDates('2026-10-31', date));
+  await expect(page.locator('.season-preview-heading time')).toHaveAttribute('datetime', date);
+}
+
+async function completePreviewRotation(page: Page, screenshotPath: string) {
+  await openRotation(page);
+  await page.getByRole('button', { name: 'Plant crop', exact: true }).click();
+  await page.getByTestId('selected-task').getByRole('button', { name: 'Watered', exact: true }).click();
+
+  await previewDate(page, '2026-11-15');
+  await expect(page.getByTestId('plot-slot-0')).toHaveAccessibleName(/Chickpea.*Ready to harvest/);
+  await expect(page.getByRole('button', { name: 'Harvest crop', exact: true })).toBeVisible();
+  await expect(page.getByLabel('Harvest date', { exact: true })).toHaveValue('2026-11-15');
+  expect((await readFarm(page)).harvests).toHaveLength(0);
+  await expectNoHorizontalOverflow(page);
+  await page.screenshot({ path: screenshotPath, fullPage: true });
+
+  await page.getByRole('button', { name: 'Harvest crop', exact: true }).click();
+  await expect(page.getByRole('combobox', { name: 'Crop', exact: true })).toContainText('Wheat');
+  await expect(page.getByLabel('Planting date', { exact: true })).toHaveValue('2026-11-20');
+  await expect(page.getByTestId('rotation-guide')).toContainText('1/2 harvested');
+  const first = await readFarm(page);
+  expect(first.demoToday).toBe('2026-11-01');
+  expect(first.harvests).toHaveLength(1);
+  expect(first.harvests[0]).toMatchObject({ cropId: 'chickpea', harvestedOn: '2026-11-15', rotation: { seasonIndex: 0 } });
+
+  await page.getByRole('button', { name: 'Plant crop', exact: true }).click();
+  await expect(page.getByTestId('plot-slot-0')).toHaveAccessibleName(/Wheat.*Planned/);
+  const second = await readFarm(page);
+  expect(second.plots[0]).toMatchObject({ cropId: 'wheat', plantedOn: '2026-11-20', rotation: { seasonIndex: 1 } });
+  await page.getByRole('button', { name: 'Edit planting', exact: true }).click();
+  await expect(page.getByLabel('Planting date', { exact: true })).toHaveValue('2026-11-20');
+  await page.getByRole('button', { name: 'Save planting', exact: true }).click();
+  await expect(page.getByTestId('plot-slot-0')).toHaveAccessibleName(/Wheat.*Planned/);
+  expect((await readFarm(page)).plots[0]).toMatchObject({ id: second.plots[0].id, cropId: 'wheat', plantedOn: '2026-11-20' });
+
+  await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Tasks', exact: true }).click();
+  const wheatTask = page.locator('.task-card').filter({ hasText: 'Wheat' });
+  await expect(wheatTask).toHaveCount(1);
+  await expect(wheatTask.locator('.task-plot')).toContainText('Whole field · Wheat');
+  await expect(wheatTask).not.toContainText('Past planting');
+  await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Your farm', exact: true }).click();
+
+  await previewDate(page, '2027-02-01');
+  await expect(page.getByTestId('plot-slot-0')).toHaveAccessibleName(/Wheat.*Ready to harvest/);
+  await expect(page.getByLabel('Harvest date', { exact: true })).toHaveValue('2027-02-01');
+  await page.getByRole('button', { name: 'Harvest crop', exact: true }).click();
+  await expect(page.getByTestId('rotation-guide')).toContainText(/complete/i);
+  await expect(page.getByRole('button', { name: 'Harvest crop', exact: true })).toHaveCount(0);
+  const complete = await readFarm(page);
+  expect(complete.demoToday).toBe('2026-11-01');
+  expect(complete.harvests.map((harvest: { cropId: string; harvestedOn: string }) => [harvest.cropId, harvest.harvestedOn])).toEqual([
+    ['chickpea', '2026-11-15'], ['wheat', '2027-02-01'],
+  ]);
+  expect(complete.plots).toHaveLength(0);
+
+  await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Journal', exact: true }).click();
+  await expect(page.getByTestId('harvest-entry')).toHaveCount(2);
+  await expect(page.getByTestId('harvest-entry').filter({ hasText: /Planned harvest/i })).toHaveCount(2);
+  await page.reload();
+  await expect(page.getByTestId('harvest-entry')).toHaveCount(2);
+  await expect(page.getByRole('alert')).toHaveCount(0);
+  await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Your farm', exact: true }).click();
+  await expect(page.getByTestId('plot-slot-0')).toHaveAccessibleName(/Chickpea.*Seedling/);
+  await expect(page.getByRole('button', { name: 'Harvest crop', exact: true })).toHaveCount(0);
+  await previewDate(page, '2027-02-01');
+  await expect(page.getByTestId('rotation-guide')).toContainText(/complete/i);
+  await expect(page.getByRole('button', { name: 'Harvest crop', exact: true })).toHaveCount(0);
+  expect((await readFarm(page)).harvests).toHaveLength(2);
+  await expectNoHorizontalOverflow(page);
+}
+
+test('future season dates support explicit harvests, replanting, and persistent planned history', async ({ page }, testInfo) => {
+  await completePreviewRotation(page, testInfo.outputPath('dated-harvest-desktop.png'));
+});
+
+test('@mobile a ready crop can be harvested and replanted on the selected season date', async ({ page }, testInfo) => {
+  await completePreviewRotation(page, testInfo.outputPath('dated-harvest-mobile.png'));
 });
 
 test('planting a different crop requires an explicit acknowledgement and does not advance the plan', async ({ page }) => {

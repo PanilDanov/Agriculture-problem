@@ -188,6 +188,7 @@ export interface HarvestRecord {
   cropId: CropId;
   plantedOn: string;
   harvestedOn: string;
+  estimatedHarvestOn?: string;
   rotation?: PlotRotation;
 }
 
@@ -262,7 +263,7 @@ export type FarmAction =
   | { type: 'plant'; slotId: number; cropId: CropId; plantedOn: string }
   | { type: 'edit_plot'; plotId: string; cropId: CropId; plantedOn: string }
   | { type: 'remove_plot'; plotId: string }
-  | { type: 'harvest'; plotId: string }
+  | { type: 'harvest'; plotId: string; harvestedOn?: string }
   | { type: 'complete_task'; taskId: string }
   | { type: 'record_watering'; plotId: string }
   | { type: 'skip_task'; taskId: string }

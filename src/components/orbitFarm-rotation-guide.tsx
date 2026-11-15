@@ -1,17 +1,18 @@
 import { ArrowRight, Check, Leaf } from 'lucide-react';
-import { CROP_CATALOG, getBedPlanProgress } from '../domain/orbitFarm-domain';
+import { CROP_CATALOG, getBedPlanProgress, getGrowthStage } from '../domain/orbitFarm-domain';
 import type { CropId, FarmState } from '../domain/orbitFarm-types';
 import { CropSprite } from './orbitFarm-crop-sprite';
 import './orbitFarm-rotation-guide.css';
 
 const cropName = (id: CropId) => CROP_CATALOG.find(crop => crop.id === id)?.name ?? id;
 
-export function RotationGuide({ state, slotId, onCompare }: {
+export function RotationGuide({ state, slotId, viewDate = state.demoToday, onCompare }: {
   state: FarmState;
   slotId: number;
+  viewDate?: string;
   onCompare?: () => void;
 }) {
-  const progress = getBedPlanProgress(state, slotId);
+  const progress = getBedPlanProgress(state, slotId, viewDate);
   if (!progress) return null;
   const { plan, completedSeasons, seasonIndex, status, currentPlot } = progress;
   return <section className={`rotation-guide rotation-guide--${status}`} aria-label="Active rotation plan" data-testid="rotation-guide">
@@ -23,7 +24,7 @@ export function RotationGuide({ state, slotId, onCompare }: {
         const active = index === seasonIndex;
         return <li key={index} className={done ? 'is-complete' : active ? 'is-current' : ''} aria-current={active ? 'step' : undefined}>
           <span className="rotation-step-icon">{done ? <Check size={18} /> : <CropSprite cropId={cropId} size={30} />}</span>
-          <span><small>Season {index + 1}</small><strong>{cropName(cropId)}</strong><small>{done ? 'Harvested' : active ? status === 'growing' ? 'Planted' : 'Plant next' : 'After harvest'}</small></span>
+          <span><small>Season {index + 1}</small><strong>{cropName(cropId)}</strong><small>{done ? 'Harvested' : active ? status === 'growing' && currentPlot ? getGrowthStage(currentPlot, viewDate) === 'Planned' ? 'Planned' : 'Planted' : 'Plant next' : 'After harvest'}</small></span>
           {index === 0 && <ArrowRight className="rotation-step-arrow" size={14} aria-hidden="true" />}
         </li>;
       })}

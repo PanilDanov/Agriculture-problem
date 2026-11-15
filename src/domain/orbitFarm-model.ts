@@ -44,6 +44,34 @@ export function getGrowthStage(plot: Plot, date: string): GrowthStage {
   return 'Growing';
 }
 
+/** Plantings visible on a farm day, including crops saved in harvest history. */
+export function getPlotsAtDate(state: FarmState, date: string): Plot[] {
+  getFarmDate(date);
+  const plots: Plot[] = [];
+  for (const bed of state.layout.beds) {
+    const live = state.plots.find(plot => plot.slotId === bed.slotId);
+    const history = state.harvests.filter(harvest => harvest.slotId === bed.slotId);
+    const activeHarvest = history.filter(harvest => harvest.plantedOn <= date && date < harvest.harvestedOn)
+      .sort((a, b) => b.plantedOn.localeCompare(a.plantedOn)).at(0);
+    if (activeHarvest) {
+      const { plotId: id, slotId, cropId, plantedOn, estimatedHarvestOn, rotation } = activeHarvest;
+      plots.push({ id, slotId, cropId, plantedOn,
+        ...(estimatedHarvestOn ? { estimatedHarvestOn } : {}), ...(rotation ? { rotation } : {}) });
+    } else if (live && live.plantedOn <= date) {
+      plots.push(live);
+    } else {
+      const upcoming = history.filter(harvest => harvest.plantedOn > date)
+        .sort((a, b) => a.plantedOn.localeCompare(b.plantedOn)).at(0);
+      if (live && (!upcoming || live.plantedOn <= upcoming.plantedOn)) { plots.push(live); continue; }
+      if (!upcoming) continue;
+      const { plotId: id, slotId, cropId, plantedOn, estimatedHarvestOn, rotation } = upcoming;
+      plots.push({ id, slotId, cropId, plantedOn,
+        ...(estimatedHarvestOn ? { estimatedHarvestOn } : {}), ...(rotation ? { rotation } : {}) });
+    }
+  }
+  return plots;
+}
+
 export interface BedPlanProgress {
   plan: RotationPlan;
   seasonIndex: 0 | 1 | null;
@@ -59,16 +87,16 @@ export function getSelectedRotationPlan(state: FarmState): RotationPlan | null {
   return state.analysis?.rotationPlans.find(plan => plan.planId === state.selectedPlanId) ?? null;
 }
 
-function bedPlanProgress(state: FarmState, slotId: number, plan: RotationPlan): BedPlanProgress {
+function bedPlanProgress(state: FarmState, slotId: number, plan: RotationPlan, date?: string): BedPlanProgress {
   let completedSeasons = 0;
   for (const harvest of state.harvests) {
     const rotation = harvest.rotation;
-    if (rotation && harvest.slotId === slotId && rotation.analysisId === state.analysis?.analysisId
+    if (rotation && (!date || harvest.harvestedOn <= date) && harvest.slotId === slotId && rotation.analysisId === state.analysis?.analysisId
       && rotation.planId === plan.planId && rotation.seasonIndex === completedSeasons
       && harvest.cropId === plan.sequence[completedSeasons]) completedSeasons += 1;
   }
   const seasonIndex = completedSeasons < 2 ? completedSeasons as 0 | 1 : null;
-  const currentPlot = state.plots.find(plot => plot.slotId === slotId) ?? null;
+  const currentPlot = (date ? getPlotsAtDate(state, date) : state.plots).find(plot => plot.slotId === slotId) ?? null;
   const season = seasonIndex === null ? null : plan.seasons?.[seasonIndex];
   const aligned = currentPlot?.rotation?.analysisId === state.analysis?.analysisId
     && currentPlot?.rotation?.planId === plan.planId && currentPlot?.rotation?.seasonIndex === seasonIndex;
@@ -82,9 +110,9 @@ function bedPlanProgress(state: FarmState, slotId: number, plan: RotationPlan): 
   };
 }
 
-export function getBedPlanProgress(state: FarmState, slotId: number): BedPlanProgress | null {
+export function getBedPlanProgress(state: FarmState, slotId: number, date?: string): BedPlanProgress | null {
   const plan = getSelectedRotationPlan(state);
-  return plan ? bedPlanProgress(state, slotId, plan) : null;
+  return plan ? bedPlanProgress(state, slotId, plan, date) : null;
 }
 
 function plantingPlanFields(state: FarmState, slotId: number, cropId: CropId, plantedOn: string): Pick<Plot, 'rotation' | 'estimatedHarvestOn'> {
@@ -106,9 +134,12 @@ export function buildAnalysisRequest(state: FarmState, requestId: string): Analy
   const inputs = validateFarmInputs(state.inputs);
   const irrigation = inputs.irrigation;
   const selectedPlan = getSelectedRotationPlan(state);
-  const selectedProgress = selectedPlan && isWholeFieldLayout(state.layout) ? getBedPlanProgress(state, state.layout.beds[0].slotId) : null;
+  const selectedProgress = selectedPlan && isWholeFieldLayout(state.layout) ? getBedPlanProgress(state, state.layout.beds[0].slotId, state.demoToday) : null;
   // The API accepts exactly two comparison seasons. A remaining single season
   // cannot be padded into a new rotation without another recommendation.
+  const previousHarvest = isWholeFieldLayout(state.layout)
+    ? state.harvests.filter(harvest => harvest.slotId === state.layout.beds[0].slotId && harvest.harvestedOn <= state.demoToday)
+      .sort((a, b) => b.harvestedOn.localeCompare(a.harvestedOn)).at(0) : null;
   const currentPlan = selectedProgress
     ? selectedProgress.completedSeasons === 0 ? selectedPlan!.sequence.map((cropId, index) => ({ seasonIndex: index + 1, cropId })) : null
     : inputs.currentPlan ?? null;
@@ -121,7 +152,7 @@ export function buildAnalysisRequest(state: FarmState, requestId: string): Analy
         waterBudget: irrigation.volumeM3 === null ? null : { volumeM3: irrigation.volumeM3, basis: 'field_inlet',
           ...(irrigation.periodStart ? { periodStart: irrigation.periodStart, periodEnd: irrigation.periodEnd } : {}) },
         applicationEfficiency: irrigation.applicationEfficiency ?? null },
-      previousCropId: inputs.previousCropId, currentPlan,
+      previousCropId: previousHarvest?.cropId ?? inputs.previousCropId, currentPlan,
       ...(inputs.fieldObservations ? { fieldObservations: inputs.fieldObservations } : {}),
       ...(inputs.seasonalWaterBalance ? { seasonalWaterBalance: inputs.seasonalWaterBalance } : {}),
       ...(inputs.agroEcologicalZone ? { agroEcologicalZone: inputs.agroEcologicalZone } : {}),
@@ -146,13 +177,20 @@ export function createScenarioState(scenarioId: ScenarioId = 'dry-week'): FarmSt
   return state;
 }
 
+export function getCareTasksAtDate(state: FarmState, date = state.demoToday): CareTask[] {
+  return state.tasks.filter(task => {
+    const harvest = state.harvests.find(item => item.plotId === task.plotId);
+    return !harvest || date < harvest.harvestedOn;
+  });
+}
+
 export function getDueTasks(state: FarmState): CareTask[] {
   const today = state.demoToday;
-  return state.tasks.filter(task => task.dueOn <= today && (task.status === 'open' || (task.status === 'snoozed' && task.snoozedUntil !== null && task.snoozedUntil <= today))).sort((a, b) => a.dueOn.localeCompare(b.dueOn));
+  return getCareTasksAtDate(state, today).filter(task => task.dueOn <= today && (task.status === 'open' || (task.status === 'snoozed' && task.snoozedUntil !== null && task.snoozedUntil <= today))).sort((a, b) => a.dueOn.localeCompare(b.dueOn));
 }
 
 function logAction(state: FarmState, taskId: string, action: JournalEntry['action']): FarmState {
-  const task = state.tasks.find(t => t.id === taskId);
+  const task = getCareTasksAtDate(state).find(t => t.id === taskId);
   if (!task || task.status === 'done' || task.status === 'skipped') return state;
   const status = action === 'snoozed' ? 'snoozed' : action === 'skipped' ? 'skipped' : 'done';
   const nextUntil = action === 'snoozed' ? addDemoDay(state.demoToday) : null;
@@ -167,8 +205,8 @@ export function getLastWatering(state: FarmState, plotId: string): string | unde
 
 export function canUndoJournalEntry(state: FarmState, entry: JournalEntry): boolean {
   if (entry.undone) return false;
-  if (entry.taskId === null) return state.plots.some(plot => plot.id === entry.plotId);
-  return state.tasks.some(task => task.id === entry.taskId)
+  if (entry.taskId === null) return getPlotsAtDate(state, state.demoToday).some(plot => plot.id === entry.plotId);
+  return getCareTasksAtDate(state).some(task => task.id === entry.taskId)
     && state.journal.filter(item => item.taskId === entry.taskId && !item.undone).at(-1)?.id === entry.id;
 }
 
@@ -207,7 +245,7 @@ export function farmReducer(state: FarmState, action: FarmAction): FarmState {
       const layout = structuredClone(parsed.data);
       const slots = new Set(layout.beds.map(bed => bed.slotId));
       const plots = state.plots.filter(plot => slots.has(plot.slotId));
-      const plotIds = new Set(plots.map(plot => plot.id));
+      const plotIds = new Set([...plots.map(plot => plot.id), ...state.harvests.filter(harvest => slots.has(harvest.slotId) && harvest.harvestedOn > state.demoToday).map(harvest => harvest.plotId)]);
       return { ...state, layout, plots, tasks: state.tasks.filter(task => plotIds.has(task.plotId)) };
     }
     case 'plant': {
@@ -238,16 +276,21 @@ export function farmReducer(state: FarmState, action: FarmAction): FarmState {
     case 'remove_plot': return { ...state, plots: state.plots.filter(p => p.id !== action.plotId), tasks: state.tasks.filter(t => t.plotId !== action.plotId) };
     case 'harvest': {
       const plot = state.plots.find(item => item.id === action.plotId);
-      if (!plot || getGrowthStage(plot, state.demoToday) !== 'Ready to harvest') return state;
+      const harvestedOn = action.harvestedOn ?? state.demoToday;
+      if (!plot || !dateSchema.safeParse(harvestedOn).success || getGrowthStage(plot, harvestedOn) !== 'Ready to harvest'
+        || state.harvests.some(harvest => harvest.plotId === plot.id)) return state;
+      const previousHarvest = lastBedHarvest(state, plot.slotId);
+      if (previousHarvest && harvestedOn < previousHarvest) return state;
       const harvest: HarvestRecord = { id: `harvest-${plot.id}`, plotId: plot.id, slotId: plot.slotId,
         bedName: getBedName(state.layout, plot.slotId), cropId: plot.cropId, plantedOn: plot.plantedOn,
-        harvestedOn: state.demoToday, ...(plot.rotation ? { rotation: structuredClone(plot.rotation) } : {}) };
-      return { ...state, plots: state.plots.filter(item => item.id !== plot.id), tasks: state.tasks.filter(task => task.plotId !== plot.id), harvests: [...state.harvests, harvest],
-        inputs: isWholeFieldLayout(state.layout) ? { ...state.inputs, previousCropId: plot.cropId, currentPlan: null } : state.inputs };
+        harvestedOn, ...(plot.estimatedHarvestOn ? { estimatedHarvestOn: plot.estimatedHarvestOn } : {}),
+        ...(plot.rotation ? { rotation: structuredClone(plot.rotation) } : {}) };
+      return { ...state, plots: state.plots.filter(item => item.id !== plot.id), tasks: harvestedOn > state.demoToday ? state.tasks : state.tasks.filter(task => task.plotId !== plot.id), harvests: [...state.harvests, harvest],
+        inputs: isWholeFieldLayout(state.layout) && harvestedOn <= state.demoToday ? { ...state.inputs, previousCropId: plot.cropId, currentPlan: null } : state.inputs };
     }
     case 'complete_task': return logAction(state, action.taskId, state.tasks.find(t => t.id === action.taskId)?.kind === 'water' ? 'watered' : 'done');
     case 'record_watering': {
-      if (!state.plots.some(plot => plot.id === action.plotId && plot.plantedOn <= state.demoToday)
+      if (!getPlotsAtDate(state, state.demoToday).some(plot => plot.id === action.plotId && plot.plantedOn <= state.demoToday)
         || getLastWatering(state, action.plotId) === state.demoToday) return state;
       const reminder = getDueTasks(state).find(task => task.plotId === action.plotId && task.kind === 'water');
       if (reminder) return logAction(state, reminder.id, 'watered');

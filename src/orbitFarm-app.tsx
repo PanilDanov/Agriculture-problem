@@ -10,7 +10,7 @@ import {
   CROP_CATALOG, SCENARIOS, buildAnalysisRequest, createApiProvider,
   createMockProvider, createScenarioState, createDefaultLayout, dateSchema, farmReducer, getDueTasks,
   addFarmDays, canUndoJournalEntry, daysBetweenFarmDates, getEstimatedHarvestDate,
-  getFarmDate, getGrowthStage, getLastWatering, getBedName, getBedPlanProgress, loadFarm, loadProviderSettings,
+  getFarmDate, getGrowthStage, getLastWatering, getBedName, getBedPlanProgress, getPlotsAtDate, getCareTasksAtDate, loadFarm, loadProviderSettings,
   saveFarm, saveProviderSettings, validateBoundary, validateFarmLayout,
 } from './domain/orbitFarm-domain';
 import type {
@@ -26,6 +26,7 @@ import { Select } from './components/orbitFarm-select';
 import { AnalysisDetails } from './components/orbitFarm-analysis-details';
 import { FieldEvidenceFields } from './components/orbitFarm-evidence-fields';
 import { RotationGuide } from './components/orbitFarm-rotation-guide';
+import { HarvestPanel } from './components/orbitFarm-harvest-panel';
 
 type Route = 'farm' | 'plans' | 'tasks' | 'journal' | 'lab' | 'setup' | 'layout';
 type TaskAction = 'complete_task' | 'skip_task' | 'snooze_task';
@@ -107,8 +108,12 @@ export function OrbitFarmApp() {
     const today = localFarmDate();
     setState(current => current.demoToday === today ? current : { ...current, demoToday: today });
   }, []);
+  const viewDate = !mapView && seasonDate ? seasonDate : state.demoToday;
+  const visiblePlots = useMemo(() => getPlotsAtDate(state, viewDate), [state, viewDate]);
+  const careTasks = useMemo(() => getCareTasksAtDate(state), [state]);
   const dueTasks = useMemo(() => getDueTasks(state), [state]);
-  const selectedPlot = state.plots.find((plot) => plot.slotId === selectedSlotId);
+  const selectedPlot = visiblePlots.find((plot) => plot.slotId === selectedSlotId);
+  const occupiedSlotIds = [...new Set([...state.plots, ...getPlotsAtDate(state, state.demoToday)].map(plot => plot.slotId))];
   const dueWatering = dueTasks.find(task => task.plotId === selectedPlot?.id && task.kind === 'water');
   const selectedPlan = state.analysis?.rotationPlans.find((plan) => plan.planId === state.selectedPlanId);
   const noticeEntry = noticeUndo ? [...state.journal].reverse().find(entry => !entry.undone && (
@@ -124,9 +129,14 @@ export function OrbitFarmApp() {
       const harvest = getEstimatedHarvestDate(plot);
       if (harvest > end) end = harvest;
     }
-    return { start: addFarmDays(start, -1), end };
-  }, [state.demoToday, state.plots]);
-  const viewDate = !mapView && seasonDate ? seasonDate : state.demoToday;
+    for (const harvest of state.harvests) {
+      if (harvest.plantedOn < start) start = harvest.plantedOn;
+      if (harvest.harvestedOn > end) end = harvest.harvestedOn;
+    }
+    if (viewDate > end) end = viewDate;
+    const rangeStart = addFarmDays(start, -1);
+    return { start: viewDate < rangeStart ? viewDate : rangeStart, end };
+  }, [state.demoToday, state.plots, state.harvests, viewDate]);
 
   function setNotice(message: string | null, undo?: UndoTarget) {
     setNoticeValue(message);
@@ -155,6 +165,7 @@ export function OrbitFarmApp() {
   }
   function dispatch(action: FarmAction, message?: string) {
     setState((current) => farmReducer(current, action));
+    if (action.type === 'harvest' && action.harvestedOn) setSeasonDate(action.harvestedOn === state.demoToday ? null : action.harvestedOn);
     if (message) {
       const undo = 'taskId' in action ? { taskId: action.taskId }
         : action.type === 'record_watering' ? { wateredPlotId: action.plotId } : undefined;
@@ -208,7 +219,7 @@ export function OrbitFarmApp() {
   function saveLayout(layout: FarmLayout) {
     const checked = validateFarmLayout(layout);
     if (!checked.valid) { setNotice(checked.errors[0] ?? 'Check your bed shapes before saving.'); return; }
-    const removed = state.plots.filter((plot) => !layout.beds.some((bed) => bed.slotId === plot.slotId));
+    const removed = state.layout.beds.filter(bed => occupiedSlotIds.includes(bed.slotId) && !layout.beds.some(next => next.slotId === bed.slotId));
     if (removed.length && !window.confirm(`Remove ${removed.length} planted ${removed.length === 1 ? 'bed' : 'beds'} from this layout? Their plantings and open tasks will be removed. Your journal history will be kept.`)) return;
     dispatch({ type: 'set_layout', layout }, 'Farm layout saved.');
     setSelectedSlotId(layout.beds.some((bed) => bed.slotId === selectedSlotId) ? selectedSlotId : layout.beds[0]?.slotId ?? null);
@@ -297,8 +308,8 @@ export function OrbitFarmApp() {
   }
   function plantShortcut() {
     if (!state.layout.beds.length) { setNotice('Draw a bed first.'); navigate('layout'); return; }
-    const empty = state.layout.beds.find((bed) => !state.plots.some((plot) => plot.slotId === bed.slotId));
-    setSelectedSlotId(empty?.slotId ?? state.plots[0]?.slotId ?? state.layout.beds[0].slotId);
+    const empty = state.layout.beds.find((bed) => !visiblePlots.some((plot) => plot.slotId === bed.slotId));
+    setSelectedSlotId(empty?.slotId ?? visiblePlots[0]?.slotId ?? state.layout.beds[0].slotId);
     setNotice(empty ? `${empty.name} is ready. Choose a crop in the planting panel.` : 'Select a bed to edit its planting.');
   }
   function taskAction(task: CareTask, type: TaskAction) {
@@ -356,7 +367,7 @@ export function OrbitFarmApp() {
                 />
                 <FarmScene
                   layout={state.layout}
-                  plots={state.plots}
+                  plots={visiblePlots}
                   selectedSlotId={selectedSlotId}
                   onSelectSlot={setSelectedSlotId}
                   viewDate={viewDate}
@@ -364,15 +375,15 @@ export function OrbitFarmApp() {
                 />
               </>}
               <div className="farm-bed-controls">
-                {state.layout.beds.length ? <Select label="Selected bed" value={selectedSlotId === null ? '' : String(selectedSlotId)} onChange={(value) => setSelectedSlotId(Number(value))} options={state.layout.beds.map((bed) => { const plot = state.plots.find((item) => item.slotId === bed.slotId); return { value: String(bed.slotId), label: `${bed.name} · ${plot ? cropName(plot.cropId) : 'Empty'}` }; })} /> : <p className="muted small">Draw a bed to plant a crop.</p>}
+                {state.layout.beds.length ? <Select label="Selected bed" value={selectedSlotId === null ? '' : String(selectedSlotId)} onChange={(value) => setSelectedSlotId(Number(value))} options={state.layout.beds.map((bed) => { const plot = visiblePlots.find((item) => item.slotId === bed.slotId); return { value: String(bed.slotId), label: `${bed.name} · ${plot ? cropName(plot.cropId) : 'Empty'}` }; })} /> : <p className="muted small">Draw a bed to plant a crop.</p>}
                 <span className="bed-count">{state.layout.beds.length} {state.layout.beds.length === 1 ? 'bed' : 'beds'}</span>
               </div>
-              <div className="farm-window-footer"><span><span className="legend-dot planted" />{state.plots.length} planted plots</span><span className="scene-caption">Schematic · not to scale</span></div>
+              <div className="farm-window-footer"><span><span className="legend-dot planted" />{visiblePlots.length} planted plots</span><span className="scene-caption">Schematic · not to scale</span></div>
             </div>
           </section>
           <aside className="care-sidebar" aria-label="Bed details">
             {selectedSlotId !== null && state.boundary && state.layout.beds.some(bed => bed.slotId === selectedSlotId) && <PlotEditor
-              key={`${state.farmId}-${selectedSlotId}-${selectedPlot?.id ?? 'empty'}-${state.selectedPlanId ?? ''}-${state.analysis?.analysisId ?? ''}`}
+              key={`${state.farmId}-${selectedSlotId}-${selectedPlot?.id ?? `empty-${viewDate}`}-${state.selectedPlanId ?? ''}-${state.analysis?.analysisId ?? ''}`}
               state={state}
               slotId={selectedSlotId}
               viewDate={viewDate}
@@ -390,7 +401,7 @@ export function OrbitFarmApp() {
         </>}
 
         {route === 'layout' && <>
-          <Suspense fallback={<div className="panel layout-loading" role="status">Getting your planning board ready…</div>}><FarmLayoutEditor layout={state.layout} plantedSlotIds={state.plots.map((plot) => plot.slotId)} onSave={saveLayout} onDirtyChange={reportLayoutDirty} onCancel={() => navigate('farm', true)} /></Suspense>
+          <Suspense fallback={<div className="panel layout-loading" role="status">Getting your planning board ready…</div>}><FarmLayoutEditor layout={state.layout} plantedSlotIds={occupiedSlotIds} onSave={saveLayout} onDirtyChange={reportLayoutDirty} onCancel={() => navigate('farm', true)} /></Suspense>
         </>}
 
         {route === 'setup' && <>
@@ -459,11 +470,11 @@ export function OrbitFarmApp() {
           </> : <div className="empty-state"><SatelliteIcon /><h2>No analysis yet</h2><button className="button primary" onClick={() => state.boundary ? void analyze() : createFarm()}><ScanLine size={17} />{state.boundary ? 'Analyze field' : 'Draw my farm'}</button></div>}
         </>}
 
-        {route === 'tasks' && <><div className="page-heading"><div><h1>Tasks</h1></div><span className="summary-pill"><ListChecks size={16} />{dueTasks.length} due today</span></div><div className="task-list">{state.tasks.length ? state.tasks.map((task) => <TaskCard task={task} state={state} onAction={taskAction} key={task.id} />) : <div className="empty-state"><Sprout size={40} /><h2>No tasks yet</h2><p>Plant a crop to add care reminders.</p><button className="button primary" onClick={() => { navigate('farm'); plantShortcut(); }}>Go to your farm</button></div>}</div></>}
+        {route === 'tasks' && <><div className="page-heading"><div><h1>Tasks</h1></div><span className="summary-pill"><ListChecks size={16} />{dueTasks.length} due today</span></div><div className="task-list">{careTasks.length ? careTasks.map((task) => <TaskCard task={task} state={state} onAction={taskAction} key={task.id} />) : <div className="empty-state"><Sprout size={40} /><h2>No tasks yet</h2><p>Plant a crop to add care reminders.</p><button className="button primary" onClick={() => { navigate('farm'); plantShortcut(); }}>Go to your farm</button></div>}</div></>}
 
         {route === 'journal' && <><div className="page-heading"><div><h1>Journal</h1><p>Saved on this device</p></div><span className="summary-pill"><BookOpen size={16} />{state.journal.filter((entry) => !entry.undone).length + state.harvests.length} recorded actions</span></div><div className="journal-layout"><section className="journal-list">
           {state.harvests.length > 0 && <><h2 className="harvest-history-heading">Harvests</h2>{[...state.harvests].reverse().map(harvest => <article className="journal-row harvest-history-row" data-testid="harvest-entry" key={harvest.id}>
-            <span className="journal-row-icon"><Wheat size={22} /></span><div><span className="small muted">{displayDate(harvest.harvestedOn)} · {harvest.bedName}</span><h3>{cropName(harvest.cropId)} harvested</h3><p>Planted {displayDate(harvest.plantedOn)}{harvest.rotation ? ` · ${harvest.rotation.planName}, season ${harvest.rotation.seasonIndex + 1}` : ''}</p></div>
+            <span className="journal-row-icon"><Wheat size={22} /></span><div><span className="small muted">{displayDate(harvest.harvestedOn)} · {harvest.bedName}</span><h3>{harvest.harvestedOn > state.demoToday ? `Planned harvest · ${cropName(harvest.cropId)}` : `${cropName(harvest.cropId)} harvested`}</h3><p>Planted {displayDate(harvest.plantedOn)}{harvest.rotation ? ` · ${harvest.rotation.planName}, season ${harvest.rotation.seasonIndex + 1}` : ''}</p></div>
           </article>)}</>}
           {state.journal.length > 0 && <>{state.harvests.length > 0 && <h2 className="harvest-history-heading">Care activity</h2>}{[...state.journal].reverse().map((entry) => <JournalRow key={entry.id} entry={entry} state={state} onUndo={() => dispatch({ type: 'undo_action', entryId: entry.id }, 'Action undone.')} />)}</>}
           {state.journal.length === 0 && state.harvests.length === 0 && <div className="empty-state"><BookOpen size={40} /><h2>No activity yet</h2><button className="button primary" onClick={() => navigate('tasks')}>See your tasks <ArrowRight size={16} /></button></div>}
@@ -592,7 +603,9 @@ function SourceEvidence({ analysis }: { analysis: AnalysisResult }) {
 }
 
 function TaskCard({ task, state, onAction, selected = false }: { task: CareTask; state: FarmState; onAction: (task: CareTask, type: TaskAction) => void; selected?: boolean }) {
-  const plot = state.plots.find((item) => item.id === task.plotId);
+  const plot = getPlotsAtDate(state, state.demoToday).find((item) => item.id === task.plotId)
+    ?? state.plots.find(item => item.id === task.plotId)
+    ?? state.harvests.find(item => item.plotId === task.plotId);
   const isDue = getDueTasks(state).some((item) => item.id === task.id);
   const status = task.status === 'done' ? 'Done' : task.status === 'skipped' ? 'Skipped' : task.status === 'snoozed' && !isDue ? 'Snoozed' : isDue ? 'Needs a check' : 'Upcoming';
   const Icon = task.kind === 'water' ? Droplets : Sprout;
@@ -646,7 +659,8 @@ function PlotEditor({ state, slotId, viewDate, dueWatering, onAction, onTaskActi
   onTaskAction: (task: CareTask, type: TaskAction) => void;
   onComparePlans: () => void;
 }) {
-  const plot = state.plots.find((item) => item.slotId === slotId);
+  const plot = getPlotsAtDate(state, viewDate).find((item) => item.slotId === slotId);
+  const archivedHarvest = plot ? state.harvests.find(harvest => harvest.plotId === plot.id) : undefined;
   const progress = getBedPlanProgress(state, slotId);
   const suggestedOptions = [...(state.analysis?.cropOptions ?? [])]
     .filter(option => option.score !== null && option.evaluationStatus !== 'excluded' && option.scoreStatus === 'complete')
@@ -657,7 +671,7 @@ function PlotEditor({ state, slotId, viewDate, dueWatering, onAction, onTaskActi
   const dateForCrop = (id: CropId) => {
     const recommendation = (id === nextCrop ? progress?.recommendedPlantingDate : null)
       ?? state.analysis?.cropOptions.find(option => option.cropId === id)?.recommendedPlantingDate;
-    return [recommendation ?? state.demoToday, lastHarvest?.harvestedOn ?? ''].sort().at(-1)!;
+    return [recommendation ?? viewDate, viewDate, lastHarvest?.harvestedOn ?? ''].sort().at(-1)!;
   };
   const [cropId, setCropId] = useState<CropId>(initialCrop);
   const [plantedOn, setPlantedOn] = useState(plot?.plantedOn ?? dateForCrop(initialCrop));
@@ -676,8 +690,7 @@ function PlotEditor({ state, slotId, viewDate, dueWatering, onAction, onTaskActi
     setError(null);
     if (!plot) setPlantedOn(dateForCrop(id));
   };
-  if (!plot && previewing) return <section className="plot-summary"><span className="eyebrow">{bedName}</span><h3>Empty bed</h3><p className="plot-preview-label">Season preview · return to the current day to plant.</p></section>;
-  if (plot && (!editing || previewing)) {
+  if (plot && (!editing || archivedHarvest)) {
     const stage = getGrowthStage(plot, viewDate);
     const lastWatering = getLastWatering(state, plot.id);
     const wateredToday = lastWatering === state.demoToday;
@@ -690,18 +703,17 @@ function PlotEditor({ state, slotId, viewDate, dueWatering, onAction, onTaskActi
           <div><span className="eyebrow">{bedName}</span><h3>{cropName(plot.cropId)}</h3></div>
           <span className="growth-dot" />
         </div>
-        <RotationGuide state={state} slotId={slotId} onCompare={previewing ? undefined : onComparePlans} />
+        <RotationGuide state={state} slotId={slotId} viewDate={viewDate} onCompare={previewing ? undefined : onComparePlans} />
         <div className="plot-detail"><span>Estimated stage</span><strong>{stage}</strong></div>
         <div className="plot-detail"><span>{plot.cropId === 'tomato' ? 'Transplant date' : stage === 'Planned' ? 'Planting date' : 'Planted'}</span><strong>{displayDate(plot.plantedOn)}</strong></div>
         <div className="plot-detail"><span>Estimated harvest</span><strong>{displayDate(getEstimatedHarvestDate(plot))}</strong></div>
-        {previewing ? <p className="plot-preview-label">Season preview · actions use the current day.</p> : <>
-          {stage === 'Ready to harvest' && <div className="harvest-panel">
-            <strong><Wheat size={18} />Ready for harvest</strong>
-            <p>Check your crop in the field. Recording the harvest saves this season and frees the bed{progress?.status === 'growing' && progress.seasonIndex === 0 ? ` for ${cropName(progress.plan.sequence[1])}` : ''}.</p>
-            <button type="button" className="button primary full-width" onClick={() => onAction({ type: 'harvest', plotId: plot.id }, `${cropName(plot.cropId)} harvest recorded. ${bedName} is ready for its next planting.`)}><CheckCheck size={17} />Harvest crop</button>
-          </div>}
+        {archivedHarvest && <div className="plot-recorded-harvest" data-testid="recorded-harvest"><CalendarDays size={16} /><span>{archivedHarvest.harvestedOn > state.demoToday ? 'Harvest planned for' : 'Harvest recorded on'} <strong>{displayDate(archivedHarvest.harvestedOn)}</strong></span></div>}
+        {!archivedHarvest && stage === 'Ready to harvest' && <HarvestPanel plot={plot} viewDate={viewDate} today={state.demoToday}
+          nextCropName={progress?.status === 'growing' && progress.seasonIndex === 0 ? cropName(progress.plan.sequence[1]) : undefined}
+          onHarvest={harvestedOn => onAction({ type: 'harvest', plotId: plot.id, harvestedOn }, `${cropName(plot.cropId)} harvest ${harvestedOn > state.demoToday ? 'planned' : 'recorded'} for ${displayDate(harvestedOn)}. ${bedName} is ready for its next planting.`)} />}
+        {!archivedHarvest && <button className="text-button" onClick={() => setEditing(true)}>Edit planting <Settings2 size={14} /></button>}
+        {previewing ? <p className="plot-preview-label">Season preview · harvests use the date you choose.</p> : <>
           {lastWatering && <div className="plot-detail"><span>Last watered</span><strong>{wateredToday ? 'Today' : displayDate(lastWatering)}</strong></div>}
-          <button className="text-button" onClick={() => setEditing(true)}>Edit planting <Settings2 size={14} /></button>
           {stage !== 'Planned' && stage !== 'Ready to harvest' && !wateredToday && (dueWatering
             ? <TaskCard task={dueWatering} state={state} onAction={onTaskAction} selected />
             : <button type="button" className="button secondary full-width plot-water-button"
@@ -721,8 +733,9 @@ function PlotEditor({ state, slotId, viewDate, dueWatering, onAction, onTaskActi
     setError(null);
     setEditing(false);
   }}>
-    <div className="plot-editor-heading"><span className="eyebrow">{bedName}</span><h3>{plot ? 'Edit planting' : 'Plant crop'}</h3></div>
-    <RotationGuide state={state} slotId={slotId} onCompare={onComparePlans} />
+    <div className="plot-editor-heading"><span className="eyebrow">{bedName}</span><h3>{plot ? 'Edit planting' : lastHarvest ? 'Plant next crop' : 'Plant crop'}</h3></div>
+    <RotationGuide state={state} slotId={slotId} viewDate={viewDate} onCompare={onComparePlans} />
+    {previewing && <p className="plot-preview-label">Planning for {displayDate(viewDate)}</p>}
     {!progress && suggestedOptions.length > 0 && <>
       <span className="eyebrow">Recommended for your field</span>
       <div className="crop-suggestion-list" aria-label="Recommended crops">{suggestedOptions.map(option => <button type="button" key={option.cropId} className="crop-suggestion" aria-pressed={cropId === option.cropId} onClick={() => chooseCrop(option.cropId)}>{option.name}<small>{Math.round(option.score!)}/100</small></button>)}</div>

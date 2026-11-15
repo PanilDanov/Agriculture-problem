@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   STORAGE_KEY, buildAnalysisRequest, createDefaultLayout, createScenarioState, farmReducer, getBedPlanProgress,
-  getEstimatedHarvestDate, getGrowthStage, getSelectedRotationPlan, loadFarm, makeMockAnalysis, saveFarm,
+  getCareTasksAtDate, getDueTasks, getEstimatedHarvestDate, getGrowthStage, getLastWatering, getPlotsAtDate, getSelectedRotationPlan, loadFarm, makeMockAnalysis, saveFarm,
 } from './orbitFarm-domain';
 import type { FarmState, StorageLike } from './orbitFarm-types';
 
@@ -231,5 +231,88 @@ describe('harvest persistence', () => {
     storage.setItem(STORAGE_KEY, saved);
     expect(loadFarm(storage).error).toMatch(/saved farm/);
     expect(storage.getItem(STORAGE_KEY)).toBe(saved);
+  });
+});
+
+
+describe('harvesting on a selected farm date', () => {
+  it('records a future date without moving today, keeps crop history, and survives reload', () => {
+    const planted = firstPlanting();
+    const plot = planted.plots[0];
+    const harvested = farmReducer(planted, { type: 'harvest', plotId: plot.id, harvestedOn: '2027-03-15' });
+    expect(harvested.demoToday).toBe(planted.demoToday);
+    expect(harvested.plots).toHaveLength(0);
+    expect(harvested.harvests[0]).toMatchObject({ harvestedOn: '2027-03-15', estimatedHarvestOn: '2027-03-15', cropId: 'chickpea' });
+    expect(getBedPlanProgress(harvested, 0)).toMatchObject({ completedSeasons: 1, nextCropId: 'wheat' });
+    expect(getBedPlanProgress(harvested, 0, '2027-03-14')).toMatchObject({ completedSeasons: 0, status: 'growing' });
+    expect(getBedPlanProgress(harvested, 0, '2027-03-15')).toMatchObject({ completedSeasons: 1, status: 'ready' });
+    const storage = memoryStorage();
+    expect(saveFarm(harvested, storage)).toBeNull();
+    expect(loadFarm(storage)).toEqual({ state: harvested, error: null });
+    expect(farmReducer(harvested, { type: 'harvest', plotId: plot.id, harvestedOn: '2027-03-15' })).toBe(harvested);
+  });
+
+  it.each(['2026-11-19', '2027-03-14', '2027-02-30', 'not-a-date'])('rejects an invalid or immature harvest date: %s', harvestedOn => {
+    const planted = firstPlanting();
+    expect(farmReducer(planted, { type: 'harvest', plotId: planted.plots[0].id, harvestedOn })).toBe(planted);
+  });
+
+  it('accepts a mature historical date independently of the current day', () => {
+    const planted = { ...firstPlanting(), demoToday: '2027-04-01' };
+    const harvested = farmReducer(planted, { type: 'harvest', plotId: planted.plots[0].id, harvestedOn: '2027-03-15' });
+    expect(harvested.harvests[0].harvestedOn).toBe('2027-03-15');
+    expect(harvested.tasks).toHaveLength(0);
+  });
+
+  it('reconstructs the earlier crop before harvest and the next planting afterwards', () => {
+    const planted = firstPlanting();
+    const original = planted.plots[0];
+    let state = farmReducer(planted, { type: 'harvest', plotId: original.id, harvestedOn: '2027-03-15' });
+    state = farmReducer(state, { type: 'plant', slotId: 0, cropId: 'wheat', plantedOn: '2027-10-01' });
+    const next = state.plots[0];
+    expect(getPlotsAtDate(state, '2026-11-19')).toEqual([original]);
+    expect(getGrowthStage(getPlotsAtDate(state, '2026-11-19')[0], '2026-11-19')).toBe('Planned');
+    expect(getPlotsAtDate(state, '2027-03-14')).toEqual([original]);
+    expect(getPlotsAtDate(state, '2027-03-15')).toEqual([next]);
+    expect(getGrowthStage(getPlotsAtDate(state, '2027-03-15')[0], '2027-03-15')).toBe('Planned');
+    state = farmReducer(state, { type: 'harvest', plotId: next.id, harvestedOn: '2028-04-20' });
+    expect(getPlotsAtDate(state, '2027-11-01')).toEqual([next]);
+    expect(getPlotsAtDate(state, '2028-04-20')).toEqual([]);
+    expect(getPlotsAtDate(state, '2026-11-19')).toEqual([original]);
+    expect(getPlotsAtDate({ ...state, layout: { ...state.layout, beds: [] } }, '2027-03-14')).toEqual([]);
+  });
+
+  it('preserves current crop care until the selected harvest date, including watering and undo', () => {
+    const planted = { ...firstPlanting(), demoToday: '2026-11-21' };
+    const plot = planted.plots[0];
+    let state = farmReducer(planted, { type: 'harvest', plotId: plot.id, harvestedOn: '2027-03-15' });
+    expect(state.tasks).toEqual(planted.tasks);
+    expect(getDueTasks(state)).toEqual(planted.tasks);
+    state = farmReducer(state, { type: 'record_watering', plotId: plot.id });
+    expect(getLastWatering(state, plot.id)).toBe('2026-11-21');
+    state = farmReducer(state, { type: 'undo_action', entryId: state.journal[0].id });
+    expect(getLastWatering(state, plot.id)).toBeUndefined();
+    expect(getDueTasks(state)).toHaveLength(1);
+    const storage = memoryStorage();
+    expect(saveFarm(state, storage)).toBeNull();
+    expect(loadFarm(storage).error).toBeNull();
+    const afterHarvest = { ...state, demoToday: '2027-03-15' };
+    expect(getCareTasksAtDate(afterHarvest)).toEqual([]);
+    expect(getDueTasks(afterHarvest)).toEqual([]);
+    expect(farmReducer(afterHarvest, { type: 'record_watering', plotId: plot.id })).toBe(afterHarvest);
+    expect(farmReducer(afterHarvest, { type: 'complete_task', taskId: planted.tasks[0].id })).toBe(afterHarvest);
+  });
+
+  it('does not send a future planned harvest as the previous crop in a current field analysis', () => {
+    const wholeField = farmReducer(preparedFarm(), { type: 'set_layout', layout: createDefaultLayout() });
+    wholeField.inputs.previousCropId = 'maize';
+    const planted = firstPlanting(wholeField);
+    const harvested = farmReducer(planted, { type: 'harvest', plotId: planted.plots[0].id, harvestedOn: '2027-03-15' });
+    expect(harvested.inputs.previousCropId).toBe('maize');
+    const requestId = '92ba7b1d-0d6b-4f28-bde2-20ca7905c97b';
+    expect(buildAnalysisRequest(harvested, requestId).localInputs).toMatchObject({ previousCropId: 'maize', currentPlan: [
+      { seasonIndex: 1, cropId: 'chickpea' }, { seasonIndex: 2, cropId: 'wheat' },
+    ] });
+    expect(buildAnalysisRequest({ ...harvested, demoToday: '2027-03-15' }, requestId).localInputs).toMatchObject({ previousCropId: 'chickpea', currentPlan: null });
   });
 });

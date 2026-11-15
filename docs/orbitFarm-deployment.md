@@ -4,7 +4,7 @@ The `lu1dgys-projects/orbitfarm` project serves the Vite frontend and FastAPI on
 
 ## Deploy from GitHub
 
-Each push to `frontend` runs `orbitFarm checks`. After the tests pass, the workflow packages the frontend and FastAPI, promotes the staged build to the public site, and checks `/health`.
+Each push to `frontend` runs `orbitFarm checks`. After the tests pass, the workflow packages the frontend and FastAPI, publishes the release to the public site, and checks `/health`.
 
 Set `VERCEL_TOKEN` as a repository Actions secret with deploy access to `lu1dgys-projects/orbitfarm`. The workflow builds the release while publishing awaits this secret. To upgrade FastAPI, update `BACKEND_REVISION` in `.github/workflows/orbitFarm-checks.yml` to the tested backend commit.
 

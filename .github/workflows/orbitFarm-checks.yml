@@ -99,12 +99,10 @@ jobs:
             exit 0
           fi
           cd "$RELEASE_DIR"
-          vercel_args=(--scope lu1dgys-projects --token "$VERCEL_TOKEN")
-          vercel deploy --prod --skip-domain --yes "${vercel_args[@]}" \
+          vercel deploy --prod --yes --token "$VERCEL_TOKEN" \
             --meta "orbitFarmFrontendSha=$GITHUB_SHA" --meta "orbitFarmBackendSha=$BACKEND_REVISION" \
             2>&1 | tee "$RUNNER_TEMP/orbitfarm-vercel.log"
           deployment=$(grep -oE 'https://orbitfarm-[a-z0-9-]+-lu1dgys-projects\.vercel\.app' "$RUNNER_TEMP/orbitfarm-vercel.log" | tail -n 1)
-          vercel promote "$deployment" --yes "${vercel_args[@]}"
           curl --fail --silent --show-error --retry 3 --retry-all-errors --max-time 20 \
             https://orbitfarm.vercel.app/health | jq -e '.status == "ok"'
           printf 'Published %s to https://orbitfarm.vercel.app/\n' "$deployment" >> "$GITHUB_STEP_SUMMARY"

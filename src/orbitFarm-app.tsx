@@ -410,24 +410,28 @@ export function OrbitFarmApp() {
           {state.pendingRequestId ? <OrbitScanner key={state.pendingRequestId} mode={analysisMode} /> : state.analysisError ? <div className="analysis-error" role="alert"><span className="error-icon"><CloudSun size={30} /></span><h2>Analysis unavailable</h2><p>{state.analysisError}</p><div className="heading-actions"><button className="button primary" onClick={() => void analyze()}><RefreshCw size={16} />Try again</button><button className="button secondary" onClick={() => navigate('farm')}>Back to farm</button></div>{state.analysis && <p className="small muted">Your last available analysis and saved farm are preserved.</p>}</div> : state.analysis ? <>
             <div className="rotation-grid">{state.analysis.rotationPlans.map((plan) => (
               <article className={`rotation-card ${plan.planId.includes('water') ? 'featured' : ''}`} key={plan.planId} aria-label={`${plan.name} plan`}>
-                <h2>{plan.name}</h2>
-                {plan.planStatus === 'provisional' && <p className="small muted">Provisional plan</p>}
-                <div className="rotation-sequence">{plan.sequence.map((crop, index) => {
-                  const season = plan.seasons?.[index];
-                  return <div key={`${crop}-${index}`}>
-                    <span className="crop-portrait"><CropSprite cropId={crop} size={60} /></span>
-                    <span className="small muted">Season {index + 1}</span>
-                    <strong>{cropName(crop)}</strong>
-                    {season && <span className="small muted">
-                      {season.recommendedPlantingDate ? `Planting ${displayDate(season.recommendedPlantingDate)}` : 'Planting date unavailable'}
-                    </span>}
-                  </div>;
-                })}<ArrowRight size={20} /></div>
-                {plan.waterScreenMm !== undefined && <p className="small muted">
-                  {plan.waterScreenMm === null ? 'Historical water comparison unavailable' : `Historical water screen · ${Math.round(plan.waterScreenMm)} mm`}
-                </p>}
+                <header className="rotation-card-heading">
+                  <h2>{plan.name}</h2>
+                  {plan.planStatus === 'provisional' && <p className="small muted">Provisional plan</p>}
+                </header>
+                <div className="rotation-card-seasons">
+                  <div className="rotation-sequence">{plan.sequence.map((crop, index) => {
+                    const season = plan.seasons?.[index];
+                    return <div key={`${crop}-${index}`}>
+                      <span className="crop-portrait"><CropSprite cropId={crop} size={60} /></span>
+                      <span className="small muted">Season {index + 1}</span>
+                      <strong>{cropName(crop)}</strong>
+                      {season && <span className="small muted">
+                        {season.recommendedPlantingDate ? `Planting ${displayDate(season.recommendedPlantingDate)}` : 'Planting date unavailable'}
+                      </span>}
+                    </div>;
+                  })}<ArrowRight size={20} /></div>
+                  {plan.waterScreenMm !== undefined && <p className="small muted">
+                    {plan.waterScreenMm === null ? 'Historical water comparison unavailable' : `Historical water screen · ${Math.round(plan.waterScreenMm)} mm`}
+                  </p>}
+                </div>
                 <details className="plan-details">
-                  <summary>Details</summary>
+                  <summary><span>Details</span><ChevronRight size={16} aria-hidden="true" /></summary>
                   <ul className="plan-reasons">{plan.reasons.map((reason) => <li key={reason}><Check size={15} />{reason}</li>)}</ul>
                   <div className="plan-tradeoffs">{plan.tradeoffs.map((tradeoff) => <p key={tradeoff}>{tradeoff}</p>)}</div>
                 </details>

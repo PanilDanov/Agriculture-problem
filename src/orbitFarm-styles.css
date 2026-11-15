@@ -87,10 +87,32 @@
 .page-heading h1{margin:0;font-size:34px;line-height:1.2}
 .page-heading p{margin-top:8px}
 .journal-layout{grid-template-columns:minmax(0,1fr)}
-.plan-details{margin:20px 0;font-size:12px;line-height:1.6}
-.plan-details>summary,.crop-details>summary{width:fit-content;color:#60794f;cursor:pointer;font-size:11px;font-weight:500}
-.plan-details .plan-reasons{margin-top:12px}
-.plan-details .plan-tradeoffs{margin-top:10px}
+.rotation-grid{align-items:start}
+.rotation-card.featured{border-width:1px}
+.rotation-card-heading h2{min-height:2.4em;margin-bottom:0;overflow-wrap:anywhere}
+.rotation-card-heading>.small{margin-top:8px;font-size:11px;line-height:1.6}
+.rotation-card-seasons{min-width:0}
+.rotation-card .rotation-sequence{margin:24px 0 0}
+.rotation-card-seasons>.small{margin-top:14px;font-size:11px;line-height:1.6}
+.rotation-card>.button{margin-top:0;min-height:44px}
+.plan-details{margin:24px 0 16px;font-size:12px;line-height:1.6}
+.plan-details>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;padding:10px 12px;border:1px solid #c7d2bc;border-radius:4px;color:#3f6148;font-size:12px;font-weight:600;user-select:none;transition:background .15s,border-color .15s}
+.plan-details>summary:hover{background:#e8efdd;border-color:#8fa57d}
+.plan-details>summary>svg{flex-shrink:0;transition:transform .15s}
+.plan-details[open]>summary{background:#e8efdd;border-color:#8fa57d}
+.plan-details[open]>summary>svg{transform:rotate(90deg)}
+.plan-details .plan-reasons{margin-top:16px;padding-top:16px}
+.plan-details .plan-tradeoffs{margin:10px 0 0}
+.crop-details>summary{width:fit-content;color:#60794f;cursor:pointer;font-size:11px;font-weight:500}
+@media(min-width:761px) and (max-width:1000px){
+  .rotation-card{grid-template-columns:minmax(0,1fr) minmax(0,1.2fr) minmax(140px,.8fr);gap:20px}
+  .rotation-card-heading{grid-column:1;grid-row:1;align-self:center}
+  .rotation-card-heading h2{min-height:0}
+  .rotation-card-seasons{grid-column:2;grid-row:1;align-self:center}
+  .rotation-card .rotation-sequence{margin:0}
+  .rotation-card>.button{grid-column:3;grid-row:1;align-self:center}
+  .rotation-card>.plan-details{grid-column:1/-1;grid-row:2;margin:0}
+}
 .crop-details{margin-top:8px}
 .crop-details p{margin-top:7px}
 .season-strip{margin-bottom:0}

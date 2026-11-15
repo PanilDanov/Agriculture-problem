@@ -62,6 +62,7 @@ export function BoundaryMap({ boundary, onChange, error }: BoundaryMapProps) {
       scrollWheelZoom: false,
       doubleClickZoom: false,
     });
+    map.attributionControl.setPrefix('<a href="https://leafletjs.com" title="A JavaScript library for interactive maps">Leaflet</a>');
     mapRef.current = map;
     L.control.zoom({ position: 'topright' }).addTo(map);
     L.control.scale({ imperial: false, position: 'bottomleft' }).addTo(map);

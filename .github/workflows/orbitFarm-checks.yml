@@ -105,4 +105,5 @@ jobs:
           deployment=$(grep -oE 'https://orbitfarm-[a-z0-9-]+-lu1dgys-projects\.vercel\.app' "$RUNNER_TEMP/orbitfarm-vercel.log" | tail -n 1)
           curl --fail --silent --show-error --retry 3 --retry-all-errors --max-time 20 \
             https://orbitfarm.vercel.app/health | jq -e '.status == "ok"'
+          node "$GITHUB_WORKSPACE/frontend/scripts/orbitFarm-smoke-release.mjs" https://orbitfarm.vercel.app
           printf 'Published %s to https://orbitfarm.vercel.app/\n' "$deployment" >> "$GITHUB_STEP_SUMMARY"

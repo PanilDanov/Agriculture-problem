@@ -36,7 +36,7 @@ Test benches use the same interface, reducer, validation, and providers as the a
 | `api-unavailable` | Analysis stays an error and offers retry; no silent successful mock fallback. |
 | `empty-farm` | Boundary entry, input validation, and the complete creation journey. |
 
-Growth stages and reminders use the browser's local calendar day. The season slider previews other dates in demo mode. Farm dates use `YYYY-MM-DD` for `demoToday`, task `dueOn` and `snoozedUntil`, journal `createdOn` and `previousSnoozedUntil`, and plot `plantedOn`. Technical `generatedAt`, `observedAt`, and `fetchedAt` metadata use ISO timestamps. Completing a task updates the journal and task status.
+Growth stages and reminders use the browser's local calendar day. The season slider previews other dates in the farm view. Farm dates use `YYYY-MM-DD` for `demoToday`, task `dueOn` and `snoozedUntil`, journal `createdOn` and `previousSnoozedUntil`, and plot `plantedOn`. Technical `generatedAt`, `observedAt`, and `fetchedAt` metadata use ISO timestamps. Completing a task updates the journal and task status.
 
 Field setup sends no planting date, season end, or timezone. The backend chooses planting recommendations and the planning horizon. A crop option can return optional `recommendedPlantingDate` as a calendar date; the actual planting record remains a separate editable date.
 

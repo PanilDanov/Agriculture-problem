@@ -380,6 +380,11 @@ test('an explicitly selected API and its URL survive reload without a mock fallb
   await expect(page.getByText('Active provider: Connected API', { exact: true })).toBeVisible();
   await expect(page.getByLabel('API base URL', { exact: true })).toHaveValue(apiBaseUrl);
   await navigate(page, 'Your farm');
+  const slider = page.getByRole('slider', { name: 'Season preview' });
+  await expect(slider).toBeVisible();
+  await expect(page.locator('.season-flight-satellite')).toBeVisible();
+  await slider.press('End');
+  await expect(page.getByRole('button', { name: 'Current day', exact: true })).toBeEnabled();
   const request = page.waitForRequest((candidate) => candidate.method() === 'POST'
     && candidate.url() === `${apiBaseUrl}/v1/analysis`);
   await page.getByRole('button', { name: 'Analyze field', exact: true }).click();

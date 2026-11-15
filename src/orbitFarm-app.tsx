@@ -113,8 +113,7 @@ export function OrbitFarmApp() {
       : entry.plotId === noticeUndo.wateredPlotId && entry.action === 'watered'
   )) : undefined;
   const lastUndoable = noticeEntry && canUndoJournalEntry(state, noticeEntry) ? noticeEntry : undefined;
-  const season = useMemo<SeasonRange | null>(() => {
-    if (providerMode !== 'mock') return null;
+  const season = useMemo<SeasonRange>(() => {
     let start = state.demoToday;
     let end = addFarmDays(state.demoToday, 365);
     for (const plot of state.plots) {
@@ -123,8 +122,8 @@ export function OrbitFarmApp() {
       if (harvest > end) end = harvest;
     }
     return { start: addFarmDays(start, -1), end };
-  }, [providerMode, state.demoToday, state.plots]);
-  const viewDate = season && !mapView && seasonDate ? seasonDate : state.demoToday;
+  }, [state.demoToday, state.plots]);
+  const viewDate = !mapView && seasonDate ? seasonDate : state.demoToday;
 
   function setNotice(message: string | null, undo?: UndoTarget) {
     setNoticeValue(message);
@@ -337,7 +336,7 @@ export function OrbitFarmApp() {
                 </div>
               </div>
               {mapView ? <div className="map-workspace"><Suspense fallback={<p className="muted small">Loading the field map…</p>}><BoundaryMap boundary={pendingBoundary} error={pendingBoundary ? validateBoundary(pendingBoundary).errors[0] : null} onChange={setPendingBoundary} /></Suspense><button className="button primary" onClick={() => { const checked = validateBoundary(pendingBoundary); if (checked.valid && pendingBoundary) { dispatch({ type: 'set_boundary', boundary: pendingBoundary }, 'Boundary saved. Analyze the field to refresh its recommendations.'); setMapView(false); } else setNotice(checked.errors[0] ?? 'Draw a valid field boundary.'); }}>Confirm boundary</button></div> : <>
-                {season && <SeasonPreview
+                <SeasonPreview
                   range={season}
                   date={viewDate}
                   currentDate={state.demoToday}
@@ -346,7 +345,7 @@ export function OrbitFarmApp() {
                     updateFarmDate();
                     setSeasonDate(null);
                   }}
-                />}
+                />
                 <FarmScene
                   layout={state.layout}
                   plots={state.plots}
